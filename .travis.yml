@@ -16,8 +16,6 @@ before_install:
   - cmake --version
 
 install:
-  - npm install
-
   # install opencv4nodejs and run tests
   - git clone https://github.com/justadudewhohacks/opencv4nodejs
   - cd opencv4nodejs
