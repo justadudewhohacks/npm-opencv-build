@@ -22,7 +22,14 @@ function findVs2017() {
       console.log('path', vsSetup.path)
       console.log('sdk', vsSetup.sdk)
 
-      return path.join(vsSetup.path, 'MSBuild', '15.0', 'Bin', 'MSBuild.exe')
+      const build = {
+        path: path.join(vsSetup.path, 'MSBuild', '15.0', 'Bin', 'MSBuild.exe'),
+        version: 15
+      }
+      console.log('using following msbuild:')
+      console.log('version:', build.version)
+      console.log('path:', build.path)
+      return build
     })
 }
 
@@ -72,8 +79,8 @@ function findMsbuildInRegistry () {
       msbuilds.forEach((msbuild) => {
         console.log('version: %s, path: %s', msbuild.version, msbuild.path)
       })
-      
-      const build = msbuilds.find((msbuild) => {      
+
+      const build = msbuilds.find((msbuild) => {
         try {
           return fs.statSync(msbuild.path)
         } catch(err){

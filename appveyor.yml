@@ -1,0 +1,37 @@
+platform:
+  - x64
+
+image:
+  - Visual Studio 2015
+  - Visual Studio 2017
+
+init:
+  - git config --global core.autocrlf true
+
+environment:
+  matrix:
+    - nodejs_version: 6
+
+clone_folder: c:\projects\opencv-build
+
+install:
+  - cmd: choco install cmake -y
+  - cmd: choco upgrade cmake
+  - ps: Install-Product node $env:nodejs_version x64
+  - node --version
+  - SET PATH=%PATH%;C:\Program Files\CMake\bin;
+
+build: off
+
+test_script:
+  - cd c:\projects\opencv-build
+  - npm install
+
+  # install opencv4nodejs and run tests
+  - cd c:\projects
+  - git clone https://github.com/justadudewhohacks/opencv4nodejs
+  - cd opencv4nodejs
+  - npm install
+  - cd test
+  - npm install
+  - npm run test-appveyor
