@@ -21,6 +21,7 @@ install:
   # install opencv4nodejs and run tests
   - git clone https://github.com/justadudewhohacks/opencv4nodejs
   - cd opencv4nodejs
+  - npm install ../
   - npm install
   - cd test
   - npm install

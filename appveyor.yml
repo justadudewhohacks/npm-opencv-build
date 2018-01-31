@@ -31,6 +31,7 @@ test_script:
   - cd c:\projects
   - git clone https://github.com/justadudewhohacks/opencv4nodejs
   - cd opencv4nodejs
+  - npm install ../opencv-build
   - npm install
   - cd test
   - npm install
