@@ -56,6 +56,6 @@ exports.isWin = function() {
   return process.platform == 'win32'
 }
 
-exports.hasSelfBuild() {
-  return process.env.OPENCV_INCLUDE_DIR && process.env.OPENCV_LIB_DIR
+exports.hasSelfBuild = function() {
+  return process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
 }

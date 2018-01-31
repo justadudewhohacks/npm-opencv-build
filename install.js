@@ -5,14 +5,14 @@ const { requireGit, requireCmake, hasSelfBuild } = require('./install/utils')
 const setupOpencv = require('./install/setup-opencv')
 
 function install() {
+  console.log('install')
   if (hasSelfBuild()) {
-    console.log('found opencv')
-    console.log('OPENCV_INCLUDE_DIR:', process.env.OPENCV_INCLUDE_DIR)
-    console.log('OPENCV_LIB_DIR:', process.env.OPENCV_LIB_DIR)
+    console.log('OPENCV4NODEJS_DISABLE_AUTOBUILD is set')
+    console.log('skipping auto build...')
     return
   }
-  console.log('did not find OPENCV_INCLUDE_DIR && OPENCV_LIB_DIR')
-  console.log('running install script')
+  console.log('if you want to use an own OpenCV installation set OPENCV4NODEJS_DISABLE_AUTOBUILD')
+  console.log('running install script...')
 
   // prevent rebuild on every install
   let hasLibs = true

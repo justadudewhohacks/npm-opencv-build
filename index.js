@@ -1,19 +1,28 @@
 const getLibs = require('./libs')
 const {
   opencvInclude,
-  opencvBinDir
+  opencvBinDir,
+  opencvModules
 } = require('./constants')
 
 const {
-  hasSelfBuild,
-  isWin
+  isWin,
+  hasSelfBuild
 } = require('./install/utils')
 
 function includes() {
+  if (hasSelfBuild()) {
+    return
+  }
+
   console.log(opencvInclude)
 }
 
 function libraries() {
+  if (hasSelfBuild()) {
+    return
+  }
+
   getLibs().map(lib => lib.libPath).forEach(lib => console.log(lib))
 }
 
@@ -31,5 +40,7 @@ function ensureBinaries() {
 module.exports = {
   includes,
   libraries,
-  ensureBinaries
+  ensureBinaries,
+  opencvModules,
+  hasSelfBuild
 }
