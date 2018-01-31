@@ -1,4 +1,4 @@
-A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build <a name="https://github.com/justadudewhohacks/opencv4nodejs"><b>opencv4nodejs </b></a>.
+A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build <a href="https://github.com/justadudewhohacks/opencv4nodejs"><b>opencv4nodejs</b></a>.
 
 # Install
 ```

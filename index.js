@@ -32,15 +32,7 @@ function libraries() {
     return
   }
 
-  if (isWin()) {
-    getLibs().map(lib => lib.libPath).forEach(lib => console.log(resolvePath(lib)))
-    return
-  }
-
-  // if not windows, link libs dynamically
-  console.log('-L' + opencvLibDir)
-  console.log('-Wl,-rpath,' + opencvLibDir)
-  getLibs().map(lib => lib.libPath).forEach(lib => console.log('-lopencv_' + lib))
+  getLibs().map(lib => lib.libPath).forEach(lib => console.log(resolvePath(lib)))
 }
 
 function ensureBinaries() {
