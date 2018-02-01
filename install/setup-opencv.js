@@ -7,7 +7,8 @@ const {
   opencvContribSrc,
   opencvContribModules,
   opencvBuild,
-  opencvLocalLib
+  opencvLocalLib,
+  numberOfCoresAvailable
 } = require('../constants')
 
 const tag = '3.4.0'
@@ -37,9 +38,9 @@ function getRunBuildCmd(msbuildExe) {
     return () => spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: opencvBuild })
       .then(() => spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: opencvBuild }))
   }
-  return () => spawn('make', ['install'], { cwd: opencvBuild })
+  return () => spawn('make', ['install', `-j${numberOfCoresAvailable}`], { cwd: opencvBuild })
     // revert the strange archiving of libopencv.so going on with make install
-    .then(() => spawn('make', ['all'], { cwd: opencvBuild }))
+    .then(() => spawn('make', ['all', `-j${numberOfCoresAvailable}`], { cwd: opencvBuild }))
 }
 
 const cmakeVsCompilers = {
