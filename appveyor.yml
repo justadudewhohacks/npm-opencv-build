@@ -34,7 +34,7 @@ test_script:
   # uninstall npm version of opencv-build
   - npm uninstall opencv-build
   # install new opencv-build version
-  - npm install ../
+  - npm install ../opencv-build
   - npm install
   - cd test
   - npm install
