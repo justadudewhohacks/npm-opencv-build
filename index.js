@@ -38,9 +38,9 @@ function libraries() {
   }
 
   // if not windows, link libs dynamically
-  console.log('-L' + opencvLibDir)
-  console.log('-Wl,-rpath,' + opencvLibDir)
-  getLibs().map(lib => lib.libPath).forEach(lib => console.log('-lopencv_' + lib))
+  console.log('-L' + resolvePath(opencvLibDir))
+  opencvModules.forEach(lib => console.log('-lopencv_' + lib))
+  console.log('-Wl,-rpath,' + resolvePath(opencvLibDir))
 }
 
 function ensureBinaries() {

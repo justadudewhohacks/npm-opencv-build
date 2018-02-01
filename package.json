@@ -4,8 +4,7 @@
   "description": "A simple script to auto build recent OpenCV + contrib version via npm",
   "main": "index.js",
   "scripts": {
-    "install": "node ./install.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install": "node ./install.js"
   },
   "repository": {
     "type": "git",

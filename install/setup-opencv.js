@@ -38,6 +38,7 @@ function getRunBuildCmd(msbuildExe) {
       .then(() => spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: opencvBuild }))
   }
   return () => spawn('make', ['all'], { cwd: opencvBuild })
+    .then(() => spawn('make', ['install'], { cwd: opencvBuild }))
 }
 
 const cmakeVsCompilers = {
