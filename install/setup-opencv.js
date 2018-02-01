@@ -37,8 +37,9 @@ function getRunBuildCmd(msbuildExe) {
     return () => spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: opencvBuild })
       .then(() => spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: opencvBuild }))
   }
-  return () => spawn('make', ['all'], { cwd: opencvBuild })
-    .then(() => spawn('make', ['install'], { cwd: opencvBuild }))
+  return () => spawn('make', ['install'], { cwd: opencvBuild })
+    // revert the strange archiving of libopencv.so going on with make install
+    .then(() => spawn('make', ['all'], { cwd: opencvBuild }))
 }
 
 const cmakeVsCompilers = {
