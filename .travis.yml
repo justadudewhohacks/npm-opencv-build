@@ -7,6 +7,14 @@ node_js:
 sudo: required
 
 before_install:
+  - sudo apt-get update
+  - sudo apt-get upgrade
+  # install tools for reading images from disk
+  - sudo apt-get install libjpeg8-dev libtiff5-dev libjasper-dev libpng12-dev
+  # install video codecs
+  - sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
+  - sudo apt-get install libxvidcore-dev libx264-dev
+  # install cmake
   - wget http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz
   - tar -xvzf cmake-3.4.1.tar.gz
   - cd cmake-3.4.1/
