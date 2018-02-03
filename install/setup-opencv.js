@@ -60,11 +60,12 @@ const cmakeArchs = {
 function getSharedCmakeFlags() {
   return [
     `-DCMAKE_INSTALL_PREFIX=${opencvBuild}`,
-    '-DCMAKE_BUILD_TYPE=Release ',
+    '-DCMAKE_BUILD_TYPE=Release',
     `-DOPENCV_EXTRA_MODULES_PATH=${opencvContribModules}`,
     '-DBUILD_EXAMPLES=OFF',
     '-DBUILD_TESTS=OFF',
-    '-DBUILD_PERF_TESTS=OFF'
+    '-DBUILD_PERF_TESTS=OFF',
+    '-DBUILD_opencv_apps=OFF'
   ]
 }
 
