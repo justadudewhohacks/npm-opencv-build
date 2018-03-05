@@ -11,7 +11,7 @@ const {
   numberOfCoresAvailable
 } = require('../constants')
 
-const tag = '3.4.0'
+const tag = '3.4.1'
 
 function getIfExistsDirCmd(dirname, exists = true) {
   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
