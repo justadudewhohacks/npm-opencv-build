@@ -8,7 +8,6 @@ sudo: required
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get upgrade
   # install tools for reading images from disk
   - sudo apt-get install libjpeg8-dev libtiff5-dev libjasper-dev libpng12-dev
   # install video codecs
