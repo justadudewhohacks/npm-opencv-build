@@ -10,7 +10,10 @@ function getLibPath(libFile) {
 
 module.exports = function () {
   const libFiles = fs.existsSync(opencvLibDir)
-    ? fs.readdirSync(opencvLibDir).filter(libFile => libFile.endsWith(libSuffix))
+    ? fs.readdirSync(opencvLibDir)
+      .filter(libFile => libFile.endsWith(libSuffix))
+      // dirty fix to prevent linking dnn_objdetect instead of dnn (since 3.4.1)
+      .filter(file => !file.includes('dnn_objdetect'))
     : []
 
   return opencvModules.map(
