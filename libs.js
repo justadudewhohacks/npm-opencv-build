@@ -22,7 +22,7 @@ function getLibSuffix() {
 }
 
 function isLibFile(file) {
-  return checkPrefix() && file.endsWith(getLibSuffix())
+  return checkPrefix(file) && file.endsWith(getLibSuffix())
 }
 
 function makeGetLibAbsPath(libDir) {
