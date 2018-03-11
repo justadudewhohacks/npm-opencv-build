@@ -47,10 +47,10 @@ module.exports = function (libDir) {
 
   const worldLibPath = findAnyIncludes(libFiles, worldModule)
   if (worldLibPath) {
-    return ({
+    return [{
       opencvModule: worldModule,
       libPath: getLibAbsPath(worldLibPath)
-    })
+    }]
   }
 
   return opencvModules.map(
