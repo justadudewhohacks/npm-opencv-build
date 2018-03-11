@@ -33,7 +33,7 @@ function findAnyIncludes(all, str) {
   return all.find(el => el.includes(str))
 }
 
-module.exports = function (libDir = opencvLibDir) {
+module.exports = function (libDir) {
   if (!fs.existsSync(libDir)) {
     throw new Error(`specified lib dir does not exist: ${libDir}`)
   }
