@@ -1,7 +1,8 @@
 const { exec, execFile, spawn } = require('child_process');
+const log = require('npmlog')
 
 const _exec = function (cmd, options) {
-  console.log('executing:', cmd)
+  log.silly('install', 'executing:', cmd)
   return new Promise(function(resolve, reject) {
     exec(cmd, options, function(err, stdout, stderr) {
       const _err = err || stderr
@@ -14,7 +15,7 @@ const _exec = function (cmd, options) {
 exports.exec = _exec
 
 exports.execFile = function (cmd, args, options) {
-  console.log('executing:', cmd, args)
+  log.silly('install', 'executing:', cmd, args)
   return new Promise(function(resolve, reject) {
     var child = execFile(cmd, args, options, function(err, stdout, stderr) {
       const _err = err || stderr
@@ -26,7 +27,7 @@ exports.execFile = function (cmd, args, options) {
 }
 
 exports.spawn = function (cmd, args, opts) {
-  console.log('spawning:', cmd, args)
+  log.silly('install', 'spawning:', cmd, args)
   return new Promise(function(resolve, reject) {
     try {
       const child = spawn(cmd, args, Object.assign({}, { stdio: 'inherit' }, opts))
@@ -45,11 +46,11 @@ exports.spawn = function (cmd, args, opts) {
 }
 
 exports.requireGit = function() {
-  return _exec('git --version').then(stdout => console.log(stdout))
+  return _exec('git --version').then(stdout => log.silly('install', stdout))
 }
 
 exports.requireCmake = function() {
-  return _exec('cmake --version').then(stdout => console.log(stdout))
+  return _exec('cmake --version').then(stdout => log.silly('install', stdout))
 }
 
 function isWin () {
@@ -68,6 +69,6 @@ exports.isUnix = function() {
   return !isWin() && !isOSX()
 }
 
-exports.hasSelfBuild = function() {
-  return process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
+exports.isAutoBuildDisabled = function() {
+  return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
 }

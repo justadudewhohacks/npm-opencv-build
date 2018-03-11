@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const log = require('npmlog')
 const { exec, execFile } = require('./utils')
 
 /* this codesnippet is partly taken from the node-gyp source: https://github.com/nodejs/node-gyp */
@@ -9,26 +10,26 @@ function findVs2017() {
                 '&{Add-Type -Path \'' + path.join(__dirname, 'Find-VS2017.cs') +
                 '\'; [VisualStudioConfiguration.Main]::Query()}']
 
-  console.log('find vs2017 via powershell:', ps, args)
+  log.silly('find-msbuild', 'find vs2017 via powershell:', ps, args)
 
   return execFile(ps, args, { encoding: 'utf8' })
     .then((stdout) => {
-      console.log('find vs2017: ', stdout)
+      log.silly('find-msbuild', 'find vs2017: ', stdout)
       const vsSetup = JSON.parse(stdout)
       if (!vsSetup || !vsSetup.path || !vsSetup.sdk) {
         return Promise.reject('unexpected powershell output')
       }
-      console.log('found vs2017')
-      console.log('path', vsSetup.path)
-      console.log('sdk', vsSetup.sdk)
+      log.silly('find-msbuild', 'found vs2017')
+      log.silly('find-msbuild', 'path', vsSetup.path)
+      log.silly('find-msbuild', 'sdk', vsSetup.sdk)
 
       const build = {
         path: path.join(vsSetup.path, 'MSBuild', '15.0', 'Bin', 'MSBuild.exe'),
         version: 15
       }
-      console.log('using following msbuild:')
-      console.log('version:', build.version)
-      console.log('path:', build.path)
+      log.silly('find-msbuild', 'using following msbuild:')
+      log.silly('find-msbuild', 'version:', build.version)
+      log.silly('find-msbuild', 'path:', build.path)
       return build
     })
 }
@@ -60,11 +61,11 @@ function parseMsBuilds(stdout) {
 
 function findMsbuildInRegistry () {
   const cmd = `reg query "HKLM\\Software\\Microsoft\\MSBuild\\ToolsVersions" /s${process.arch === 'ia32' ? '' : ' /reg:32'}`
-  console.log('find msbuild in registry:', cmd)
+  log.silly('find-msbuild', 'find msbuild in registry:', cmd)
 
   return exec(cmd)
     .then((stdout) => {
-      console.log('find vs2017: ', stdout)
+      log.silly('find-msbuild', 'find vs: ', stdout)
 
       // use most recent version
       const msbuilds = parseMsBuilds(stdout)
@@ -75,9 +76,9 @@ function findMsbuildInRegistry () {
         return Promise.reject('failed to find msbuild in registry')
       }
 
-      console.log('trying the following msbuild paths:')
+      log.silly('find-msbuild', 'trying the following msbuild paths:')
       msbuilds.forEach((msbuild) => {
-        console.log('version: %s, path: %s', msbuild.version, msbuild.path)
+        log.silly('find-msbuild', 'version: %s, path: %s', msbuild.version, msbuild.path)
       })
 
       const build = msbuilds.find((msbuild) => {
@@ -95,16 +96,16 @@ function findMsbuildInRegistry () {
         return Promise.reject('could not find msbuild.exe from path in registry')
       }
 
-      console.log('using following msbuild:')
-      console.log('version:', build.version)
-      console.log('path:', build.path)
+      log.silly('find-msbuild', 'using following msbuild:')
+      log.silly('find-msbuild', 'version:', build.version)
+      log.silly('find-msbuild', 'path:', build.path)
       return Promise.resolve(build)
     })
   }
 
 module.exports = function() {
   return findVs2017().catch((err) => {
-    console.log('failed to find vs2017 via powershell:', err)
+    log.silly('find-msbuild', 'failed to find vs2017 via powershell:', err)
     return findMsbuildInRegistry()
   })
 }

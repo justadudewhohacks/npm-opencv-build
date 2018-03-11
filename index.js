@@ -7,12 +7,12 @@ const {
   opencvModules
 } = require('./constants')
 const {
-  hasSelfBuild
+  isAutoBuildDisabled
 } = require('./install/utils')
 
 module.exports = {
   opencvInclude,
   getLibs,
   opencvModules,
-  hasSelfBuild
+  isAutoBuildDisabled
 }

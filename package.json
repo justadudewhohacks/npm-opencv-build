@@ -16,9 +16,12 @@
     "opencv4nodejs"
   ],
   "author": "justadudewhohacks",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/justadudewhohacks/npm-opencv-build/issues"
   },
-  "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme"
+  "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme",
+  "dependencies": {
+    "npmlog": "^4.1.2"
+  }
 }
