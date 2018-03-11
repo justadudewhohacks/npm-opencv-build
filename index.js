@@ -12,6 +12,7 @@ const {
 
 module.exports = {
   opencvInclude,
+  opencvLibDir,
   opencvBinDir,
   getLibs,
   opencvModules,
