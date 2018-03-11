@@ -52,8 +52,20 @@ exports.requireCmake = function() {
   return _exec('cmake --version').then(stdout => console.log(stdout))
 }
 
-exports.isWin = function() {
+function isWin () {
   return process.platform == 'win32'
+}
+
+exports.isWin = isWin
+
+function isOSX() {
+  return process.platform == 'darwin'
+}
+
+exports.isOSX = isOSX
+
+exports.isUnix = function() {
+  return !isWin() && !isOSX()
 }
 
 exports.hasSelfBuild = function() {
