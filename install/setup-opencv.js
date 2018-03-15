@@ -1,3 +1,4 @@
+const log = require('npmlog')
 const { exec, spawn, isWin } = require('./utils')
 const findMsBuild = require('./find-msbuild')
 const {
@@ -81,7 +82,13 @@ function getCmakeArgs(cmakeFlags) {
 }
 
 function getMsbuildIfWin() {
-  return isWin() ? findMsBuild() : Promise.resolve()
+  return isWin()
+    ? findMsBuild()
+      .then((msbuild) => {
+        log.info('install', 'using msbuild:', msbuild)
+        return msbuild
+      })
+    : Promise.resolve()
 }
 
 module.exports = function() {

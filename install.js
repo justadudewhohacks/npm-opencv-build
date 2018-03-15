@@ -1,6 +1,10 @@
 const fs = require('fs')
 const log = require('npmlog')
 
+if (process.env.npm_config_loglevel === 'silly') {
+  log.level = 'silly'
+}
+
 const getLibs = require('./libs')
 const {
   requireGit,
