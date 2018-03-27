@@ -39,7 +39,7 @@ module.exports = function({ opencvModules, isWin, isOSX, fs, path }) {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }
 
-    const resolveLib = createLibResolver(fs, path, libDir)
+    const resolveLib = createLibResolver(libDir)
 
     const worldLibPath = resolveLib(worldModule)
     if (worldLibPath) {
