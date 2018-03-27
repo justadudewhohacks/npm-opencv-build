@@ -1,5 +1,8 @@
 const path = require('path')
-const getLibs = require('./libs')
+const fs = require('fs')
+const { isWin, isOSX } = require('./install/utils')
+const { opencvModules } = require('./constants')
+const getLibs = require('./libs')({ isWin, isOSX, opencvModules, path, fs })
 const {
   opencvInclude,
   opencvLibDir,

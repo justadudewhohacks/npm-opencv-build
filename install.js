@@ -1,3 +1,4 @@
+const path = require('path')
 const fs = require('fs')
 const log = require('npmlog')
 
@@ -5,12 +6,19 @@ if (process.env.npm_config_loglevel === 'silly') {
   log.level = 'silly'
 }
 
-const getLibs = require('./libs')
 const {
+  opencvModules
+} = require('./constants')
+const {
+  isWin,
+  isOSX,
   requireGit,
   requireCmake,
   isAutoBuildDisabled
 } = require('./install/utils')
+
+const getLibs = require('./libs')({ isWin, isOSX, opencvModules, path, fs })
+
 const {
   opencvLibDir
 } = require('./install/utils')

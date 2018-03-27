@@ -26,6 +26,7 @@ build: off
 test_script:
   - cd c:\projects\opencv-build
   - npm install
+  - npm test
 
   # install opencv4nodejs and run tests
   - cd c:\projects

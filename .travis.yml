@@ -2,7 +2,7 @@ language: node_js
 
 node_js:
   - '6'
-  - '9'
+  # - '9' TODO figure out why travis has problems installing npmlog here
 
 sudo: required
 
@@ -26,6 +26,7 @@ install:
   # install opencv4nodejs and run tests
   - git clone https://github.com/justadudewhohacks/opencv4nodejs
   - cd opencv4nodejs
+  - npm test
   # uninstall npm version of opencv-build
   - npm uninstall opencv-build
   # install new opencv-build version
