@@ -97,7 +97,8 @@ function getSharedCmakeFlags() {
     '-DBUILD_opencv_surface_matching=OFF',
     '-DBUILD_opencv_ts=OFF',
     '-DBUILD_opencv_xobjdetect=OFF',
-    '-DBUILD_opencv_xphoto=OFF'
+    '-DBUILD_opencv_xphoto=OFF',
+    '-DWITH_VTK=OFF'
   ]
 }
 
