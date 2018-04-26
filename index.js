@@ -5,7 +5,8 @@ const {
   opencvInclude,
   opencvLibDir,
   opencvBinDir,
-  opencvModules
+  opencvModules,
+  opencvBuild
 } = require('./constants')
 const getLibs = require('./libs')({ isWin, isOSX, opencvModules, path, fs })
 
@@ -19,5 +20,6 @@ module.exports = {
   opencvBinDir,
   getLibs,
   opencvModules,
-  isAutoBuildDisabled
+  isAutoBuildDisabled,
+  opencvBuildDir: opencvBuild
 }
