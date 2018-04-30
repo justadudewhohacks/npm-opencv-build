@@ -68,6 +68,7 @@ function getSharedCmakeFlags() {
     '-DBUILD_TESTS=OFF',
     '-DBUILD_PERF_TESTS=OFF',
     '-DBUILD_JAVA=OFF',
+    '-DCUDA_NVCC_FLAGS=--expt-relaxed-constexpr',
     '-DBUILD_opencv_apps=OFF',
     '-DBUILD_opencv_aruco=OFF',
     '-DBUILD_opencv_bgsegm=OFF',
