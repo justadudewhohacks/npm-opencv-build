@@ -139,5 +139,7 @@ module.exports = function() {
       .then(() => spawn('git', ['checkout', `tags/${tag}`, '-b', `v${tag}`], { cwd: opencvSrc }))
       .then(() => spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: opencvBuild }))
       .then(getRunBuildCmd(isWin() ? msbuild.path : undefined))
+      .then(() => exec(getRmDirCmd('opencv'), { cwd: opencvRoot }))
+      .then(() => exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot }))
   )
 }
