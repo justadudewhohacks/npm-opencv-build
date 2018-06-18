@@ -21,7 +21,7 @@ const getLibs = require('./libs')({ isWin, isOSX, opencvModules, path, fs })
 
 const {
   opencvLibDir
-} = require('./install/utils')
+} = require('./constants')
 const setupOpencv = require('./install/setup-opencv')
 
 function install() {
@@ -38,7 +38,7 @@ function install() {
 
     log.info('install', `found opencv library dir: ${opencvLibDir}`)
     log.info('install', 'checking for opencv libraries')
-    getLibs().forEach((lib) => {
+    getLibs(opencvLibDir).forEach((lib) => {
       hasLibs = hasLibs && !!lib.libPath
       log.info('install', '%s: %s', lib.opencvModule, lib.libPath || 'not found')
     })
