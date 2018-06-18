@@ -25,32 +25,35 @@ const {
 const setupOpencv = require('./install/setup-opencv')
 
 function install() {
-  log.silly('install', 'install')
   if (isAutoBuildDisabled()) {
     log.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set')
     log.info('install', 'skipping auto build...')
     return
   }
   log.info('install', 'if you want to use an own OpenCV installation set OPENCV4NODEJS_DISABLE_AUTOBUILD')
-  log.info('install', 'running install script...')
 
   // prevent rebuild on every install
   if (fs.existsSync(opencvLibDir)) {
     let hasLibs = true
 
-    log.silly('install', 'checking opencv libraries')
+    log.info('install', `found opencv library dir: ${opencvLibDir}`)
+    log.info('install', 'checking for opencv libraries')
     getLibs().forEach((lib) => {
       hasLibs = hasLibs && !!lib.libPath
-      log.silly('install', '%s: %s', lib.opencvModule, lib.libPath || 'not found')
+      log.info('install', '%s: %s', lib.opencvModule, lib.libPath || 'not found')
     })
 
     if (hasLibs) {
-      log.silly('install', 'found all libraries')
+      log.info('install', 'found all libraries')
       return
+    } else {
+      log.info('install', 'missing some libraries')
     }
+  } else {
+    log.info('install', `library dir does not exist: ${opencvLibDir}`)
   }
 
-  log.silly('install', 'installing opencv')
+  log.info('install', 'running install script...')
   return requireGit()
     .then(requireCmake)
     .then(setupOpencv)

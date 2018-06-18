@@ -126,16 +126,15 @@ function getMsbuildIfWin() {
 module.exports = function() {
   const opencvRepo = 'https://github.com/opencv/opencv.git'
   const opencvContribRepo = 'https://github.com/opencv/opencv_contrib.git'
-
+  throw new Error('oops')
   return getMsbuildIfWin().then(msbuild =>
     exec(getMkDirCmd('opencv'), { cwd: rootDir })
-      .then(() => exec(getMkDirCmd('build'), { cwd: opencvRoot }))
-      .then(() => exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot }))
-      .then(() => spawn('git', ['clone', '--progress', opencvContribRepo], { cwd: opencvRoot }))
-      .then(() => spawn('git', ['checkout', `tags/${tag}`, '-b', `v${tag}`], { cwd: opencvContribSrc }))
-      .then(() => exec(getRmDirCmd('opencv'), { cwd: opencvRoot }))
-      .then(() => spawn('git', ['clone', '--progress', opencvRepo], { cwd: opencvRoot }))
-      .then(() => spawn('git', ['checkout', `tags/${tag}`, '-b', `v${tag}`], { cwd: opencvSrc }))
+      //.then(() => exec(getRmDirCmd('build'), { cwd: opencvRoot }))
+      //.then(() => exec(getMkDirCmd('build'), { cwd: opencvRoot }))
+      //.then(() => exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot }))
+      //.then(() => spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  1, '--progress', opencvContribRepo], { cwd: opencvRoot }))
+      //.then(() => exec(getRmDirCmd('opencv'), { cwd: opencvRoot }))
+      //.then(() => spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  1, '--progress', opencvRepo], { cwd: opencvRoot }))
       .then(() => spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: opencvBuild }))
       .then(getRunBuildCmd(isWin() ? msbuild.path : undefined))
   )
