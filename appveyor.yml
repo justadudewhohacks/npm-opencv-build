@@ -24,6 +24,7 @@ install:
 build: off
 
 test_script:
+  # install and run tests of opencv-build
   - cd c:\projects\opencv-build
   - npm install
   - npm test
