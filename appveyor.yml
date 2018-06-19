@@ -10,7 +10,7 @@ init:
 
 environment:
   matrix:
-    - nodejs_version: 6
+    - nodejs_version: 10
 
 clone_folder: c:\projects\opencv-build
 
