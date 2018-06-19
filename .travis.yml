@@ -1,8 +1,9 @@
 language: node_js
 
 node_js:
-  - '6'
+  # - '6' note: the npm v3 shipped with node 6 messes up __dirname when installing package local filesystem
   # - '9' TODO figure out why travis has problems installing npmlog here
+  - 10
 
 sudo: required
 
@@ -23,6 +24,10 @@ before_install:
   - cmake --version
 
 install:
+  # install and run tests of opencv-build
+  - npm install
+  - npm test
+
   # install opencv4nodejs and run tests
   - git clone https://github.com/justadudewhohacks/opencv4nodejs
   - cd opencv4nodejs
