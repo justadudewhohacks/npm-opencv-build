@@ -12,7 +12,7 @@ const {
   numberOfCoresAvailable
 } = require('../constants')
 
-const tag = '3.4.1'
+const tag = '3.4.3'
 
 function getIfExistsDirCmd(dirname, exists = true) {
   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
@@ -62,6 +62,7 @@ function getSharedCmakeFlags() {
   return [
     `-DCMAKE_INSTALL_PREFIX=${opencvBuild}`,
     '-DCMAKE_BUILD_TYPE=Release',
+    '-DOPENCV_ENABLE_NONFREE=ON',
     `-DOPENCV_EXTRA_MODULES_PATH=${opencvContribModules}`,
     '-DBUILD_EXAMPLES=OFF',
     '-DBUILD_DOCS=OFF',
