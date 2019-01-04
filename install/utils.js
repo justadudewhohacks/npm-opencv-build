@@ -33,7 +33,10 @@ exports.spawn = function (cmd, args, opts) {
       const child = spawn(cmd, args, Object.assign({}, { stdio: 'inherit' }, opts))
 
       child.on('exit', function (code) {
-        const msg = 'child process exited with code ' + code.toString()
+        if(typeof code !== 'number'){
+          code = 'null';
+        }
+        const msg = 'child process exited with code ' + code.toString() + ' (for more info, set \'--loglevel silly\')'
         if (code !== 0) {
           return reject(msg)
         }
