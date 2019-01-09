@@ -1,5 +1,5 @@
 const log = require('npmlog')
-const { exec, spawn, isWin } = require('./utils')
+const { exec, spawn, isWin, flags } = require('./utils')
 const findMsBuild = require('./find-msbuild')
 const {
   rootDir,
@@ -59,7 +59,8 @@ const cmakeArchs = {
 }
 
 function getSharedCmakeFlags() {
-  return [
+  const additionalFlags = flags();
+  const defaultFlags = [
     `-DCMAKE_INSTALL_PREFIX=${opencvBuild}`,
     '-DCMAKE_BUILD_TYPE=Release',
     '-DOPENCV_ENABLE_NONFREE=ON',
@@ -101,7 +102,8 @@ function getSharedCmakeFlags() {
     '-DBUILD_opencv_xobjdetect=OFF',
     '-DBUILD_opencv_xphoto=OFF',
     '-DWITH_VTK=OFF'
-  ]
+  ];
+  return defaultFlags.concat(additionalFlags);
 }
 
 function getWinCmakeFlags(msversion) {
