@@ -65,6 +65,7 @@ function getSharedCmakeFlags() {
     '-DCMAKE_BUILD_TYPE=Release',
     '-DOPENCV_ENABLE_NONFREE=ON',
     `-DOPENCV_EXTRA_MODULES_PATH=${opencvContribModules}`,
+    '-DBUILD_CUDA=OFF',
     '-DBUILD_EXAMPLES=OFF',
     '-DBUILD_DOCS=OFF',
     '-DBUILD_TESTS=OFF',
