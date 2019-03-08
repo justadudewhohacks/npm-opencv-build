@@ -48,6 +48,10 @@ var getLibs = getLibsFactory_1.getLibsFactory({ isWin: utils_1.isWin, isOSX: uti
 function checkInstalledLibs(autoBuildFile) {
     var hasLibs = true;
     log.info('install', 'checking for opencv libraries');
+    if (!fs.existsSync(dirs_1.dirs.opencvLibDir)) {
+        log.info('install', 'library dir does not exist:', dirs_1.dirs.opencvLibDir);
+        return;
+    }
     var installedLibs = getLibs(dirs_1.dirs.opencvLibDir);
     autoBuildFile.modules.forEach(function (_a) {
         var opencvModule = _a.opencvModule, libPath = _a.libPath;
@@ -96,7 +100,13 @@ function install() {
                     else {
                         log.info('install', "failed to find auto-build.json: " + dirs_1.dirs.autoBuildFile);
                     }
+                    log.info('install', '');
                     log.info('install', 'running install script...');
+                    log.info('install', '');
+                    log.info('install', 'opencv version: %s', env_1.opencvVersion());
+                    log.info('install', 'with opencv contrib: %s', env_1.isWithoutContrib() ? 'no' : 'yes');
+                    log.info('install', 'custom build flags: %s', env_1.autoBuildFlags());
+                    log.info('install', '');
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);

@@ -10,6 +10,10 @@ export function isAutoBuildDisabled() {
   return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
 }
 
+export function isWithoutContrib() {
+  return !!process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB
+}
+
 export function autoBuildFlags(): string {
   return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || ''
 }

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags } from './env';
+import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib } from './env';
 import { findMsBuild } from './findMsBuild';
 import { AutoBuildFile } from './types';
 import { exec, isWin, spawn } from './utils';
@@ -45,7 +45,15 @@ function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
 }
 
 function getSharedCmakeFlags() {
-  return defaultCmakeFlags.concat(parseAutoBuildFlags())
+  const conditionalFlags = isWithoutContrib()
+    ? []
+    : [
+      '-DOPENCV_ENABLE_NONFREE=ON',
+      `-DOPENCV_EXTRA_MODULES_PATH=${dirs.opencvContribModules}`
+    ]
+  return defaultCmakeFlags
+    .concat(conditionalFlags)
+    .concat(parseAutoBuildFlags())
 }
 
 function getWinCmakeFlags(msversion: string) {
@@ -98,8 +106,13 @@ export async function setupOpencv() {
   await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
   await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
 
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
+  if (isWithoutContrib()) {
+    log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
+  } else {
+    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
+  }
   await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
+
   await spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs.opencvBuild })
   await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
 

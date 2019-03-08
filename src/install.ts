@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { opencvModules } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, isAutoBuildDisabled, readAutoBuildFile, opencvVersion } from './env';
+import { autoBuildFlags, isAutoBuildDisabled, readAutoBuildFile, opencvVersion, isWithoutContrib } from './env';
 import { getLibsFactory } from './getLibsFactory';
 import { setupOpencv } from './setupOpencv';
 import { AutoBuildFile } from './types';
@@ -17,7 +17,13 @@ function checkInstalledLibs(autoBuildFile: AutoBuildFile) {
   let hasLibs = true
 
   log.info('install', 'checking for opencv libraries')
+
+  if (!fs.existsSync(dirs.opencvLibDir)) {
+    log.info('install', 'library dir does not exist:', dirs.opencvLibDir)
+    return
+  }
   const installedLibs = getLibs(dirs.opencvLibDir)
+
   autoBuildFile.modules.forEach(({ opencvModule, libPath }) => {
     if (!libPath) {
       log.info('install', '%s: %s', opencvModule, 'ignored')
@@ -62,7 +68,13 @@ export async function install() {
     log.info('install', `failed to find auto-build.json: ${dirs.autoBuildFile}`)
   }
 
+  log.info('install', '')
   log.info('install', 'running install script...')
+  log.info('install', '')
+  log.info('install', 'opencv version: %s', opencvVersion())
+  log.info('install', 'with opencv contrib: %s', isWithoutContrib() ? 'no' : 'yes')
+  log.info('install', 'custom build flags: %s', autoBuildFlags())
+  log.info('install', '')
 
   try {
     await requireGit()

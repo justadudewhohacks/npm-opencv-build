@@ -8,6 +8,10 @@ function isAutoBuildDisabled() {
     return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD;
 }
 exports.isAutoBuildDisabled = isAutoBuildDisabled;
+function isWithoutContrib() {
+    return !!process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB;
+}
+exports.isWithoutContrib = isWithoutContrib;
 function autoBuildFlags() {
     return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || '';
 }

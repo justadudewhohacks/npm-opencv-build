@@ -96,7 +96,15 @@ function getRunBuildCmd(msbuildExe) {
     }); };
 }
 function getSharedCmakeFlags() {
-    return constants_1.defaultCmakeFlags.concat(env_1.parseAutoBuildFlags());
+    var conditionalFlags = env_1.isWithoutContrib()
+        ? []
+        : [
+            '-DOPENCV_ENABLE_NONFREE=ON',
+            "-DOPENCV_EXTRA_MODULES_PATH=" + dirs_1.dirs.opencvContribModules
+        ];
+    return constants_1.defaultCmakeFlags
+        .concat(conditionalFlags)
+        .concat(env_1.parseAutoBuildFlags());
 }
 function getWinCmakeFlags(msversion) {
     var cmakeVsCompiler = constants_1.cmakeVsCompilers[msversion];
@@ -166,24 +174,28 @@ function setupOpencv() {
                     return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 6:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvContribRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
+                    if (!env_1.isWithoutContrib()) return [3 /*break*/, 7];
+                    log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set');
+                    return [3 /*break*/, 9];
+                case 7: return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvContribRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
                 case 8:
                     _a.sent();
+                    _a.label = 9;
+                case 9: return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
+                case 10:
+                    _a.sent();
                     return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(utils_1.isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs_1.dirs.opencvBuild })];
-                case 9:
+                case 11:
                     _a.sent();
                     return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)()];
-                case 10:
+                case 12:
                     _a.sent();
                     writeAutoBuildFile();
                     return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: dirs_1.dirs.opencvRoot })];
-                case 11:
+                case 13:
                     _a.sent();
                     return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: dirs_1.dirs.opencvRoot })];
-                case 12:
+                case 14:
                     _a.sent();
                     return [2 /*return*/];
             }
