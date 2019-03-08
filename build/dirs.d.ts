@@ -8,4 +8,5 @@ export declare const dirs: {
     opencvInclude: string;
     opencvLibDir: string;
     opencvBinDir: string;
+    autoBuildFile: string;
 };

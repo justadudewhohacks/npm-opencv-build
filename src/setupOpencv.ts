@@ -1,7 +1,11 @@
+import * as fs from 'fs';
+
+import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
-import { flags, numberOfCoresAvailable, opencvVersion } from './env';
+import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags } from './env';
 import { findMsBuild } from './findMsBuild';
+import { AutoBuildFile } from './types';
 import { exec, isWin, spawn } from './utils';
 
 const log = require('npmlog')
@@ -41,7 +45,7 @@ function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
 }
 
 function getSharedCmakeFlags() {
-  return defaultCmakeFlags.concat(flags());
+  return defaultCmakeFlags.concat(parseAutoBuildFlags())
 }
 
 function getWinCmakeFlags(msversion: string) {
@@ -73,20 +77,34 @@ async function getMsbuildIfWin() {
   }
 }
 
+function writeAutoBuildFile() {
+  const autoBuildFile: AutoBuildFile = {
+    opencvVersion: opencvVersion(),
+    autoBuildFlags: autoBuildFlags(),
+    modules: getLibs(dirs.opencvLibDir)
+  }
+  fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
+}
+
 export async function setupOpencv() {
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
   const msbuild = await getMsbuildIfWin()
+
   await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
   await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
   await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
   await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
   await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
+
   await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
   await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
   await spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs.opencvBuild })
   await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
+
+  writeAutoBuildFile()
+
   await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
   await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
 }

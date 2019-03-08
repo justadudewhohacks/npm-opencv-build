@@ -7,7 +7,7 @@ import { getLibsFactory } from './getLibsFactory';
 import { isOSX, isWin } from './utils';
 
 export { opencvModules } from './constants';
-export { isAutoBuildDisabled } from './env';
+export { isAutoBuildDisabled, readAutoBuildFile } from './env';
 export const opencvInclude = dirs.opencvInclude
 export const opencvLibDir = dirs.opencvLibDir
 export const opencvBinDir = dirs.opencvBinDir

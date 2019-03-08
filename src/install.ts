@@ -1,16 +1,35 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { dirs } from './dirs';
 import { opencvModules } from './constants';
-import { isAutoBuildDisabled } from './env';
+import { dirs } from './dirs';
+import { autoBuildFlags, isAutoBuildDisabled, readAutoBuildFile, opencvVersion } from './env';
 import { getLibsFactory } from './getLibsFactory';
 import { setupOpencv } from './setupOpencv';
+import { AutoBuildFile } from './types';
 import { isOSX, isWin, requireCmake, requireGit } from './utils';
 
 const log = require('npmlog')
 
 const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
+
+function checkInstalledLibs(autoBuildFile: AutoBuildFile) {
+  let hasLibs = true
+
+  log.info('install', 'checking for opencv libraries')
+  const installedLibs = getLibs(dirs.opencvLibDir)
+  autoBuildFile.modules.forEach(({ opencvModule, libPath }) => {
+    if (!libPath) {
+      log.info('install', '%s: %s', opencvModule, 'ignored')
+      return
+    }
+    const foundLib = installedLibs.find(lib => lib.opencvModule === opencvModule)
+    hasLibs = hasLibs && !!foundLib
+    log.info('install', '%s: %s', opencvModule, foundLib ? foundLib.libPath : 'not found')
+  })
+
+  return hasLibs
+}
 
 export async function install() {
   if (isAutoBuildDisabled()) {
@@ -21,24 +40,26 @@ export async function install() {
   log.info('install', 'if you want to use an own OpenCV installation set OPENCV4NODEJS_DISABLE_AUTOBUILD')
 
   // prevent rebuild on every install
-  if (fs.existsSync(dirs.opencvLibDir)) {
-    let hasLibs = true
+  const autoBuildFile = readAutoBuildFile()
+  if (autoBuildFile) {
+    log.info('install', `found auto-build.json: ${dirs.autoBuildFile}`)
 
-    log.info('install', `found opencv library dir: ${dirs.opencvLibDir}`)
-    log.info('install', 'checking for opencv libraries')
-    getLibs(dirs.opencvLibDir).forEach((lib) => {
-      hasLibs = hasLibs && !!lib.libPath
-      log.info('install', '%s: %s', lib.opencvModule, lib.libPath || 'not found')
-    })
-
-    if (hasLibs) {
-      log.info('install', 'found all libraries')
-      return
+    if (autoBuildFile.opencvVersion !== opencvVersion()) {
+      log.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=${opencvVersion()}`)
+    } else if (autoBuildFile.autoBuildFlags !== autoBuildFlags()) {
+      log.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but OPENCV4NODEJS_AUTOBUILD_FLAGS=${autoBuildFlags()}`)
     } else {
-      log.info('install', 'missing some libraries')
+      const hasLibs = checkInstalledLibs(autoBuildFile)
+      if (hasLibs) {
+        log.info('install', 'found all libraries')
+        return
+      } else {
+        log.info('install', 'missing some libraries')
+      }
     }
+
   } else {
-    log.info('install', `library dir does not exist: ${dirs.opencvLibDir}`)
+    log.info('install', `failed to find auto-build.json: ${dirs.autoBuildFile}`)
   }
 
   log.info('install', 'running install script...')

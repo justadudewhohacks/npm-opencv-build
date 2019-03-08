@@ -35,6 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var fs = require("fs");
+var _1 = require(".");
 var constants_1 = require("./constants");
 var dirs_1 = require("./dirs");
 var env_1 = require("./env");
@@ -94,7 +96,7 @@ function getRunBuildCmd(msbuildExe) {
     }); };
 }
 function getSharedCmakeFlags() {
-    return constants_1.defaultCmakeFlags.concat(env_1.flags());
+    return constants_1.defaultCmakeFlags.concat(env_1.parseAutoBuildFlags());
 }
 function getWinCmakeFlags(msversion) {
     var cmakeVsCompiler = constants_1.cmakeVsCompilers[msversion];
@@ -129,6 +131,14 @@ function getMsbuildIfWin() {
             }
         });
     });
+}
+function writeAutoBuildFile() {
+    var autoBuildFile = {
+        opencvVersion: env_1.opencvVersion(),
+        autoBuildFlags: env_1.autoBuildFlags(),
+        modules: _1.getLibs(dirs_1.dirs.opencvLibDir)
+    };
+    fs.writeFileSync(dirs_1.dirs.autoBuildFile, JSON.stringify(autoBuildFile));
 }
 function setupOpencv() {
     return __awaiter(this, void 0, void 0, function () {
@@ -168,6 +178,7 @@ function setupOpencv() {
                     return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)()];
                 case 10:
                     _a.sent();
+                    writeAutoBuildFile();
                     return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 11:
                     _a.sent();

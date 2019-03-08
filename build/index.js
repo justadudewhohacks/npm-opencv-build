@@ -10,6 +10,7 @@ var constants_2 = require("./constants");
 exports.opencvModules = constants_2.opencvModules;
 var env_1 = require("./env");
 exports.isAutoBuildDisabled = env_1.isAutoBuildDisabled;
+exports.readAutoBuildFile = env_1.readAutoBuildFile;
 exports.opencvInclude = dirs_1.dirs.opencvInclude;
 exports.opencvLibDir = dirs_1.dirs.opencvLibDir;
 exports.opencvBinDir = dirs_1.dirs.opencvBinDir;

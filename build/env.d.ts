@@ -1,4 +1,7 @@
+import { AutoBuildFile } from './types';
 export declare function isAutoBuildDisabled(): boolean;
-export declare function flags(): string[];
+export declare function autoBuildFlags(): string;
+export declare function parseAutoBuildFlags(): string[];
 export declare function opencvVersion(): string;
 export declare function numberOfCoresAvailable(): number;
+export declare function readAutoBuildFile(): AutoBuildFile | undefined;

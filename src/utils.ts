@@ -56,7 +56,6 @@ async function requireCmd(cmd: string, hint: string) {
     const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`
     throw new Error(errMessage)
   }
-
 }
 
 export async function requireGit() {
