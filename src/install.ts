@@ -5,7 +5,7 @@ import { dirs } from './dirs';
 import { opencvModules } from './constants';
 import { isAutoBuildDisabled } from './env';
 import { getLibsFactory } from './getLibsFactory';
-import { setupOpencv } from './setup-opencv';
+import { setupOpencv } from './setupOpencv';
 import { isOSX, isWin, requireCmake, requireGit } from './utils';
 
 const log = require('npmlog')

@@ -1,16 +1,10 @@
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
-import { flags, opencvVersion } from './env';
+import { dirs } from './dirs';
+import { flags, numberOfCoresAvailable, opencvVersion } from './env';
+import { findMsBuild } from './findMsBuild';
 import { exec, isWin, spawn } from './utils';
 
 const log = require('npmlog')
-const findMsBuild = require('./find-msbuild')
-const {
-  rootDir,
-  opencvRoot,
-  opencvSrc,
-  opencvBuild,
-  numberOfCoresAvailable
-} = require('../constants')
 
 function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
@@ -35,14 +29,14 @@ function getMsbuildCmd(sln: string): string[] {
 function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
   if (msbuildExe) {
     return async () => {
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: opencvBuild })
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: opencvBuild })
+      await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: dirs.opencvBuild })
+      await spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: dirs.opencvBuild })
     }
   }
   return async () => {
-    await spawn('make', ['install', `-j${numberOfCoresAvailable}`], { cwd: opencvBuild })
+    await spawn('make', ['install', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
     // revert the strange archiving of libopencv.so going on with make install
-    await spawn('make', ['all', `-j${numberOfCoresAvailable}`], { cwd: opencvBuild })
+    await spawn('make', ['all', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
   }
 }
 
@@ -68,12 +62,12 @@ function getWinCmakeFlags(msversion: string) {
 }
 
 function getCmakeArgs(cmakeFlags: string[]) {
-  return [opencvSrc].concat(cmakeFlags)
+  return [dirs.opencvSrc].concat(cmakeFlags)
 }
 
-function getMsbuildIfWin() {
+async function getMsbuildIfWin() {
   if (isWin()) {
-    const msbuild = findMsBuild()
+    const msbuild = await findMsBuild()
     log.info('install', 'using msbuild:', msbuild)
     return msbuild
   }
@@ -81,18 +75,18 @@ function getMsbuildIfWin() {
 
 export async function setupOpencv() {
   const tag = opencvVersion()
+  log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
   const msbuild = await getMsbuildIfWin()
-
-  await exec(getMkDirCmd('opencv'), { cwd: rootDir })
-  await exec(getRmDirCmd('build'), { cwd: opencvRoot })
-  await exec(getMkDirCmd('build'), { cwd: opencvRoot })
-  await exec(getRmDirCmd('opencv'), { cwd: opencvRoot })
-  await exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot })
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: opencvRoot })
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: opencvRoot })
-  await spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: opencvBuild })
-  await getRunBuildCmd(isWin() ? msbuild.path : undefined)
-  await exec(getRmDirCmd('opencv'), { cwd: opencvRoot })
-  await exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot })
+  await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
+  await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
+  await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
+  await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
+  await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
+  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
+  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
+  await spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs.opencvBuild })
+  await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
+  await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
+  await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
 }

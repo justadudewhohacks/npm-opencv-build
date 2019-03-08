@@ -41,7 +41,7 @@ var dirs_1 = require("./dirs");
 var constants_1 = require("./constants");
 var env_1 = require("./env");
 var getLibsFactory_1 = require("./getLibsFactory");
-var setup_opencv_1 = require("./setup-opencv");
+var setupOpencv_1 = require("./setupOpencv");
 var utils_1 = require("./utils");
 var log = require('npmlog');
 var getLibs = getLibsFactory_1.getLibsFactory({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path: path, fs: fs });
@@ -87,7 +87,7 @@ function install() {
                     return [4 /*yield*/, utils_1.requireCmake()];
                 case 3:
                     _a.sent();
-                    return [4 /*yield*/, setup_opencv_1.setupOpencv()];
+                    return [4 /*yield*/, setupOpencv_1.setupOpencv()];
                 case 4:
                     _a.sent();
                     return [3 /*break*/, 6];

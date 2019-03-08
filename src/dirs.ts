@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { isWin } from './utils';
 
-const rootDir = __dirname
+const rootDir = path.resolve(__dirname, '../')
 const opencvRoot = path.join(rootDir, 'opencv')
 const opencvSrc = path.join(opencvRoot, 'opencv')
 const opencvContribSrc = path.join(opencvRoot, 'opencv_contrib')

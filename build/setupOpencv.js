@@ -36,11 +36,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var constants_1 = require("./constants");
+var dirs_1 = require("./dirs");
 var env_1 = require("./env");
+var findMsBuild_1 = require("./findMsBuild");
 var utils_1 = require("./utils");
 var log = require('npmlog');
-var findMsBuild = require('./find-msbuild');
-var _a = require('../constants'), rootDir = _a.rootDir, opencvRoot = _a.opencvRoot, opencvSrc = _a.opencvSrc, opencvBuild = _a.opencvBuild, numberOfCoresAvailable = _a.numberOfCoresAvailable;
 function getIfExistsDirCmd(dirname, exists) {
     if (exists === void 0) { exists = true; }
     return utils_1.isWin() ? "if " + (!exists ? 'not ' : '') + "exist " + dirname : '';
@@ -64,10 +64,10 @@ function getRunBuildCmd(msbuildExe) {
         return function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, utils_1.spawn("" + msbuildExe, getMsbuildCmd('./OpenCV.sln'), { cwd: opencvBuild })];
+                    case 0: return [4 /*yield*/, utils_1.spawn("" + msbuildExe, getMsbuildCmd('./OpenCV.sln'), { cwd: dirs_1.dirs.opencvBuild })];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, utils_1.spawn("" + msbuildExe, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: opencvBuild })];
+                        return [4 /*yield*/, utils_1.spawn("" + msbuildExe, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: dirs_1.dirs.opencvBuild })];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -78,13 +78,13 @@ function getRunBuildCmd(msbuildExe) {
     return function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, utils_1.spawn('make', ['install', "-j" + numberOfCoresAvailable], { cwd: opencvBuild })
+                case 0: return [4 /*yield*/, utils_1.spawn('make', ['install', "-j" + env_1.numberOfCoresAvailable()], { cwd: dirs_1.dirs.opencvBuild })
                     // revert the strange archiving of libopencv.so going on with make install
                 ];
                 case 1:
                     _a.sent();
                     // revert the strange archiving of libopencv.so going on with make install
-                    return [4 /*yield*/, utils_1.spawn('make', ['all', "-j" + numberOfCoresAvailable], { cwd: opencvBuild })];
+                    return [4 /*yield*/, utils_1.spawn('make', ['all', "-j" + env_1.numberOfCoresAvailable()], { cwd: dirs_1.dirs.opencvBuild })];
                 case 2:
                     // revert the strange archiving of libopencv.so going on with make install
                     _a.sent();
@@ -111,14 +111,24 @@ function getWinCmakeFlags(msversion) {
     ].concat(getSharedCmakeFlags());
 }
 function getCmakeArgs(cmakeFlags) {
-    return [opencvSrc].concat(cmakeFlags);
+    return [dirs_1.dirs.opencvSrc].concat(cmakeFlags);
 }
 function getMsbuildIfWin() {
-    if (utils_1.isWin()) {
-        var msbuild = findMsBuild();
-        log.info('install', 'using msbuild:', msbuild);
-        return msbuild;
-    }
+    return __awaiter(this, void 0, void 0, function () {
+        var msbuild;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!utils_1.isWin()) return [3 /*break*/, 2];
+                    return [4 /*yield*/, findMsBuild_1.findMsBuild()];
+                case 1:
+                    msbuild = _a.sent();
+                    log.info('install', 'using msbuild:', msbuild);
+                    return [2 /*return*/, msbuild];
+                case 2: return [2 /*return*/];
+            }
+        });
+    });
 }
 function setupOpencv() {
     return __awaiter(this, void 0, void 0, function () {
@@ -127,40 +137,41 @@ function setupOpencv() {
             switch (_a.label) {
                 case 0:
                     tag = env_1.opencvVersion();
+                    log.info('install', 'installing opencv version %s into directory: %s', tag, dirs_1.dirs.opencvRoot);
                     return [4 /*yield*/, getMsbuildIfWin()];
                 case 1:
                     msbuild = _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getMkDirCmd('opencv'), { cwd: rootDir })];
+                    return [4 /*yield*/, utils_1.exec(getMkDirCmd('opencv'), { cwd: dirs_1.dirs.rootDir })];
                 case 2:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('build'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('build'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 3:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getMkDirCmd('build'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getMkDirCmd('build'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 4:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 5:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 6:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvContribRepoUrl], { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvContribRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
                 case 7:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(utils_1.isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: opencvBuild })];
+                    return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(utils_1.isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs_1.dirs.opencvBuild })];
                 case 9:
                     _a.sent();
-                    return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)];
+                    return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)()];
                 case 10:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 11:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: opencvRoot })];
+                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: dirs_1.dirs.opencvRoot })];
                 case 12:
                     _a.sent();
                     return [2 /*return*/];

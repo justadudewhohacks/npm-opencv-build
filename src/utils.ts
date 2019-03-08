@@ -48,10 +48,10 @@ export function spawn(cmd: string, args: string[], options?: child_process.ExecO
 }
 
 async function requireCmd(cmd: string, hint: string) {
-  log.silly('install', `executing: ${cmd}`)
+  log.info('install', `executing: ${cmd}`)
   try {
     const stdout = await exec(cmd)
-    log.silly('install', `found git: ${cmd}: ${stdout}`)
+    log.info('install', `${cmd}: ${stdout}`)
   } catch (err) {
     const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`
     throw new Error(errMessage)
@@ -60,11 +60,11 @@ async function requireCmd(cmd: string, hint: string) {
 }
 
 export async function requireGit() {
-  requireCmd('git --version', 'if no tool for unzipping of .tar.gz files is found, git is required')
+  await requireCmd('git --version', 'git is required')
 }
 
 export async function requireCmake() {
-  requireCmd('cmake --version', 'cmake is required to build opencv')
+  await requireCmd('cmake --version', 'cmake is required to build opencv')
 }
 
 export function isWin () {

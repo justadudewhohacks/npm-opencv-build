@@ -90,14 +90,14 @@ function requireCmd(cmd, hint) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    log.silly('install', "executing: " + cmd);
+                    log.info('install', "executing: " + cmd);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, exec(cmd)];
                 case 2:
                     stdout = _a.sent();
-                    log.silly('install', "found git: " + cmd + ": " + stdout);
+                    log.info('install', cmd + ": " + stdout);
                     return [3 /*break*/, 4];
                 case 3:
                     err_1 = _a.sent();
@@ -111,8 +111,12 @@ function requireCmd(cmd, hint) {
 function requireGit() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            requireCmd('git --version', 'if no tool for unzipping of .tar.gz files is found, git is required');
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, requireCmd('git --version', 'git is required')];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
         });
     });
 }
@@ -120,8 +124,12 @@ exports.requireGit = requireGit;
 function requireCmake() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            requireCmd('cmake --version', 'cmake is required to build opencv');
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, requireCmd('cmake --version', 'cmake is required to build opencv')];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
         });
     });
 }

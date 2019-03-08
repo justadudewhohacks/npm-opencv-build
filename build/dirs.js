@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
 var utils_1 = require("./utils");
-var rootDir = __dirname;
+var rootDir = path.resolve(__dirname, '../');
 var opencvRoot = path.join(rootDir, 'opencv');
 var opencvSrc = path.join(opencvRoot, 'opencv');
 var opencvContribSrc = path.join(opencvRoot, 'opencv_contrib');
