@@ -2,8 +2,9 @@
   "name": "opencv-build",
   "version": "0.0.17",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
+    "build": "rm -rf build && tsc",
     "install": "node ./install.js",
     "test": "mocha --recursive ./test"
   },
@@ -23,10 +24,12 @@
   },
   "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme",
   "dependencies": {
+    "@types/node": "^11.10.5",
     "npmlog": "^4.1.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^5.0.5"
+    "mocha": "^5.0.5",
+    "typescript": "^3.3.3333"
   }
 }
