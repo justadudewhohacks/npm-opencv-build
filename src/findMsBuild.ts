@@ -106,10 +106,10 @@ function findMsbuildInRegistry () {
 
 export async function findMsBuild() {
   try {
-    return findVs2017()
+    return await findVs2017()
   } catch(err) {
     log.info('find-msbuild', 'failed to find vs2017 via powershell:', err)
     log.info('find-msbuild', 'attempting to find msbuild via registry query...')
-    return findMsbuildInRegistry()
+    return await findMsbuildInRegistry()
   }
 }

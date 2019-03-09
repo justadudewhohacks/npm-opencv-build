@@ -126,16 +126,21 @@ function findMsbuildInRegistry() {
 }
 function findMsBuild() {
     return __awaiter(this, void 0, void 0, function () {
+        var err_1;
         return __generator(this, function (_a) {
-            try {
-                return [2 /*return*/, findVs2017()];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 4]);
+                    return [4 /*yield*/, findVs2017()];
+                case 1: return [2 /*return*/, _a.sent()];
+                case 2:
+                    err_1 = _a.sent();
+                    log.info('find-msbuild', 'failed to find vs2017 via powershell:', err_1);
+                    log.info('find-msbuild', 'attempting to find msbuild via registry query...');
+                    return [4 /*yield*/, findMsbuildInRegistry()];
+                case 3: return [2 /*return*/, _a.sent()];
+                case 4: return [2 /*return*/];
             }
-            catch (err) {
-                log.info('find-msbuild', 'failed to find vs2017 via powershell:', err);
-                log.info('find-msbuild', 'attempting to find msbuild via registry query...');
-                return [2 /*return*/, findMsbuildInRegistry()];
-            }
-            return [2 /*return*/];
         });
     });
 }
