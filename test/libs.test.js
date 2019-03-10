@@ -1,6 +1,6 @@
 const { expect } = require('chai')
-const { opencvModules } = require('../constants')
-const createGetLibs = require('../libs')
+const { opencvModules } = require('../build/constants')
+const { getLibsFactory } = require('../build/getLibsFactory')
 
 function createFake(libFiles, { isWin, isOSX } = { isWin: false, isOSX: false }) {
   const fs = {
@@ -16,7 +16,7 @@ function createFake(libFiles, { isWin, isOSX } = { isWin: false, isOSX: false })
     isWin: () => isWin,
     isOSX: () => isOSX,
   }
-  return createGetLibs(Object.assign({}, utils, { fs, path }))
+  return getLibsFactory(Object.assign({}, utils, { fs, path }))
 }
 
 describe('libs', () => {

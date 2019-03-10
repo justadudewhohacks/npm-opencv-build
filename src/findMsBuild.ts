@@ -7,13 +7,13 @@ const { exec, execFile } = require('./utils')
 function findVs2017() {
   const ps = path.join(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
   const args = ['-ExecutionPolicy', 'Unrestricted', '-Command',
-                '&{Add-Type -Path \'' + path.join(__dirname, 'Find-VS2017.cs') +
+                '&{Add-Type -Path \'' + path.join(__dirname, '../Find-VS2017.cs') +
                 '\'; [VisualStudioConfiguration.Main]::Query()}']
 
   log.silly('find-msbuild', 'find vs2017 via powershell:', ps, args)
 
   return execFile(ps, args, { encoding: 'utf8' })
-    .then((stdout) => {
+    .then((stdout: any) => {
       log.silly('find-msbuild', 'find vs2017: ', stdout)
       const vsSetup = JSON.parse(stdout)
       if (!vsSetup || !vsSetup.path || !vsSetup.sdk) {
@@ -34,17 +34,18 @@ function findVs2017() {
     })
 }
 
-function parseMsBuilds(stdout) {
+function parseMsBuilds(stdout: any) {
   let reVers = /ToolsVersions\\([^\\]+)$/i
   , rePath = /\r\n[ \t]+MSBuildToolsPath[ \t]+REG_SZ[ \t]+([^\r]+)/i
-  , msbuilds = []
   , r
 
-  stdout.split('\r\n\r\n').forEach(function(l) {
+  let msbuilds: any[] = []
+
+  stdout.split('\r\n\r\n').forEach(function(l: any) {
     if (!l) return
     l = l.trim()
     if (r = reVers.exec(l.substring(0, l.indexOf('\r\n')))) {
-      var ver = parseFloat(r[1], 10)
+      var ver = parseFloat(r[1])
       if (ver >= 3.5) {
         if (r = rePath.exec(l)) {
           msbuilds.push({
@@ -64,7 +65,7 @@ function findMsbuildInRegistry () {
   log.silly('find-msbuild', 'find msbuild in registry:', cmd)
 
   return exec(cmd)
-    .then((stdout) => {
+    .then((stdout: any) => {
       log.silly('find-msbuild', 'find vs: ', stdout)
 
       // use most recent version
@@ -76,9 +77,9 @@ function findMsbuildInRegistry () {
         return Promise.reject('failed to find msbuild in registry')
       }
 
-      log.silly('find-msbuild', 'trying the following msbuild paths:')
+      log.info('find-msbuild', 'trying the following msbuild paths:')
       msbuilds.forEach((msbuild) => {
-        log.silly('find-msbuild', 'version: %s, path: %s', msbuild.version, msbuild.path)
+        log.info('find-msbuild', 'version: %s, path: %s', msbuild.version, msbuild.path)
       })
 
       const build = msbuilds.find((msbuild) => {
@@ -103,9 +104,12 @@ function findMsbuildInRegistry () {
     })
   }
 
-module.exports = function() {
-  return findVs2017().catch((err) => {
-    log.silly('find-msbuild', 'failed to find vs2017 via powershell:', err)
-    return findMsbuildInRegistry()
-  })
+export async function findMsBuild() {
+  try {
+    return await findVs2017()
+  } catch(err) {
+    log.info('find-msbuild', 'failed to find vs2017 via powershell:', err)
+    log.info('find-msbuild', 'attempting to find msbuild via registry query...')
+    return await findMsbuildInRegistry()
+  }
 }

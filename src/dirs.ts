@@ -1,9 +1,8 @@
-const path = require('path')
-const os = require('os');
+import * as path from 'path';
 
-const { isWin } = require('./install/utils')
+import { isWin } from './utils';
 
-const rootDir = __dirname
+const rootDir = path.resolve(__dirname, '../')
 const opencvRoot = path.join(rootDir, 'opencv')
 const opencvSrc = path.join(opencvRoot, 'opencv')
 const opencvContribSrc = path.join(opencvRoot, 'opencv_contrib')
@@ -12,31 +11,9 @@ const opencvBuild = path.join(opencvRoot, 'build')
 const opencvInclude = path.join(opencvBuild, 'include')
 const opencvLibDir = isWin() ? path.join(opencvBuild, 'lib/Release') : path.join(opencvBuild, 'lib')
 const opencvBinDir = isWin() ? path.join(opencvBuild, 'bin/Release') : path.join(opencvBuild, 'bin')
+const autoBuildFile = path.join(opencvRoot, 'auto-build.json')
 
-const numberOfCoresAvailable = os.cpus().length
-
-const opencvModules = [
-  'core',
-  'highgui',
-  'imgcodecs',
-  'imgproc',
-  'features2d',
-  'calib3d',
-  'photo',
-  'objdetect',
-  'ml',
-  'video',
-  'videoio',
-  'videostab',
-  'dnn',
-  'face',
-  'text',
-  'tracking',
-  'xfeatures2d',
-  'ximgproc'
-]
-
-module.exports = {
+export const dirs = {
   rootDir,
   opencvRoot,
   opencvSrc,
@@ -46,6 +23,5 @@ module.exports = {
   opencvInclude,
   opencvLibDir,
   opencvBinDir,
-  opencvModules,
-  numberOfCoresAvailable
+  autoBuildFile
 }

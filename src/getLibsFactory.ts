@@ -1,6 +1,12 @@
+import { OpencvModule } from './types';
+
 const worldModule = 'world';
 
-module.exports = function({ opencvModules, isWin, isOSX, fs, path }) {
+export function getLibsFactory(
+  args: { opencvModules: string[], isWin: () => boolean, isOSX: () => boolean, fs: any, path: any }
+): (libDir: string) => OpencvModule[] {
+
+  const { opencvModules, isWin, isOSX, fs, path } = args
 
   function getLibPrefix() {
     return isWin() ? 'opencv_' : 'libopencv_'
@@ -10,12 +16,12 @@ module.exports = function({ opencvModules, isWin, isOSX, fs, path }) {
     return isWin() ? 'lib' : (isOSX() ? 'dylib' : 'so')
   }
 
-  function getLibNameRegex(opencvModuleName) {
+  function getLibNameRegex(opencvModuleName: string) {
     return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`)
   }
 
-  function createLibResolver(libDir) {
-    function getLibAbsPath(libFile) {
+  function createLibResolver(libDir: string): (libFile: string) => string | undefined {
+    function getLibAbsPath(libFile: string | undefined): string | undefined {
       return (
         libFile
           ? fs.realpathSync(path.resolve(libDir, libFile))
@@ -23,18 +29,18 @@ module.exports = function({ opencvModules, isWin, isOSX, fs, path }) {
       )
     }
 
-    function matchLibName(libFile, opencvModuleName) {
-      return (libFile.match(getLibNameRegex(opencvModuleName)) || [])[0]
+    function matchLibName(libFile: string, opencvModuleName: string) {
+      return !!(libFile.match(getLibNameRegex(opencvModuleName)) || [])[0]
     }
 
-    const libFiles = fs.readdirSync(libDir)
+    const libFiles = fs.readdirSync(libDir) as string[]
 
-    return function (opencvModuleName) {
+    return function (opencvModuleName: string) {
       return getLibAbsPath(libFiles.find(libFile => matchLibName(libFile, opencvModuleName)))
     }
   }
 
-  return function (libDir) {
+  return function (libDir: string) {
     if (!fs.existsSync(libDir)) {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }
@@ -49,7 +55,7 @@ module.exports = function({ opencvModules, isWin, isOSX, fs, path }) {
       }]
     }
 
-    return opencvModules.map(
+    return (opencvModules as string[]).map(
       opencvModule => ({
         opencvModule,
         libPath: resolveLib(opencvModule)
