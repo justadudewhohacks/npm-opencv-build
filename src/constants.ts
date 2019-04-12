@@ -1,6 +1,6 @@
 import { dirs } from './dirs';
 
-export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.4.tar.gz'
+export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz'
 
 export const opencvRepoUrl = 'https://github.com/opencv/opencv.git'
 export const opencvContribRepoUrl = 'https://github.com/opencv/opencv_contrib.git'

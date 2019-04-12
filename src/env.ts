@@ -28,7 +28,7 @@ export function parseAutoBuildFlags(): string[] {
 }
 
 export function opencvVersion() {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.3'
+  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
 }
 
 export function numberOfCoresAvailable() {
