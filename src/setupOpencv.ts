@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib } from './env';
+import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib, buildWithCuda } from './env';
 import { findMsBuild } from './findMsBuild';
 import { AutoBuildFile } from './types';
 import { exec, isWin, spawn, isCudaAvailable } from './utils';
@@ -61,7 +61,7 @@ function getSharedCmakeFlags() {
       `-DOPENCV_EXTRA_MODULES_PATH=${dirs.opencvContribModules}`
     ]
 
-  if (isCudaAvailable()) {
+  if (buildWithCuda() && isCudaAvailable()) {
     log.info('install', 'Adding CUDA flags...');
     conditionalFlags.concat(getCudaCmakeFlags());
   }
