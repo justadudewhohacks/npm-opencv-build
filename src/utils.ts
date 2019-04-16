@@ -1,4 +1,6 @@
 import * as child_process from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const log = require('npmlog')
 
@@ -77,3 +79,31 @@ export function isOSX() {
 export function isUnix() {
   return !isWin() && !isOSX()
 }
+
+export async function isCudaAvailable() {
+  log.info('install', 'Check if CUDA is available & what version...');
+
+  if (isWin()) {
+    try {
+      await requireCmd('nvcc --version', 'CUDA availability check');
+      return true;
+    } catch (err) {
+      log.info('install', 'Seems like CUDA is not installed.');
+      return false;
+    }
+  }
+
+  // Because NVCC is not installed by default & requires an extra install step,
+  // this is work around that always works
+  const cudaVersionFilePath = path.resolve('/usr/local/cuda/version.txt');
+
+  if (fs.existsSync(cudaVersionFilePath)) {
+    const content = fs.readFileSync(cudaVersionFilePath, 'utf8');
+    log.info('install', content);
+    return true;
+  } else {
+    log.info('install', 'CUDA version file could not be found.');
+    return false;
+  }
+}
+ 
