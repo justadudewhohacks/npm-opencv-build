@@ -3,10 +3,10 @@ import * as fs from 'fs';
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib } from './env';
+import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib, buildWithCuda } from './env';
 import { findMsBuild } from './findMsBuild';
 import { AutoBuildFile } from './types';
-import { exec, isWin, spawn } from './utils';
+import { exec, isWin, spawn, isCudaAvailable } from './utils';
 
 const log = require('npmlog')
 
@@ -44,6 +44,15 @@ function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
   }
 }
 
+function getCudaCmakeFlags() {
+  return [
+    '-DWITH_CUDA=ON',
+    '-DBUILD_opencv_cudacodec=OFF', // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
+    '-DCUDA_FAST_MATH=ON', // optional
+    '-DWITH_CUBLAS=ON', // optional
+  ];
+}
+
 function getSharedCmakeFlags() {
   const conditionalFlags = isWithoutContrib()
     ? []
@@ -51,6 +60,12 @@ function getSharedCmakeFlags() {
       '-DOPENCV_ENABLE_NONFREE=ON',
       `-DOPENCV_EXTRA_MODULES_PATH=${dirs.opencvContribModules}`
     ]
+
+  if (buildWithCuda() && isCudaAvailable()) {
+    log.info('install', 'Adding CUDA flags...');
+    conditionalFlags.concat(getCudaCmakeFlags());
+  }
+
   return defaultCmakeFlags
     .concat(conditionalFlags)
     .concat(parseAutoBuildFlags())
@@ -95,10 +110,13 @@ function writeAutoBuildFile() {
 }
 
 export async function setupOpencv() {
+  const msbuild = await getMsbuildIfWin()
+
+  // Get cmake flags here to check for CUDA early on instead of the start of the building process
+  const cMakeFlags = isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags();
+  
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
-
-  const msbuild = await getMsbuildIfWin()
 
   await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
   await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
@@ -113,7 +131,7 @@ export async function setupOpencv() {
   }
   await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
 
-  await spawn('cmake', getCmakeArgs(isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs.opencvBuild })
+  await spawn('cmake', getCmakeArgs(cMakeFlags), { cwd: dirs.opencvBuild })
   await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
 
   writeAutoBuildFile()
