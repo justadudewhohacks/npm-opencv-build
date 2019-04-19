@@ -54,7 +54,7 @@ function getCudaCmakeFlags() {
 }
 
 function getSharedCmakeFlags() {
-  const conditionalFlags = isWithoutContrib()
+  let conditionalFlags = isWithoutContrib()
     ? []
     : [
       '-DOPENCV_ENABLE_NONFREE=ON',
@@ -63,7 +63,7 @@ function getSharedCmakeFlags() {
 
   if (buildWithCuda() && isCudaAvailable()) {
     log.info('install', 'Adding CUDA flags...');
-    conditionalFlags.concat(getCudaCmakeFlags());
+    conditionalFlags = conditionalFlags.concat(getCudaCmakeFlags());
   }
 
   return defaultCmakeFlags
@@ -114,7 +114,7 @@ export async function setupOpencv() {
 
   // Get cmake flags here to check for CUDA early on instead of the start of the building process
   const cMakeFlags = isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags();
-  
+
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
