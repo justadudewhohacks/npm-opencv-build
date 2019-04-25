@@ -8,6 +8,10 @@ function isAutoBuildDisabled() {
     return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD;
 }
 exports.isAutoBuildDisabled = isAutoBuildDisabled;
+function buildWithCuda() {
+    return !!process.env.OPENCV4NODEJS_BUILD_CUDA || false;
+}
+exports.buildWithCuda = buildWithCuda;
 function isWithoutContrib() {
     return !!process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB;
 }
@@ -26,7 +30,7 @@ function parseAutoBuildFlags() {
 }
 exports.parseAutoBuildFlags = parseAutoBuildFlags;
 function opencvVersion() {
-    return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.3';
+    return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6';
 }
 exports.opencvVersion = opencvVersion;
 function numberOfCoresAvailable() {

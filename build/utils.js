@@ -36,6 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var child_process = require("child_process");
+var fs = require("fs");
+var path = require("path");
 var log = require('npmlog');
 function exec(cmd, options) {
     log.silly('install', 'executing:', cmd);
@@ -146,3 +148,39 @@ function isUnix() {
     return !isWin() && !isOSX();
 }
 exports.isUnix = isUnix;
+function isCudaAvailable() {
+    return __awaiter(this, void 0, void 0, function () {
+        var err_2, cudaVersionFilePath, content;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    log.info('install', 'Check if CUDA is available & what version...');
+                    if (!isWin()) return [3 /*break*/, 4];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, requireCmd('nvcc --version', 'CUDA availability check')];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/, true];
+                case 3:
+                    err_2 = _a.sent();
+                    log.info('install', 'Seems like CUDA is not installed.');
+                    return [2 /*return*/, false];
+                case 4:
+                    cudaVersionFilePath = path.resolve('/usr/local/cuda/version.txt');
+                    if (fs.existsSync(cudaVersionFilePath)) {
+                        content = fs.readFileSync(cudaVersionFilePath, 'utf8');
+                        log.info('install', content);
+                        return [2 /*return*/, true];
+                    }
+                    else {
+                        log.info('install', 'CUDA version file could not be found.');
+                        return [2 /*return*/, false];
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.isCudaAvailable = isCudaAvailable;

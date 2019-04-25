@@ -8,3 +8,4 @@ export declare function requireCmake(): Promise<void>;
 export declare function isWin(): boolean;
 export declare function isOSX(): boolean;
 export declare function isUnix(): boolean;
+export declare function isCudaAvailable(): Promise<boolean>;

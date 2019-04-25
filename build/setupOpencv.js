@@ -95,6 +95,14 @@ function getRunBuildCmd(msbuildExe) {
         });
     }); };
 }
+function getCudaCmakeFlags() {
+    return [
+        '-DWITH_CUDA=ON',
+        '-DBUILD_opencv_cudacodec=OFF',
+        '-DCUDA_FAST_MATH=ON',
+        '-DWITH_CUBLAS=ON',
+    ];
+}
 function getSharedCmakeFlags() {
     var conditionalFlags = env_1.isWithoutContrib()
         ? []
@@ -102,6 +110,10 @@ function getSharedCmakeFlags() {
             '-DOPENCV_ENABLE_NONFREE=ON',
             "-DOPENCV_EXTRA_MODULES_PATH=" + dirs_1.dirs.opencvContribModules
         ];
+    if (env_1.buildWithCuda() && utils_1.isCudaAvailable()) {
+        log.info('install', 'Adding CUDA flags...');
+        conditionalFlags = conditionalFlags.concat(getCudaCmakeFlags());
+    }
     return constants_1.defaultCmakeFlags
         .concat(conditionalFlags)
         .concat(env_1.parseAutoBuildFlags());
@@ -150,15 +162,17 @@ function writeAutoBuildFile() {
 }
 function setupOpencv() {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, msbuild;
+        var msbuild, cMakeFlags, tag;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    tag = env_1.opencvVersion();
-                    log.info('install', 'installing opencv version %s into directory: %s', tag, dirs_1.dirs.opencvRoot);
-                    return [4 /*yield*/, getMsbuildIfWin()];
+                case 0: return [4 /*yield*/, getMsbuildIfWin()
+                    // Get cmake flags here to check for CUDA early on instead of the start of the building process
+                ];
                 case 1:
                     msbuild = _a.sent();
+                    cMakeFlags = utils_1.isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags();
+                    tag = env_1.opencvVersion();
+                    log.info('install', 'installing opencv version %s into directory: %s', tag, dirs_1.dirs.opencvRoot);
                     return [4 /*yield*/, utils_1.exec(getMkDirCmd('opencv'), { cwd: dirs_1.dirs.rootDir })];
                 case 2:
                     _a.sent();
@@ -184,7 +198,7 @@ function setupOpencv() {
                 case 9: return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
                 case 10:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(utils_1.isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags()), { cwd: dirs_1.dirs.opencvBuild })];
+                    return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(cMakeFlags), { cwd: dirs_1.dirs.opencvBuild })];
                 case 11:
                     _a.sent();
                     return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)()];

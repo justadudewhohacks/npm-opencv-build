@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var dirs_1 = require("./dirs");
-exports.OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.4.tar.gz';
+exports.OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz';
 exports.opencvRepoUrl = 'https://github.com/opencv/opencv.git';
 exports.opencvContribRepoUrl = 'https://github.com/opencv/opencv_contrib.git';
 exports.opencvModules = [
