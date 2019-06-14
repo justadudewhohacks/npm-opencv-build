@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
+var path = require("path");
 var _1 = require(".");
 var constants_1 = require("./constants");
 var dirs_1 = require("./dirs");
@@ -158,11 +159,13 @@ function writeAutoBuildFile() {
         autoBuildFlags: env_1.autoBuildFlags(),
         modules: _1.getLibs(dirs_1.dirs.opencvLibDir)
     };
+    log.info('install', 'writing auto-build file into directory: %s', dirs_1.dirs.autoBuildFile);
+    log.info('install', autoBuildFile);
     fs.writeFileSync(dirs_1.dirs.autoBuildFile, JSON.stringify(autoBuildFile));
 }
 function setupOpencv() {
     return __awaiter(this, void 0, void 0, function () {
-        var msbuild, cMakeFlags, tag;
+        var msbuild, cMakeFlags, tag, cmakeArgs, rmOpenCV, err_1, rmOpenCVContrib, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, getMsbuildIfWin()
@@ -198,20 +201,46 @@ function setupOpencv() {
                 case 9: return [4 /*yield*/, utils_1.spawn('git', ['clone', '-b', "" + tag, '--single-branch', '--depth', '1', '--progress', constants_1.opencvRepoUrl], { cwd: dirs_1.dirs.opencvRoot })];
                 case 10:
                     _a.sent();
-                    return [4 /*yield*/, utils_1.spawn('cmake', getCmakeArgs(cMakeFlags), { cwd: dirs_1.dirs.opencvBuild })];
+                    cmakeArgs = getCmakeArgs(cMakeFlags);
+                    log.info('install', 'running cmake %s', cmakeArgs);
+                    return [4 /*yield*/, utils_1.spawn('cmake', cmakeArgs, { cwd: dirs_1.dirs.opencvBuild })];
                 case 11:
                     _a.sent();
+                    log.info('install', 'starting build...');
                     return [4 /*yield*/, getRunBuildCmd(utils_1.isWin() ? msbuild.path : undefined)()];
                 case 12:
                     _a.sent();
                     writeAutoBuildFile();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv'), { cwd: dirs_1.dirs.opencvRoot })];
+                    rmOpenCV = getRmDirCmd('opencv');
+                    _a.label = 13;
                 case 13:
-                    _a.sent();
-                    return [4 /*yield*/, utils_1.exec(getRmDirCmd('opencv_contrib'), { cwd: dirs_1.dirs.opencvRoot })];
+                    _a.trys.push([13, 15, , 16]);
+                    return [4 /*yield*/, utils_1.exec(rmOpenCV, { cwd: dirs_1.dirs.opencvRoot })];
                 case 14:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [3 /*break*/, 16];
+                case 15:
+                    err_1 = _a.sent();
+                    log.error('install', 'failed to clean opencv source folder:', err_1);
+                    log.error('install', 'command was: %s', rmOpenCV);
+                    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs_1.dirs.opencvRoot, 'opencv'));
+                    return [3 /*break*/, 16];
+                case 16:
+                    rmOpenCVContrib = getRmDirCmd('opencv_contrib');
+                    _a.label = 17;
+                case 17:
+                    _a.trys.push([17, 19, , 20]);
+                    return [4 /*yield*/, utils_1.exec(rmOpenCVContrib, { cwd: dirs_1.dirs.opencvRoot })];
+                case 18:
+                    _a.sent();
+                    return [3 /*break*/, 20];
+                case 19:
+                    err_2 = _a.sent();
+                    log.error('install', 'failed to clean opencv_contrib source folder:', err_2);
+                    log.error('install', 'command was: %s', rmOpenCV);
+                    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs_1.dirs.opencvRoot, 'opencv_contrib'));
+                    return [3 /*break*/, 20];
+                case 20: return [2 /*return*/];
             }
         });
     });

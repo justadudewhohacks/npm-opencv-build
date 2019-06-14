@@ -1,12 +1,20 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, numberOfCoresAvailable, opencvVersion, parseAutoBuildFlags, isWithoutContrib, buildWithCuda } from './env';
+import {
+  autoBuildFlags,
+  buildWithCuda,
+  isWithoutContrib,
+  numberOfCoresAvailable,
+  opencvVersion,
+  parseAutoBuildFlags,
+} from './env';
 import { findMsBuild } from './findMsBuild';
 import { AutoBuildFile } from './types';
-import { exec, isWin, spawn, isCudaAvailable } from './utils';
+import { exec, isCudaAvailable, isWin, spawn } from './utils';
 
 const log = require('npmlog')
 
@@ -106,6 +114,8 @@ function writeAutoBuildFile() {
     autoBuildFlags: autoBuildFlags(),
     modules: getLibs(dirs.opencvLibDir)
   }
+  log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
+  log.info('install', autoBuildFile)
   fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
 }
 
@@ -131,11 +141,29 @@ export async function setupOpencv() {
   }
   await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
 
-  await spawn('cmake', getCmakeArgs(cMakeFlags), { cwd: dirs.opencvBuild })
+  const cmakeArgs = getCmakeArgs(cMakeFlags)
+  log.info('install', 'running cmake %s', cmakeArgs)
+  await spawn('cmake', cmakeArgs, { cwd: dirs.opencvBuild })
+  log.info('install', 'starting build...')
   await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
 
   writeAutoBuildFile()
 
-  await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
-  await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
+  const rmOpenCV = getRmDirCmd('opencv')
+  try {
+    await exec(rmOpenCV, { cwd: dirs.opencvRoot })
+  } catch (err) {
+    log.error('install', 'failed to clean opencv source folder:', err)
+    log.error('install', 'command was: %s', rmOpenCV)
+    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv'))
+  }
+
+  const rmOpenCVContrib = getRmDirCmd('opencv_contrib')
+  try {
+    await exec(rmOpenCVContrib, { cwd: dirs.opencvRoot })
+  } catch (err) {
+    log.error('install', 'failed to clean opencv_contrib source folder:', err)
+    log.error('install', 'command was: %s', rmOpenCV)
+    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv_contrib'))
+  }
 }

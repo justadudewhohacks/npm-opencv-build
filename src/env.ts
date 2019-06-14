@@ -44,7 +44,7 @@ export function readAutoBuildFile(): AutoBuildFile | undefined {
     const fileExists = fs.existsSync(dirs.autoBuildFile)
     if (fileExists) {
       const autoBuildFile = JSON.parse(fs.readFileSync(dirs.autoBuildFile).toString()) as AutoBuildFile
-      if (!autoBuildFile.opencvVersion || !autoBuildFile.autoBuildFlags || !Array.isArray(autoBuildFile.modules)) {
+      if (!autoBuildFile.opencvVersion || !('autoBuildFlags' in autoBuildFile) || !Array.isArray(autoBuildFile.modules)) {
         throw new Error('auto-build.json has invalid contents')
       }
       return autoBuildFile

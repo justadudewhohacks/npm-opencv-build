@@ -6,6 +6,7 @@ export declare const dirs: {
     opencvContribModules: string;
     opencvBuild: string;
     opencvInclude: string;
+    opencv4Include: string;
     opencvLibDir: string;
     opencvBinDir: string;
     autoBuildFile: string;

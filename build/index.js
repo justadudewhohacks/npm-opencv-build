@@ -12,6 +12,7 @@ var env_1 = require("./env");
 exports.isAutoBuildDisabled = env_1.isAutoBuildDisabled;
 exports.readAutoBuildFile = env_1.readAutoBuildFile;
 exports.opencvInclude = dirs_1.dirs.opencvInclude;
+exports.opencv4Include = dirs_1.dirs.opencv4Include;
 exports.opencvLibDir = dirs_1.dirs.opencvLibDir;
 exports.opencvBinDir = dirs_1.dirs.opencvBinDir;
 exports.opencvBuildDir = dirs_1.dirs.opencvBuild;

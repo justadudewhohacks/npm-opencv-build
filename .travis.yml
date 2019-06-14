@@ -1,11 +1,17 @@
 language: node_js
 
-node_js:
-  # - '6' note: the npm v3 shipped with node 6 messes up __dirname when installing package local filesystem
-  # - '9' TODO figure out why travis has problems installing npmlog here
-  - 10
-
 sudo: required
+
+matrix:
+  include:
+    # default OpenCV Version (3.4.6)
+    - os: linux
+      node_js: 10
+    # OpenCV 4.1.0
+    - os: linux
+      node_js: 10
+      env:
+        - OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=4.1.0
 
 before_install:
   - sudo apt-get update

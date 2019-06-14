@@ -42,7 +42,7 @@ function readAutoBuildFile() {
         var fileExists = fs.existsSync(dirs_1.dirs.autoBuildFile);
         if (fileExists) {
             var autoBuildFile = JSON.parse(fs.readFileSync(dirs_1.dirs.autoBuildFile).toString());
-            if (!autoBuildFile.opencvVersion || !autoBuildFile.autoBuildFlags || !Array.isArray(autoBuildFile.modules)) {
+            if (!autoBuildFile.opencvVersion || !('autoBuildFlags' in autoBuildFile) || !Array.isArray(autoBuildFile.modules)) {
                 throw new Error('auto-build.json has invalid contents');
             }
             return autoBuildFile;
