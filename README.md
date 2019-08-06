@@ -19,12 +19,12 @@ npm install --global windows-build-tools
 ```
 
 ## Custom flags
-it's possible to specify custom flags to build process inserting on the `package.json` where the dependency is declared an object like:
+It's possible to specify custom flags to build process inserting on the `package.json` where the dependency is declared an object like:
 ```json
 {
   ...
   "opencv4nodejs": {
-    "flags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+    "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
   }
 }
 ```
