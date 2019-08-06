@@ -78,11 +78,11 @@ function install() {
                             if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
                                 process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
                                     process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
-                                    rootPackageJSON.opencv4nodejs.flags
+                                    rootPackageJSON.opencv4nodejs.autoBuildFlags
                                 ].join(' ');
                             }
                             else {
-                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.flags;
+                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags;
                             }
                         }
                     }
