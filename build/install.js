@@ -67,10 +67,25 @@ function checkInstalledLibs(autoBuildFile) {
 }
 function install() {
     return __awaiter(this, void 0, void 0, function () {
-        var autoBuildFile, hasLibs, err_1;
+        var rootPackageJSON, autoBuildFile, hasLibs, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (process.env.INIT_CWD) {
+                        rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'));
+                        if (rootPackageJSON.opencv4nodejs &&
+                            rootPackageJSON.opencv4nodejs.autoBuildFlags) {
+                            if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
+                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
+                                    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
+                                    rootPackageJSON.opencv4nodejs.autoBuildFlags
+                                ].join(' ');
+                            }
+                            else {
+                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags;
+                            }
+                        }
+                    }
                     if (env_1.isAutoBuildDisabled()) {
                         log.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set');
                         log.info('install', 'skipping auto build...');

@@ -17,3 +17,15 @@ npm install opencv-build
 ``` bash
 npm install --global windows-build-tools
 ```
+
+## Custom flags
+It's possible to specify custom flags to build process inserting on the `package.json` where the dependency is declared an object like:
+```json
+{
+  ...
+  "opencv4nodejs": {
+    "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+  }
+}
+```
+these flags will be used during building in the same way as described [here](https://github.com/justadudewhohacks/opencv4nodejs#auto-build-flags).
