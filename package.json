@@ -1,6 +1,6 @@
 {
   "name": "opencv-build",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm",
   "main": "./build/index.js",
   "scripts": {
