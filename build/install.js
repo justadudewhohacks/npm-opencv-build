@@ -72,18 +72,24 @@ function install() {
             switch (_a.label) {
                 case 0:
                     if (process.env.INIT_CWD) {
-                        rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'));
-                        if (rootPackageJSON.opencv4nodejs &&
-                            rootPackageJSON.opencv4nodejs.autoBuildFlags) {
-                            if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
-                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
-                                    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
-                                    rootPackageJSON.opencv4nodejs.autoBuildFlags
-                                ].join(' ');
+                        try {
+                            rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'));
+                            if (rootPackageJSON.opencv4nodejs &&
+                                rootPackageJSON.opencv4nodejs.autoBuildFlags) {
+                                if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
+                                    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
+                                        process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
+                                        rootPackageJSON.opencv4nodejs.autoBuildFlags
+                                    ].join(' ');
+                                }
+                                else {
+                                    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags;
+                                }
                             }
-                            else {
-                                process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags;
-                            }
+                        }
+                        catch (error) {
+                            log.info('No package.json in folder.');
+                            log.verbose(error);
                         }
                     }
                     if (env_1.isAutoBuildDisabled()) {
