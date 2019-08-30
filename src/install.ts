@@ -39,21 +39,27 @@ function checkInstalledLibs(autoBuildFile: AutoBuildFile) {
 
 export async function install() {
   if (process.env.INIT_CWD) {
-    let rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'))
+    try {
+      const rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'))
 
-    if (rootPackageJSON.opencv4nodejs &&
-      rootPackageJSON.opencv4nodejs.autoBuildFlags) {
+      if (rootPackageJSON.opencv4nodejs &&
+        rootPackageJSON.opencv4nodejs.autoBuildFlags) {
 
-      if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
+        if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
 
-        process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
-          process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
-          rootPackageJSON.opencv4nodejs.autoBuildFlags
-        ].join(' ')
-      } else {
+          process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
+            process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
+            rootPackageJSON.opencv4nodejs.autoBuildFlags
+          ].join(' ')
+        } else {
 
-        process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags
+          process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags
+        }
       }
+    } catch (error) {
+
+      log.info('No package.json in folder.');
+      log.verbose(error);
     }
   }
 
