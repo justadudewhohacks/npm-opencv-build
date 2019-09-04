@@ -4,10 +4,11 @@ import * as path from 'path';
 import { opencvModules } from './constants';
 import { dirs } from './dirs';
 import { getLibsFactory } from './getLibsFactory';
-import { isOSX, isWin } from './utils';
+import { isOSX, isUnix, isWin } from './utils';
 
 export { opencvModules } from './constants';
-export { isAutoBuildDisabled, readAutoBuildFile } from './env';
+export { isAutoBuildDisabled, readAutoBuildFile, readEnvsFromPackageJson } from './env';
+export { isOSX, isWin, isUnix } from './utils';
 export const opencvInclude = dirs.opencvInclude
 export const opencv4Include = dirs.opencv4Include
 export const opencvLibDir = dirs.opencvLibDir

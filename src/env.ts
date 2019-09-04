@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as os from 'os';
+import * as path from 'path';
 
 import { dirs } from './dirs';
 import { AutoBuildFile } from './types';
@@ -22,6 +23,14 @@ export function autoBuildFlags(): string {
   return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || ''
 }
 
+export function opencvVersion() {
+  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
+}
+
+export function numberOfCoresAvailable() {
+  return os.cpus().length
+}
+
 export function parseAutoBuildFlags(): string[] {
   const flagStr = autoBuildFlags()
   if (typeof(flagStr) === 'string' && flagStr.length) {
@@ -29,14 +38,6 @@ export function parseAutoBuildFlags(): string[] {
     return flagStr.split(' ')
   }
   return []
-}
-
-export function opencvVersion() {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
-}
-
-export function numberOfCoresAvailable() {
-  return os.cpus().length
 }
 
 export function readAutoBuildFile(): AutoBuildFile | undefined {
@@ -54,4 +55,79 @@ export function readAutoBuildFile(): AutoBuildFile | undefined {
     log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', dirs.autoBuildFile, err.toString())
   }
   return undefined
+}
+
+function parsePackageJson() {
+  if (!process.env.INIT_CWD) {
+    log.error('process.env.INIT_CWD is undefined or empty')
+    return
+  }
+  const absPath = path.resolve(process.env.INIT_CWD, 'package.json')
+  if (!fs.existsSync(absPath)) {
+    log.info('No package.json in folder.')
+    return
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(absPath).toString())
+  } catch (error) {
+    log.error('failed to parse package.json:')
+    log.error(error)
+  }
+}
+
+export function readEnvsFromPackageJson() {
+  const rootPackageJSON = parsePackageJson()
+  if (!rootPackageJSON || !rootPackageJSON.opencv4nodejs) {
+    return
+  }
+
+  const envs = Object.keys(rootPackageJSON.opencv4nodejs)
+  if (envs.length) {
+    log.info('the following opencv4nodejs environment variables are set in the package.json:')
+    envs.forEach(key => log.info(`${key}: ${rootPackageJSON.opencv4nodejs[key]}`))
+  }
+
+  const {
+    autoBuildBuildCuda,
+    autoBuildFlags,
+    autoBuildOpenCVVersion,
+    autoBuildWithoutContrib,
+    disableAutoBuild,
+    opencvIncludeDir,
+    opencvLibDir,
+    opencvBinDir
+  } = rootPackageJSON.opencv4nodejs
+
+  if (autoBuildFlags) {
+    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags
+  }
+
+  if (autoBuildBuildCuda) {
+    process.env.OPENCV4NODEJS_BUILD_CUDA = autoBuildBuildCuda
+  }
+
+  if (autoBuildOpenCVVersion) {
+    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpenCVVersion
+  }
+
+  if (autoBuildWithoutContrib) {
+    process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = autoBuildWithoutContrib
+  }
+
+  if (disableAutoBuild) {
+    process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = disableAutoBuild
+  }
+
+  if (opencvIncludeDir) {
+    process.env.OPENCV_INCLUDE_DIR = opencvIncludeDir
+  }
+
+  if (opencvLibDir) {
+    process.env.OPENCV_LIB_DIR = opencvIncludeDir
+  }
+
+  if (opencvBinDir) {
+    process.env.OPENCV_BIN_DIR = opencvBinDir
+  }
 }

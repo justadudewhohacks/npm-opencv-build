@@ -3,7 +3,14 @@ import * as path from 'path';
 
 import { opencvModules } from './constants';
 import { dirs } from './dirs';
-import { autoBuildFlags, isAutoBuildDisabled, readAutoBuildFile, opencvVersion, isWithoutContrib } from './env';
+import {
+  autoBuildFlags,
+  isAutoBuildDisabled,
+  isWithoutContrib,
+  opencvVersion,
+  readAutoBuildFile,
+  readEnvsFromPackageJson,
+} from './env';
 import { getLibsFactory } from './getLibsFactory';
 import { setupOpencv } from './setupOpencv';
 import { AutoBuildFile } from './types';
@@ -38,30 +45,9 @@ function checkInstalledLibs(autoBuildFile: AutoBuildFile) {
 }
 
 export async function install() {
-  if (process.env.INIT_CWD) {
-    try {
-      const rootPackageJSON = require(path.resolve(process.env.INIT_CWD, 'package.json'))
-
-      if (rootPackageJSON.opencv4nodejs &&
-        rootPackageJSON.opencv4nodejs.autoBuildFlags) {
-
-        if (process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS) {
-
-          process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = [
-            process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS,
-            rootPackageJSON.opencv4nodejs.autoBuildFlags
-          ].join(' ')
-        } else {
-
-          process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = rootPackageJSON.opencv4nodejs.autoBuildFlags
-        }
-      }
-    } catch (error) {
-
-      log.info('No package.json in folder.');
-      log.verbose(error);
-    }
-  }
+  // if project directory has a package.json containing opencv4nodejs variables
+  // apply these variables to the process environment
+  readEnvsFromPackageJson()
 
   if (isAutoBuildDisabled()) {
     log.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set')
