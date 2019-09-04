@@ -1,5 +1,6 @@
 export { opencvModules } from './constants';
-export { isAutoBuildDisabled, readAutoBuildFile } from './env';
+export { isAutoBuildDisabled, readAutoBuildFile, readEnvsFromPackageJson } from './env';
+export { isOSX, isWin, isUnix } from './utils';
 export declare const opencvInclude: string;
 export declare const opencv4Include: string;
 export declare const opencvLibDir: string;

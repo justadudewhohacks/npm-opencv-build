@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
 var os = require("os");
+var path = require("path");
 var dirs_1 = require("./dirs");
 var log = require('npmlog');
 function isAutoBuildDisabled() {
@@ -20,6 +21,14 @@ function autoBuildFlags() {
     return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || '';
 }
 exports.autoBuildFlags = autoBuildFlags;
+function opencvVersion() {
+    return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6';
+}
+exports.opencvVersion = opencvVersion;
+function numberOfCoresAvailable() {
+    return os.cpus().length;
+}
+exports.numberOfCoresAvailable = numberOfCoresAvailable;
 function parseAutoBuildFlags() {
     var flagStr = autoBuildFlags();
     if (typeof (flagStr) === 'string' && flagStr.length) {
@@ -29,14 +38,6 @@ function parseAutoBuildFlags() {
     return [];
 }
 exports.parseAutoBuildFlags = parseAutoBuildFlags;
-function opencvVersion() {
-    return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6';
-}
-exports.opencvVersion = opencvVersion;
-function numberOfCoresAvailable() {
-    return os.cpus().length;
-}
-exports.numberOfCoresAvailable = numberOfCoresAvailable;
 function readAutoBuildFile() {
     try {
         var fileExists = fs.existsSync(dirs_1.dirs.autoBuildFile);
@@ -55,3 +56,58 @@ function readAutoBuildFile() {
     return undefined;
 }
 exports.readAutoBuildFile = readAutoBuildFile;
+function parsePackageJson() {
+    if (!process.env.INIT_CWD) {
+        log.error('process.env.INIT_CWD is undefined or empty');
+        return;
+    }
+    var absPath = path.resolve(process.env.INIT_CWD, 'package.json');
+    if (!fs.existsSync(absPath)) {
+        log.info('No package.json in folder.');
+        return;
+    }
+    try {
+        return JSON.parse(fs.readFileSync(absPath).toString());
+    }
+    catch (error) {
+        log.error('failed to parse package.json:');
+        log.error(error);
+    }
+}
+function readEnvsFromPackageJson() {
+    var rootPackageJSON = parsePackageJson();
+    if (!rootPackageJSON || !rootPackageJSON.opencv4nodejs) {
+        return;
+    }
+    var envs = Object.keys(rootPackageJSON.opencv4nodejs);
+    if (envs.length) {
+        log.info('the following opencv4nodejs environment variables are set in the package.json:');
+        envs.forEach(function (key) { return log.info(key + ": " + rootPackageJSON.opencv4nodejs[key]); });
+    }
+    var _a = rootPackageJSON.opencv4nodejs, autoBuildBuildCuda = _a.autoBuildBuildCuda, autoBuildFlags = _a.autoBuildFlags, autoBuildOpenCVVersion = _a.autoBuildOpenCVVersion, autoBuildWithoutContrib = _a.autoBuildWithoutContrib, disableAutoBuild = _a.disableAutoBuild, opencvIncludeDir = _a.opencvIncludeDir, opencvLibDir = _a.opencvLibDir, opencvBinDir = _a.opencvBinDir;
+    if (autoBuildFlags) {
+        process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags;
+    }
+    if (autoBuildBuildCuda) {
+        process.env.OPENCV4NODEJS_BUILD_CUDA = autoBuildBuildCuda;
+    }
+    if (autoBuildOpenCVVersion) {
+        process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpenCVVersion;
+    }
+    if (autoBuildWithoutContrib) {
+        process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = autoBuildWithoutContrib;
+    }
+    if (disableAutoBuild) {
+        process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = disableAutoBuild;
+    }
+    if (opencvIncludeDir) {
+        process.env.OPENCV_INCLUDE_DIR = opencvIncludeDir;
+    }
+    if (opencvLibDir) {
+        process.env.OPENCV_LIB_DIR = opencvIncludeDir;
+    }
+    if (opencvBinDir) {
+        process.env.OPENCV_BIN_DIR = opencvBinDir;
+    }
+}
+exports.readEnvsFromPackageJson = readEnvsFromPackageJson;
