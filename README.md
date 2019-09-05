@@ -4,28 +4,44 @@
 A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build <a href="https://github.com/justadudewhohacks/opencv4nodejs"><b>opencv4nodejs</b></a>.
 
 # Install
-```
+
+``` bash
 npm install opencv-build
 ```
 
 ## Requirements
+
 - cmake
 
 ### Windows
+
 - windows build tools or Visual Studio
 
 ``` bash
 npm install --global windows-build-tools
 ```
 
-## Custom flags
-It's possible to specify custom flags to build process inserting on the `package.json` where the dependency is declared an object like:
+## Environment Variables
+
+It's possible to specify build environment variables by inserting them into the `package.json` where the dependency is declared an object like:
+
 ```json
 {
   ...
   "opencv4nodejs": {
-    "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+    "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc",
+    "autoBuildOpenCVVersion": 4.1.0
   }
 }
 ```
-these flags will be used during building in the same way as described [here](https://github.com/justadudewhohacks/opencv4nodejs#auto-build-flags).
+
+The following environment variables can be passed:
+
+- autoBuildBuildCuda
+- autoBuildFlags
+- autoBuildOpenCVVersion
+- autoBuildWithoutContrib
+- disableAutoBuild
+- opencvIncludeDir
+- opencvLibDir
+- opencvBinDir

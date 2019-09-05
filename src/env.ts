@@ -124,7 +124,7 @@ export function readEnvsFromPackageJson() {
   }
 
   if (opencvLibDir) {
-    process.env.OPENCV_LIB_DIR = opencvIncludeDir
+    process.env.OPENCV_LIB_DIR = opencvLibDir
   }
 
   if (opencvBinDir) {
