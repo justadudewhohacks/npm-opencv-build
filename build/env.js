@@ -84,15 +84,15 @@ function readEnvsFromPackageJson() {
         log.info('the following opencv4nodejs environment variables are set in the package.json:');
         envs.forEach(function (key) { return log.info(key + ": " + rootPackageJSON.opencv4nodejs[key]); });
     }
-    var _a = rootPackageJSON.opencv4nodejs, autoBuildBuildCuda = _a.autoBuildBuildCuda, autoBuildFlags = _a.autoBuildFlags, autoBuildOpenCVVersion = _a.autoBuildOpenCVVersion, autoBuildWithoutContrib = _a.autoBuildWithoutContrib, disableAutoBuild = _a.disableAutoBuild, opencvIncludeDir = _a.opencvIncludeDir, opencvLibDir = _a.opencvLibDir, opencvBinDir = _a.opencvBinDir;
+    var _a = rootPackageJSON.opencv4nodejs, autoBuildBuildCuda = _a.autoBuildBuildCuda, autoBuildFlags = _a.autoBuildFlags, autoBuildOpencvVersion = _a.autoBuildOpencvVersion, autoBuildWithoutContrib = _a.autoBuildWithoutContrib, disableAutoBuild = _a.disableAutoBuild, opencvIncludeDir = _a.opencvIncludeDir, opencvLibDir = _a.opencvLibDir, opencvBinDir = _a.opencvBinDir;
     if (autoBuildFlags) {
         process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags;
     }
     if (autoBuildBuildCuda) {
         process.env.OPENCV4NODEJS_BUILD_CUDA = autoBuildBuildCuda;
     }
-    if (autoBuildOpenCVVersion) {
-        process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpenCVVersion;
+    if (autoBuildOpencvVersion) {
+        process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpencvVersion;
     }
     if (autoBuildWithoutContrib) {
         process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = autoBuildWithoutContrib;

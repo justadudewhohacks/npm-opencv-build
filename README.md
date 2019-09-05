@@ -39,7 +39,7 @@ The following environment variables can be passed:
 
 - autoBuildBuildCuda
 - autoBuildFlags
-- autoBuildOpenCVVersion
+- autoBuildOpencvVersion
 - autoBuildWithoutContrib
 - disableAutoBuild
 - opencvIncludeDir

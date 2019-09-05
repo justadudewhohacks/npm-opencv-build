@@ -91,7 +91,7 @@ export function readEnvsFromPackageJson() {
   const {
     autoBuildBuildCuda,
     autoBuildFlags,
-    autoBuildOpenCVVersion,
+    autoBuildOpencvVersion,
     autoBuildWithoutContrib,
     disableAutoBuild,
     opencvIncludeDir,
@@ -107,8 +107,8 @@ export function readEnvsFromPackageJson() {
     process.env.OPENCV4NODEJS_BUILD_CUDA = autoBuildBuildCuda
   }
 
-  if (autoBuildOpenCVVersion) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpenCVVersion
+  if (autoBuildOpencvVersion) {
+    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpencvVersion
   }
 
   if (autoBuildWithoutContrib) {
