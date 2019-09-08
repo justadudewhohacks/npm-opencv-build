@@ -4,12 +4,12 @@ import * as path from 'path';
 import { opencvModules } from './constants';
 import { dirs } from './dirs';
 import {
+  applyEnvsFromPackageJson,
   autoBuildFlags,
   isAutoBuildDisabled,
   isWithoutContrib,
   opencvVersion,
   readAutoBuildFile,
-  readEnvsFromPackageJson,
 } from './env';
 import { getLibsFactory } from './getLibsFactory';
 import { setupOpencv } from './setupOpencv';
@@ -47,7 +47,7 @@ function checkInstalledLibs(autoBuildFile: AutoBuildFile) {
 export async function install() {
   // if project directory has a package.json containing opencv4nodejs variables
   // apply these variables to the process environment
-  readEnvsFromPackageJson()
+  applyEnvsFromPackageJson()
 
   if (isAutoBuildDisabled()) {
     log.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set')

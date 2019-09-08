@@ -57,35 +57,42 @@ export function readAutoBuildFile(): AutoBuildFile | undefined {
   return undefined
 }
 
-function parsePackageJson() {
-  if (!process.env.INIT_CWD) {
-    log.error('process.env.INIT_CWD is undefined or empty')
-    return
+export function getCwd() {
+  const cwd = process.env.INIT_CWD || process.cwd()
+  if (!cwd) {
+    throw new Error('process.env.INIT_CWD || process.cwd() is undefined or empty')
   }
-  const absPath = path.resolve(process.env.INIT_CWD, 'package.json')
-  if (!fs.existsSync(absPath)) {
-    log.info('No package.json in folder.')
-    return
-  }
+  return cwd
+}
 
-  try {
-    return JSON.parse(fs.readFileSync(absPath).toString())
-  } catch (error) {
-    log.error('failed to parse package.json:')
-    log.error(error)
+function parsePackageJson() {
+  const absPath = path.resolve(getCwd(), 'package.json')
+  if (!fs.existsSync(absPath)) {
+    return null
   }
+  return JSON.parse(fs.readFileSync(absPath).toString())
 }
 
 export function readEnvsFromPackageJson() {
   const rootPackageJSON = parsePackageJson()
-  if (!rootPackageJSON || !rootPackageJSON.opencv4nodejs) {
-    return
+  return rootPackageJSON
+    ? (rootPackageJSON.opencv4nodejs || {})
+    : {}
+}
+
+export function applyEnvsFromPackageJson() {
+  let envs: any = {}
+  try {
+    envs = readEnvsFromPackageJson()
+  } catch (err) {
+    log.error('failed to parse package.json:')
+    log.error(err)
   }
 
-  const envs = Object.keys(rootPackageJSON.opencv4nodejs)
-  if (envs.length) {
+  const envKeys = Object.keys(envs)
+  if (envKeys.length) {
     log.info('the following opencv4nodejs environment variables are set in the package.json:')
-    envs.forEach(key => log.info(`${key}: ${rootPackageJSON.opencv4nodejs[key]}`))
+    envKeys.forEach(key => log.info(`${key}: ${envs[key]}`))
   }
 
   const {
@@ -97,7 +104,7 @@ export function readEnvsFromPackageJson() {
     opencvIncludeDir,
     opencvLibDir,
     opencvBinDir
-  } = rootPackageJSON.opencv4nodejs
+  } = envs
 
   if (autoBuildFlags) {
     process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags

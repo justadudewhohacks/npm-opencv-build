@@ -27,10 +27,9 @@ It's possible to specify build environment variables by inserting them into the 
 
 ```json
 {
-  ...
   "opencv4nodejs": {
     "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc",
-    "autoBuildOpenCVVersion": 4.1.0
+    "autoBuildOpencvVersion": "4.1.0"
   }
 }
 ```

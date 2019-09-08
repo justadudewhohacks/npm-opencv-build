@@ -7,4 +7,6 @@ export declare function opencvVersion(): string;
 export declare function numberOfCoresAvailable(): number;
 export declare function parseAutoBuildFlags(): string[];
 export declare function readAutoBuildFile(): AutoBuildFile | undefined;
-export declare function readEnvsFromPackageJson(): void;
+export declare function getCwd(): string;
+export declare function readEnvsFromPackageJson(): any;
+export declare function applyEnvsFromPackageJson(): void;

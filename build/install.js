@@ -74,7 +74,7 @@ function install() {
                 case 0:
                     // if project directory has a package.json containing opencv4nodejs variables
                     // apply these variables to the process environment
-                    env_1.readEnvsFromPackageJson();
+                    env_1.applyEnvsFromPackageJson();
                     if (env_1.isAutoBuildDisabled()) {
                         log.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set');
                         log.info('install', 'skipping auto build...');

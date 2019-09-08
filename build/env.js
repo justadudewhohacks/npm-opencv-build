@@ -56,35 +56,43 @@ function readAutoBuildFile() {
     return undefined;
 }
 exports.readAutoBuildFile = readAutoBuildFile;
+function getCwd() {
+    var cwd = process.env.INIT_CWD || process.cwd();
+    if (!cwd) {
+        throw new Error('process.env.INIT_CWD || process.cwd() is undefined or empty');
+    }
+    return cwd;
+}
+exports.getCwd = getCwd;
 function parsePackageJson() {
-    if (!process.env.INIT_CWD) {
-        log.error('process.env.INIT_CWD is undefined or empty');
-        return;
-    }
-    var absPath = path.resolve(process.env.INIT_CWD, 'package.json');
+    var absPath = path.resolve(getCwd(), 'package.json');
     if (!fs.existsSync(absPath)) {
-        log.info('No package.json in folder.');
-        return;
+        return null;
     }
-    try {
-        return JSON.parse(fs.readFileSync(absPath).toString());
-    }
-    catch (error) {
-        log.error('failed to parse package.json:');
-        log.error(error);
-    }
+    return JSON.parse(fs.readFileSync(absPath).toString());
 }
 function readEnvsFromPackageJson() {
     var rootPackageJSON = parsePackageJson();
-    if (!rootPackageJSON || !rootPackageJSON.opencv4nodejs) {
-        return;
+    return rootPackageJSON
+        ? (rootPackageJSON.opencv4nodejs || {})
+        : {};
+}
+exports.readEnvsFromPackageJson = readEnvsFromPackageJson;
+function applyEnvsFromPackageJson() {
+    var envs = {};
+    try {
+        envs = readEnvsFromPackageJson();
     }
-    var envs = Object.keys(rootPackageJSON.opencv4nodejs);
-    if (envs.length) {
+    catch (err) {
+        log.error('failed to parse package.json:');
+        log.error(err);
+    }
+    var envKeys = Object.keys(envs);
+    if (envKeys.length) {
         log.info('the following opencv4nodejs environment variables are set in the package.json:');
-        envs.forEach(function (key) { return log.info(key + ": " + rootPackageJSON.opencv4nodejs[key]); });
+        envKeys.forEach(function (key) { return log.info(key + ": " + envs[key]); });
     }
-    var _a = rootPackageJSON.opencv4nodejs, autoBuildBuildCuda = _a.autoBuildBuildCuda, autoBuildFlags = _a.autoBuildFlags, autoBuildOpencvVersion = _a.autoBuildOpencvVersion, autoBuildWithoutContrib = _a.autoBuildWithoutContrib, disableAutoBuild = _a.disableAutoBuild, opencvIncludeDir = _a.opencvIncludeDir, opencvLibDir = _a.opencvLibDir, opencvBinDir = _a.opencvBinDir;
+    var autoBuildBuildCuda = envs.autoBuildBuildCuda, autoBuildFlags = envs.autoBuildFlags, autoBuildOpencvVersion = envs.autoBuildOpencvVersion, autoBuildWithoutContrib = envs.autoBuildWithoutContrib, disableAutoBuild = envs.disableAutoBuild, opencvIncludeDir = envs.opencvIncludeDir, opencvLibDir = envs.opencvLibDir, opencvBinDir = envs.opencvBinDir;
     if (autoBuildFlags) {
         process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags;
     }
@@ -110,4 +118,4 @@ function readEnvsFromPackageJson() {
         process.env.OPENCV_BIN_DIR = opencvBinDir;
     }
 }
-exports.readEnvsFromPackageJson = readEnvsFromPackageJson;
+exports.applyEnvsFromPackageJson = applyEnvsFromPackageJson;

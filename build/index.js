@@ -12,6 +12,7 @@ var env_1 = require("./env");
 exports.isAutoBuildDisabled = env_1.isAutoBuildDisabled;
 exports.readAutoBuildFile = env_1.readAutoBuildFile;
 exports.readEnvsFromPackageJson = env_1.readEnvsFromPackageJson;
+exports.applyEnvsFromPackageJson = env_1.applyEnvsFromPackageJson;
 var utils_2 = require("./utils");
 exports.isOSX = utils_2.isOSX;
 exports.isWin = utils_2.isWin;
