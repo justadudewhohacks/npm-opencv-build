@@ -6,7 +6,7 @@ var path = require("path");
 var dirs_1 = require("./dirs");
 var log = require('npmlog');
 function isAutoBuildDisabled() {
-    return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD;
+    return !!Number(process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD);
 }
 exports.isAutoBuildDisabled = isAutoBuildDisabled;
 function buildWithCuda() {
