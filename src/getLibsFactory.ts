@@ -17,7 +17,7 @@ export function getLibsFactory(
   }
 
   function getLibNameRegex(opencvModuleName: string) {
-    return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`)
+    return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,6}.${getLibSuffix()}$`)
   }
 
   function createLibResolver(libDir: string): (libFile: string) => string | undefined {
