@@ -1,18 +1,24 @@
-const path = require('path')
-const fs = require('fs')
-const log = require('npmlog')
-const { exec, execFile } = require('./utils')
+import * as log from 'npmlog';
+import * as path from 'path';
+import * as fs from 'fs';
+import { exec, execFile } from './utils';
+
+export interface pathVersion {
+  version: number;
+  path: string;
+}
 
 /* this codesnippet is partly taken from the node-gyp source: https://github.com/nodejs/node-gyp */
-function findVs2017() {
-  const ps = path.join(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+function findVs2017(): Promise<pathVersion> {
+  const ps = path.join(process.env.SystemRoot as string, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
   const args = ['-ExecutionPolicy', 'Unrestricted', '-Command',
                 '&{Add-Type -Path \'' + path.join(__dirname, '../Find-VS2017.cs') +
                 '\'; [VisualStudioConfiguration.Main]::Query()}']
 
   log.silly('find-msbuild', 'find vs2017 via powershell:', ps, args)
 
-  return execFile(ps, args, { encoding: 'utf8' })
+  //  default is {  encoding: 'utf8' })
+  return execFile(ps, args)
     .then((stdout: any) => {
       log.silly('find-msbuild', 'find vs2017: ', stdout)
       const vsSetup = JSON.parse(stdout)
@@ -34,12 +40,12 @@ function findVs2017() {
     })
 }
 
-function parseMsBuilds(stdout: any) {
+function parseMsBuilds(stdout: string): pathVersion[] {
   let reVers = /ToolsVersions\\([^\\]+)$/i
   , rePath = /\r\n[ \t]+MSBuildToolsPath[ \t]+REG_SZ[ \t]+([^\r]+)/i
   , r
 
-  let msbuilds: any[] = []
+  let msbuilds: pathVersion[] = []
 
   stdout.split('\r\n\r\n').forEach(function(l: any) {
     if (!l) return
@@ -60,7 +66,7 @@ function parseMsBuilds(stdout: any) {
   return msbuilds
 }
 
-function findMsbuildInRegistry () {
+function findMsbuildInRegistry(): Promise<pathVersion> {
   const cmd = `reg query "HKLM\\Software\\Microsoft\\MSBuild\\ToolsVersions" /s${process.arch === 'ia32' ? '' : ' /reg:32'}`
   log.silly('find-msbuild', 'find msbuild in registry:', cmd)
 
@@ -104,7 +110,7 @@ function findMsbuildInRegistry () {
     })
   }
 
-export async function findMsBuild() {
+export async function findMsBuild(): Promise<pathVersion> {
   try {
     return await findVs2017()
   } catch(err) {

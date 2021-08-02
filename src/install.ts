@@ -16,7 +16,7 @@ import { setupOpencv } from './setupOpencv';
 import { AutoBuildFile } from './types';
 import { isOSX, isWin, requireCmake, requireGit } from './utils';
 
-const log = require('npmlog')
+import * as log from 'npmlog';
 
 const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
 
@@ -92,7 +92,10 @@ export async function install() {
     await requireCmake()
     await setupOpencv()
   } catch(err) {
-    log.error(err)
+    if (err.toString)
+      log.error('install', err.toString())
+    else
+      log.error('install', JSON.stringify(err))
     process.exit(1)
   }
 }

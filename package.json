@@ -24,12 +24,13 @@
   },
   "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme",
   "dependencies": {
-    "npmlog": "^4.1.2"
+    "npmlog": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^12.7.4",
+    "@types/node": "^16.4.3",
+    "@types/npmlog": "^4.1.3",
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
-    "typescript": "^3.6.2"
+    "typescript": "^4.3.5"
   }
 }

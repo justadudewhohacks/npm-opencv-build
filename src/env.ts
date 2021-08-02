@@ -1,11 +1,9 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-
 import { dirs } from './dirs';
 import { AutoBuildFile } from './types';
-
-const log = require('npmlog')
+import * as log from 'npmlog';
 
 export function isAutoBuildDisabled() {
   return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
@@ -85,14 +83,14 @@ export function applyEnvsFromPackageJson() {
   try {
     envs = readEnvsFromPackageJson()
   } catch (err) {
-    log.error('failed to parse package.json:')
-    log.error(err)
+    log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
+    log.error('applyEnvsFromPackageJson', err)
   }
 
   const envKeys = Object.keys(envs)
   if (envKeys.length) {
-    log.info('the following opencv4nodejs environment variables are set in the package.json:')
-    envKeys.forEach(key => log.info(`${key}: ${envs[key]}`))
+    log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
+    envKeys.forEach(key => log.info('applyEnvsFromPackageJson', `${key}: ${envs[key]}`))
   }
 
   const {

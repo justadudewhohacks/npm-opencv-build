@@ -12,11 +12,10 @@ import {
   opencvVersion,
   parseAutoBuildFlags,
 } from './env';
-import { findMsBuild } from './findMsBuild';
+import { findMsBuild, pathVersion } from './findMsBuild';
 import { AutoBuildFile } from './types';
 import { exec, isCudaAvailable, isWin, spawn } from './utils';
-
-const log = require('npmlog')
+import * as log from 'npmlog';
 
 function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
@@ -38,7 +37,7 @@ function getMsbuildCmd(sln: string): string[] {
   ]
 }
 
-function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
+function getRunBuildCmd(msbuildExe?: string): () => Promise<void> {
   if (msbuildExe) {
     return async () => {
       await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: dirs.opencvBuild })
@@ -100,12 +99,13 @@ function getCmakeArgs(cmakeFlags: string[]) {
   return [dirs.opencvSrc].concat(cmakeFlags)
 }
 
-async function getMsbuildIfWin() {
+async function getMsbuildIfWin(): Promise<pathVersion | undefined> {
   if (isWin()) {
     const msbuild = await findMsBuild()
     log.info('install', 'using msbuild:', msbuild)
     return msbuild
   }
+  return undefined;
 }
 
 function writeAutoBuildFile() {
@@ -115,15 +115,16 @@ function writeAutoBuildFile() {
     modules: getLibs(dirs.opencvLibDir)
   }
   log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
-  log.info('install', autoBuildFile)
+  log.info('install', JSON.stringify(autoBuildFile))
   fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
 }
 
 export async function setupOpencv() {
   const msbuild = await getMsbuildIfWin()
-
+  if (!msbuild)
+    throw Error('Error getting Ms Build info');
   // Get cmake flags here to check for CUDA early on instead of the start of the building process
-  const cMakeFlags = isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags();
+  const cMakeFlags = isWin() ? getWinCmakeFlags("" + msbuild.version) : getSharedCmakeFlags();
 
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)

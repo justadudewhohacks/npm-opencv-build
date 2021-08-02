@@ -8,7 +8,7 @@
     "strictNullChecks": true,
     "outDir": "build",
     "module": "commonjs",
-    "target": "es5",
+    "target": "ES2016",
     "moduleResolution": "node",
     "typeRoots": [
       "typings",

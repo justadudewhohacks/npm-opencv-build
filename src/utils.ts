@@ -1,8 +1,7 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const log = require('npmlog')
+import * as log from 'npmlog';
 
 export function exec(cmd: string, options?: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'executing:', cmd)
@@ -31,7 +30,7 @@ export function spawn(cmd: string, args: string[], options?: child_process.ExecO
   log.silly('install', 'spawning:', cmd, args)
   return new Promise(function(resolve, reject) {
     try {
-      const child = child_process.spawn(cmd, args, Object.assign({}, { stdio: 'inherit' }, options))
+      const child = child_process.spawn(cmd, args, { stdio: 'inherit', ...options})
 
       child.on('exit', function (code) {
         if (typeof code !== 'number') {
