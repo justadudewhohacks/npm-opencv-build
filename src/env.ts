@@ -84,8 +84,19 @@ export function readEnvsFromPackageJson(): {[key:string]: string | boolean | num
     : {}
 }
 
+export interface OpenCVBuildOption {
+  autoBuildBuildCuda?: string;
+  autoBuildFlags?: string;
+  autoBuildOpencvVersion?: string;
+  autoBuildWithoutContrib?: string;
+  disableAutoBuild?: string;
+  opencvIncludeDir?: string;
+  opencvLibDir?: string;
+  opencvBinDir?: string;
+}
+
 export function applyEnvsFromPackageJson() {
-  let envs: {[key:string]: string | boolean | number} = {};
+  let envs: OpenCVBuildOption = {};
   try {
     envs = readEnvsFromPackageJson()
   } catch (err) {
@@ -96,7 +107,7 @@ export function applyEnvsFromPackageJson() {
   const envKeys = Object.keys(envs)
   if (envKeys.length) {
     log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
-    envKeys.forEach(key => log.info('applyEnvsFromPackageJson', `${key}: ${envs[key]}`))
+    envKeys.forEach(key => log.info('applyEnvsFromPackageJson', `${key}: ${(envs as any)[key]}`))
   }
 
   const {
