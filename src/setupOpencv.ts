@@ -20,18 +20,6 @@ import { promisify } from 'util';
 
 const primraf = promisify(rimraf);
 
-// function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
-//   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
-// }
-
-//function getMkDirCmd(dirname: string): string {
-//  return isWin() ? `${getIfExistsDirCmd(dirname, false)} mkdir ${dirname}` : `mkdir -p ${dirname}`
-//}
-
-//function getRmDirCmd(dirname: string): string {
-//  return isWin() ? `${getIfExistsDirCmd(dirname)} rd /s /q ${dirname}` : `rm -rf ${dirname}`
-//}
-
 function getMsbuildCmd(sln: string): string[] {
   return [
     sln,
@@ -139,20 +127,18 @@ export async function setupOpencv(): Promise<void> {
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
-  // await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
+  const opencvContribRoot = path.join(dirs.opencvRoot, 'opencv_contrib')
+  const opencvRoot = path.join(dirs.opencvRoot, 'opencv')
+
   fs.mkdirSync(path.join(dirs.rootDir, 'opencv'), {recursive: true});
 
-  // await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
   await primraf(path.join(dirs.opencvRoot, 'build'));
 
-  // await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
   fs.mkdirSync(path.join(dirs.opencvRoot, 'build'), {recursive: true});
 
-  // await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
-  await primraf(path.join(dirs.opencvRoot, 'opencv'));
+  await primraf(opencvRoot);
 
-  // await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
-  await primraf(path.join(dirs.opencvRoot, 'opencv_contrib'));
+  await primraf(opencvContribRoot);
 
   if (isWithoutContrib()) {
     log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
@@ -169,24 +155,20 @@ export async function setupOpencv(): Promise<void> {
 
   writeAutoBuildFile()
 
-  rimraf.sync('opencv');
-  // const rmOpenCV = getRmDirCmd('opencv')
+  /**
+   * DELETE TMP build dirs
+   */
   try {
-    await primraf(path.join(dirs.opencvRoot, 'opencv'))
-    // await exec(rmOpenCV, { cwd: dirs.opencvRoot })
+    await primraf(opencvRoot)
   } catch (err) {
     log.error('install', 'failed to clean opencv source folder:', err)
-    // log.error('install', 'command was: %s', rmOpenCV)
-    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv'))
+    log.error('install', 'consider removing the folder yourself: %s', opencvRoot)
   }
 
-  // const rmOpenCVContrib = getRmDirCmd('opencv_contrib')
   try {
-    await primraf(path.join(dirs.opencvRoot, 'opencv_contrib'))
-    // await exec(rmOpenCVContrib, { cwd: dirs.opencvRoot })
+    await primraf(opencvContribRoot)
   } catch (err) {
     log.error('install', 'failed to clean opencv_contrib source folder:', err)
-    // log.error('install', 'command was: %s', rmOpenCV)
-    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv_contrib'))
+    log.error('install', 'consider removing the folder yourself: %s', opencvContribRoot)
   }
 }

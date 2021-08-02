@@ -68,10 +68,15 @@ function parsePackageJson() {
   if (!fs.existsSync(absPath)) {
     return null
   }
+  log.info('config', `looking for opencv4nodejs option from ${absPath}`);
   return JSON.parse(fs.readFileSync(absPath).toString())
 }
 
-export function readEnvsFromPackageJson() {
+/**
+ * get opencv4nodejs section from package.json if available
+ * @returns opencv4nodejs customs
+ */
+export function readEnvsFromPackageJson(): {[key:string]: string | boolean | number} {
   const rootPackageJSON = parsePackageJson()
   return rootPackageJSON
     ? (rootPackageJSON.opencv4nodejs || {})
@@ -79,7 +84,7 @@ export function readEnvsFromPackageJson() {
 }
 
 export function applyEnvsFromPackageJson() {
-  let envs: any = {}
+  let envs: {[key:string]: string | boolean | number} = {};
   try {
     envs = readEnvsFromPackageJson()
   } catch (err) {
@@ -105,34 +110,34 @@ export function applyEnvsFromPackageJson() {
   } = envs
 
   if (autoBuildFlags) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = autoBuildFlags
+    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = '' + autoBuildFlags
   }
 
   if (autoBuildBuildCuda) {
-    process.env.OPENCV4NODEJS_BUILD_CUDA = autoBuildBuildCuda
+    process.env.OPENCV4NODEJS_BUILD_CUDA = '' + autoBuildBuildCuda
   }
 
   if (autoBuildOpencvVersion) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = autoBuildOpencvVersion
+    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = '' + autoBuildOpencvVersion
   }
 
   if (autoBuildWithoutContrib) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = autoBuildWithoutContrib
+    process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = '' + autoBuildWithoutContrib
   }
 
   if (disableAutoBuild) {
-    process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = disableAutoBuild
+    process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = '' + disableAutoBuild
   }
 
   if (opencvIncludeDir) {
-    process.env.OPENCV_INCLUDE_DIR = opencvIncludeDir
+    process.env.OPENCV_INCLUDE_DIR = '' + opencvIncludeDir
   }
 
   if (opencvLibDir) {
-    process.env.OPENCV_LIB_DIR = opencvLibDir
+    process.env.OPENCV_LIB_DIR = '' + opencvLibDir
   }
 
   if (opencvBinDir) {
-    process.env.OPENCV_BIN_DIR = opencvBinDir
+    process.env.OPENCV_BIN_DIR = '' + opencvBinDir
   }
 }
