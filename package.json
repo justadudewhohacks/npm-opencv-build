@@ -4,10 +4,12 @@
   "description": "A simple script to auto build recent OpenCV + contrib version via npm",
   "main": "./build/index.js",
   "scripts": {
-    "prebuild": "rimraf build",
-    "prepare": "tsc",
-    "build": "rimraf build && tsc",
-    "install": "node ./install.js",
+    "clean": "rimraf build opencv",
+    "build": "tsc",
+    "cleanbuild": "rimraf build && tsc",
+    "preinstall": "npm run build",
+    "install": "node ./build/main.js",
+    "prepare": "npm run build",
     "test": "mocha --recursive ./test"
   },
   "repository": {
@@ -31,6 +33,7 @@
   "devDependencies": {
     "@types/node": "^16.4.3",
     "@types/npmlog": "^4.1.3",
+    "@types/rimraf": "^3.0.1",
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
     "rimraf": "^3.0.2",
