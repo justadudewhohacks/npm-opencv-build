@@ -22,7 +22,7 @@ export function autoBuildFlags(): string {
 }
 
 export function opencvVersion() {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
+  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.15'
 }
 
 export function numberOfCoresAvailable() {
