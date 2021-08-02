@@ -2,14 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dirs = void 0;
 const path = require("path");
-const env_1 = require("./env");
 const utils_1 = require("./utils");
 class Dirs {
     get rootDir() {
         return path.resolve(__dirname, '../');
     }
     get opencvRoot() {
-        return path.join(this.rootDir, `opencv-${env_1.opencvVersion()}`);
+        // return path.join(this.rootDir, `opencv-${opencvVersion()}`)
+        return path.join(this.rootDir, `opencv`);
     }
     get opencvSrc() {
         return path.join(this.opencvRoot, 'opencv');

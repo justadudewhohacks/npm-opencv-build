@@ -29,17 +29,18 @@ function getLibsFactory(args) {
     }
     function createLibResolver(libDir) {
         function getLibAbsPath(libFile) {
-            return (libFile
-                ? fs.realpathSync(path.resolve(libDir, libFile))
-                : undefined);
+            if (!libFile)
+                return undefined;
+            return fs.realpathSync(path.resolve(libDir, libFile));
         }
-        function matchLibName(libFile, opencvModuleName) {
-            const regexp = getLibNameRegex(opencvModuleName);
+        function matchLibName(libFile, regexp) {
             return !!(libFile.match(regexp) || [])[0];
         }
         const libFiles = fs.readdirSync(libDir);
         return function (opencvModuleName) {
-            return getLibAbsPath(libFiles.find(libFile => matchLibName(libFile, opencvModuleName)));
+            const regexp = getLibNameRegex(opencvModuleName);
+            const matchs = libFiles.find(libFile => matchLibName(libFile, regexp));
+            return getLibAbsPath(matchs);
         };
     }
     return function (libDir) {

@@ -46,23 +46,22 @@ export function getLibsFactory(
   }
 
   function createLibResolver(libDir: string): (libFile: string) => string | undefined {
-    function getLibAbsPath(libFile: string | undefined): string | undefined {
-      return (
-        libFile
-          ? fs.realpathSync(path.resolve(libDir, libFile))
-          : undefined
-      )
+    function getLibAbsPath(libFile?: string): string | undefined {
+      if (!libFile)
+        return undefined;
+      return fs.realpathSync(path.resolve(libDir, libFile))
     }
 
-    function matchLibName(libFile: string, opencvModuleName: string) {
-      const regexp = getLibNameRegex(opencvModuleName);
+    function matchLibName(libFile: string, regexp: RegExp) {
       return !!(libFile.match(regexp) || [])[0]
     }
 
     const libFiles: string[] = fs.readdirSync(libDir)
 
     return function (opencvModuleName: string) {
-      return getLibAbsPath(libFiles.find(libFile => matchLibName(libFile, opencvModuleName)))
+      const regexp = getLibNameRegex(opencvModuleName);
+      const matchs = libFiles.find(libFile => matchLibName(libFile, regexp));
+      return getLibAbsPath(matchs);
     }
   }
 
