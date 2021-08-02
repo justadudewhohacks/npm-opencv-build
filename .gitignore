@@ -2,3 +2,4 @@ opencv
 node_modules
 .vscode
 build/
+opencv-*/

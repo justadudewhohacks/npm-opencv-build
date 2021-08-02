@@ -3,8 +3,9 @@
   "version": "0.1.9",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm",
   "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
-    "clean": "rimraf build opencv",
+    "clean": "rimraf build",
     "build": "tsc",
     "cleanbuild": "rimraf build && tsc",
     "preinstall": "npm run build",

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { opencvModules } from './constants';
-import { dirs } from './dirs';
+import dirs from './dirs';
 import {
   applyEnvsFromPackageJson,
   autoBuildFlags,

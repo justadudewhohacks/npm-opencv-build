@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
-import { dirs } from './dirs';
+import dirs from './dirs';
 import {
   autoBuildFlags,
   buildWithCuda,
@@ -107,7 +107,7 @@ function writeAutoBuildFile(): void {
   }
   log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
   log.info('install', JSON.stringify(autoBuildFile))
-  fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
+  fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
 }
 
 export async function setupOpencv(): Promise<void> {

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { dirs } from './dirs';
+import dirs from './dirs';
 import { AutoBuildFile } from './types';
 import * as log from 'npmlog';
 
@@ -21,8 +21,9 @@ export function autoBuildFlags(): string {
   return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || ''
 }
 
+// last: '3.4.15'
 export function opencvVersion() {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.15'
+  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
 }
 
 export function numberOfCoresAvailable() {
