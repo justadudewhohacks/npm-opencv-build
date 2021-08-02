@@ -16,14 +16,14 @@ const fs = require("fs");
 const utils_1 = require("./utils");
 /* this codesnippet is partly taken from the node-gyp source: https://github.com/nodejs/node-gyp */
 function findVs2017() {
-    const ps = path.join(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
-    const args = ['-ExecutionPolicy', 'Unrestricted', '-Command',
-        '&{Add-Type -Path \'' + path.join(__dirname, '../Find-VS2017.cs') +
-            '\'; [VisualStudioConfiguration.Main]::Query()}'];
-    log.silly('find-msbuild', 'find vs2017 via powershell:', ps, args);
-    //  default is {  encoding: 'utf8' })
-    return utils_1.execFile(ps, args)
-        .then((stdout) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ps = path.join(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+        const args = ['-ExecutionPolicy', 'Unrestricted', '-Command',
+            '&{Add-Type -Path \'' + path.join(__dirname, '../Find-VS2017.cs') +
+                '\'; [VisualStudioConfiguration.Main]::Query()}'];
+        log.silly('find-msbuild', 'find vs2017 via powershell:', ps, args);
+        //  default is {  encoding: 'utf8' })
+        const stdout = yield utils_1.execFile(ps, args);
         log.silly('find-msbuild', 'find vs2017: ', stdout);
         const vsSetup = JSON.parse(stdout);
         if (!vsSetup || !vsSetup.path || !vsSetup.sdk) {
@@ -43,19 +43,21 @@ function findVs2017() {
     });
 }
 function parseMsBuilds(stdout) {
-    let reVers = /ToolsVersions\\([^\\]+)$/i, rePath = /\r\n[ \t]+MSBuildToolsPath[ \t]+REG_SZ[ \t]+([^\r]+)/i, r;
+    let reVers = /ToolsVersions\\([^\\]+)$/i, rePath = /\r\n[ \t]+MSBuildToolsPath[ \t]+REG_SZ[ \t]+([^\r]+)/i;
     let msbuilds = [];
     stdout.split('\r\n\r\n').forEach(function (l) {
         if (!l)
             return;
         l = l.trim();
-        if (r = reVers.exec(l.substring(0, l.indexOf('\r\n')))) {
-            var ver = parseFloat(r[1]);
+        const r1 = reVers.exec(l.substring(0, l.indexOf('\r\n')));
+        if (r1) {
+            var ver = parseFloat(r1[1]);
             if (ver >= 3.5) {
-                if (r = rePath.exec(l)) {
+                const r2 = rePath.exec(l);
+                if (r2) {
                     msbuilds.push({
                         version: ver,
-                        path: r[1]
+                        path: r2[1]
                     });
                 }
             }
@@ -64,10 +66,10 @@ function parseMsBuilds(stdout) {
     return msbuilds;
 }
 function findMsbuildInRegistry() {
-    const cmd = `reg query "HKLM\\Software\\Microsoft\\MSBuild\\ToolsVersions" /s${process.arch === 'ia32' ? '' : ' /reg:32'}`;
-    log.silly('find-msbuild', 'find msbuild in registry:', cmd);
-    return utils_1.exec(cmd)
-        .then((stdout) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cmd = `reg query "HKLM\\Software\\Microsoft\\MSBuild\\ToolsVersions" /s${process.arch === 'ia32' ? '' : ' /reg:32'}`;
+        log.silly('find-msbuild', 'find msbuild in registry:', cmd);
+        const stdout = yield utils_1.exec(cmd);
         log.silly('find-msbuild', 'find vs: ', stdout);
         // use most recent version
         const msbuilds = parseMsBuilds(stdout)

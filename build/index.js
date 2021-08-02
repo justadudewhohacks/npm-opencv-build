@@ -18,9 +18,27 @@ var utils_2 = require("./utils");
 Object.defineProperty(exports, "isOSX", { enumerable: true, get: function () { return utils_2.isOSX; } });
 Object.defineProperty(exports, "isWin", { enumerable: true, get: function () { return utils_2.isWin; } });
 Object.defineProperty(exports, "isUnix", { enumerable: true, get: function () { return utils_2.isUnix; } });
+/**
+ * opencv include directory
+ */
 exports.opencvInclude = dirs_1.default.opencvInclude;
+/**
+ * opencv4 include directory
+ */
 exports.opencv4Include = dirs_1.default.opencv4Include;
+/**
+ * built lib directory
+ */
 exports.opencvLibDir = dirs_1.default.opencvLibDir;
+/**
+ * built bin directory
+ */
 exports.opencvBinDir = dirs_1.default.opencvBinDir;
+/**
+ * build directory
+ */
 exports.opencvBuildDir = dirs_1.default.opencvBuild;
+/**
+ * list available module + path as OpencvModule[]
+ */
 exports.getLibs = getLibsFactory_1.getLibsFactory({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path, fs });

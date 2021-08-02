@@ -7,8 +7,8 @@ export class Dirs {
     return path.resolve(__dirname, '../');
   }
   get opencvRoot(): string {
-    // return path.join(this.rootDir, `opencv-${opencvVersion()}`)
-    return path.join(this.rootDir, `opencv`)
+    return path.join(this.rootDir, `opencv-${opencvVersion()}`)
+    // return path.join(this.rootDir, `opencv`)
   }
   get opencvSrc(): string {
     return path.join(this.opencvRoot, 'opencv')

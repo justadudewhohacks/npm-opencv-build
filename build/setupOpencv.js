@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupOpencv = void 0;
 const fs = require("fs");
-const path = require("path");
 const _1 = require(".");
 const constants_1 = require("./constants");
 const dirs_1 = require("./dirs");
@@ -101,6 +100,7 @@ function writeAutoBuildFile() {
     log.info('install', 'writing auto-build file into directory: %s', dirs_1.default.autoBuildFile);
     log.info('install', JSON.stringify(autoBuildFile));
     fs.writeFileSync(dirs_1.default.autoBuildFile, JSON.stringify(autoBuildFile, null, 4));
+    return autoBuildFile;
 }
 function setupOpencv() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -119,13 +119,10 @@ function setupOpencv() {
         }
         const tag = env_1.opencvVersion();
         log.info('install', 'installing opencv version %s into directory: %s', tag, dirs_1.default.opencvRoot);
-        const opencvContribRoot = path.join(dirs_1.default.opencvRoot, 'opencv_contrib');
-        const opencvRoot = path.join(dirs_1.default.opencvRoot, 'opencv');
-        fs.mkdirSync(path.join(dirs_1.default.rootDir, 'opencv'), { recursive: true });
-        yield primraf(path.join(dirs_1.default.opencvRoot, 'build'));
-        fs.mkdirSync(path.join(dirs_1.default.opencvRoot, 'build'), { recursive: true });
-        yield primraf(opencvRoot);
-        yield primraf(opencvContribRoot);
+        yield primraf(dirs_1.default.opencvBuild);
+        yield primraf(dirs_1.default.opencvSrc);
+        yield primraf(dirs_1.default.opencvContribSrc);
+        fs.mkdirSync(dirs_1.default.opencvBuild, { recursive: true });
         if (env_1.isWithoutContrib()) {
             log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set');
         }
@@ -143,18 +140,18 @@ function setupOpencv() {
          * DELETE TMP build dirs
          */
         try {
-            yield primraf(opencvRoot);
+            yield primraf(dirs_1.default.opencvSrc);
         }
         catch (err) {
             log.error('install', 'failed to clean opencv source folder:', err);
-            log.error('install', 'consider removing the folder yourself: %s', opencvRoot);
+            log.error('install', 'consider removing the folder yourself: %s', dirs_1.default.opencvSrc);
         }
         try {
-            yield primraf(opencvContribRoot);
+            yield primraf(dirs_1.default.opencvContribSrc);
         }
         catch (err) {
             log.error('install', 'failed to clean opencv_contrib source folder:', err);
-            log.error('install', 'consider removing the folder yourself: %s', opencvContribRoot);
+            log.error('install', 'consider removing the folder yourself: %s', dirs_1.default.opencvContribSrc);
         }
     });
 }

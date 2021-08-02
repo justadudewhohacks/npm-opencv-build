@@ -41,7 +41,7 @@ export function getLibsFactory(
    */
   function getLibNameRegex(opencvModuleName: string): RegExp {
     // const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`;
-    const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*.${getLibSuffix()}$`;
+    const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*\.${getLibSuffix()}$`;
     return new RegExp(regexp)
   }
 
@@ -80,8 +80,8 @@ export function getLibsFactory(
       }]
     }
 
-    return (opencvModules as string[]).map(
-      opencvModule => ({
+    return opencvModules.map(
+      (opencvModule: string) => ({
         opencvModule,
         libPath: resolveLib(opencvModule)
       })

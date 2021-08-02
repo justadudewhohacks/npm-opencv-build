@@ -24,7 +24,7 @@ function getLibsFactory(args) {
      */
     function getLibNameRegex(opencvModuleName) {
         // const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`;
-        const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*.${getLibSuffix()}$`;
+        const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*\.${getLibSuffix()}$`;
         return new RegExp(regexp);
     }
     function createLibResolver(libDir) {
@@ -55,7 +55,7 @@ function getLibsFactory(args) {
                     libPath: worldLibPath
                 }];
         }
-        return opencvModules.map(opencvModule => ({
+        return opencvModules.map((opencvModule) => ({
             opencvModule,
             libPath: resolveLib(opencvModule)
         }));

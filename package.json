@@ -7,8 +7,9 @@
   "scripts": {
     "clean": "rimraf build",
     "build": "tsc",
+    "do-install": "node ./build/main.js",
     "cleanbuild": "rimraf build && tsc",
-    "postinstall": "node ./build/main.js",
+    "postinstall": "npm run do-install",
     "prepare": "npm run build",
     "test": "mocha --recursive ./test"
   },

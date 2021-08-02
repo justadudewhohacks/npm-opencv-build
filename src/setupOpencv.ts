@@ -99,7 +99,7 @@ async function getMsbuildIfWin(): Promise<pathVersion | undefined> {
   return undefined;
 }
 
-function writeAutoBuildFile(): void {
+function writeAutoBuildFile(): AutoBuildFile {
   const autoBuildFile: AutoBuildFile = {
     opencvVersion: opencvVersion(),
     autoBuildFlags: autoBuildFlags(),
@@ -108,6 +108,7 @@ function writeAutoBuildFile(): void {
   log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
   log.info('install', JSON.stringify(autoBuildFile))
   fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
+  return autoBuildFile;
 }
 
 export async function setupOpencv(): Promise<void> {
@@ -127,18 +128,11 @@ export async function setupOpencv(): Promise<void> {
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
-  const opencvContribRoot = path.join(dirs.opencvRoot, 'opencv_contrib')
-  const opencvRoot = path.join(dirs.opencvRoot, 'opencv')
+  await primraf(dirs.opencvBuild);
+  await primraf(dirs.opencvSrc);
+  await primraf(dirs.opencvContribSrc);
 
-  fs.mkdirSync(path.join(dirs.rootDir, 'opencv'), {recursive: true});
-
-  await primraf(path.join(dirs.opencvRoot, 'build'));
-
-  fs.mkdirSync(path.join(dirs.opencvRoot, 'build'), {recursive: true});
-
-  await primraf(opencvRoot);
-
-  await primraf(opencvContribRoot);
+  fs.mkdirSync(dirs.opencvBuild, {recursive: true});
 
   if (isWithoutContrib()) {
     log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
@@ -159,16 +153,16 @@ export async function setupOpencv(): Promise<void> {
    * DELETE TMP build dirs
    */
   try {
-    await primraf(opencvRoot)
+    await primraf(dirs.opencvSrc)
   } catch (err) {
     log.error('install', 'failed to clean opencv source folder:', err)
-    log.error('install', 'consider removing the folder yourself: %s', opencvRoot)
+    log.error('install', 'consider removing the folder yourself: %s', dirs.opencvSrc)
   }
 
   try {
-    await primraf(opencvContribRoot)
+    await primraf(dirs.opencvContribSrc)
   } catch (err) {
     log.error('install', 'failed to clean opencv_contrib source folder:', err)
-    log.error('install', 'consider removing the folder yourself: %s', opencvContribRoot)
+    log.error('install', 'consider removing the folder yourself: %s', dirs.opencvContribSrc)
   }
 }
