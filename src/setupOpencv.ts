@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
 import { getLibs } from '.';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
 import { dirs } from './dirs';
@@ -14,20 +13,24 @@ import {
 } from './env';
 import { findMsBuild, pathVersion } from './findMsBuild';
 import { AutoBuildFile } from './types';
-import { exec, isCudaAvailable, isWin, spawn } from './utils';
+import { isCudaAvailable, isWin, spawn } from './utils';
 import * as log from 'npmlog';
+import * as rimraf from 'rimraf';
+import { promisify } from 'util';
 
-function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
-  return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
-}
+const primraf = promisify(rimraf);
 
-function getMkDirCmd(dirname: string): string {
-  return isWin() ? `${getIfExistsDirCmd(dirname, false)} mkdir ${dirname}` : `mkdir -p ${dirname}`
-}
+// function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
+//   return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
+// }
 
-function getRmDirCmd(dirname: string): string {
-  return isWin() ? `${getIfExistsDirCmd(dirname)} rd /s /q ${dirname}` : `rm -rf ${dirname}`
-}
+//function getMkDirCmd(dirname: string): string {
+//  return isWin() ? `${getIfExistsDirCmd(dirname, false)} mkdir ${dirname}` : `mkdir -p ${dirname}`
+//}
+
+//function getRmDirCmd(dirname: string): string {
+//  return isWin() ? `${getIfExistsDirCmd(dirname)} rd /s /q ${dirname}` : `rm -rf ${dirname}`
+//}
 
 function getMsbuildCmd(sln: string): string[] {
   return [
@@ -51,7 +54,7 @@ function getRunBuildCmd(msbuildExe?: string): () => Promise<void> {
   }
 }
 
-function getCudaCmakeFlags() {
+function getCudaCmakeFlags(): string[] {
   return [
     '-DWITH_CUDA=ON',
     '-DBUILD_opencv_cudacodec=OFF', // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
@@ -60,7 +63,7 @@ function getCudaCmakeFlags() {
   ];
 }
 
-function getSharedCmakeFlags() {
+function getSharedCmakeFlags(): string[] {
   let conditionalFlags = isWithoutContrib()
     ? []
     : [
@@ -78,7 +81,7 @@ function getSharedCmakeFlags() {
     .concat(parseAutoBuildFlags())
 }
 
-function getWinCmakeFlags(msversion: string) {
+function getWinCmakeFlags(msversion: string): string[] {
   const cmakeVsCompiler = (cmakeVsCompilers as any)[msversion]
   const cmakeArch = (cmakeArchs as any)[process.arch]
 
@@ -95,7 +98,7 @@ function getWinCmakeFlags(msversion: string) {
   ].concat(getSharedCmakeFlags())
 }
 
-function getCmakeArgs(cmakeFlags: string[]) {
+function getCmakeArgs(cmakeFlags: string[]): string[] {
   return [dirs.opencvSrc].concat(cmakeFlags)
 }
 
@@ -108,7 +111,7 @@ async function getMsbuildIfWin(): Promise<pathVersion | undefined> {
   return undefined;
 }
 
-function writeAutoBuildFile() {
+function writeAutoBuildFile(): void {
   const autoBuildFile: AutoBuildFile = {
     opencvVersion: opencvVersion(),
     autoBuildFlags: autoBuildFlags(),
@@ -119,21 +122,37 @@ function writeAutoBuildFile() {
   fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
 }
 
-export async function setupOpencv() {
+export async function setupOpencv(): Promise<void> {
   const msbuild = await getMsbuildIfWin()
-  if (!msbuild)
-    throw Error('Error getting Ms Build info');
+  let cMakeFlags: string[] = [];
+  let msbuildPath: string | undefined = undefined;
   // Get cmake flags here to check for CUDA early on instead of the start of the building process
-  const cMakeFlags = isWin() ? getWinCmakeFlags("" + msbuild.version) : getSharedCmakeFlags();
+  if (isWin()) {
+    if (!msbuild)
+      throw Error('Error getting Ms Build info');
+    cMakeFlags = getWinCmakeFlags("" + msbuild.version);
+    msbuildPath = msbuild.path;
+  } else {
+    cMakeFlags = getSharedCmakeFlags();
+  }
 
   const tag = opencvVersion()
   log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
 
-  await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
-  await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
-  await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
-  await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
-  await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
+  // await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
+  fs.mkdirSync(path.join(dirs.rootDir, 'opencv'), {recursive: true});
+
+  // await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
+  await primraf(path.join(dirs.opencvRoot, 'build'));
+
+  // await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
+  fs.mkdirSync(path.join(dirs.opencvRoot, 'build'), {recursive: true});
+
+  // await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
+  await primraf(path.join(dirs.opencvRoot, 'opencv'));
+
+  // await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
+  await primraf(path.join(dirs.opencvRoot, 'opencv_contrib'));
 
   if (isWithoutContrib()) {
     log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
@@ -146,25 +165,28 @@ export async function setupOpencv() {
   log.info('install', 'running cmake %s', cmakeArgs)
   await spawn('cmake', cmakeArgs, { cwd: dirs.opencvBuild })
   log.info('install', 'starting build...')
-  await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
+  await getRunBuildCmd(msbuildPath)()
 
   writeAutoBuildFile()
 
-  const rmOpenCV = getRmDirCmd('opencv')
+  rimraf.sync('opencv');
+  // const rmOpenCV = getRmDirCmd('opencv')
   try {
-    await exec(rmOpenCV, { cwd: dirs.opencvRoot })
+    await primraf(path.join(dirs.opencvRoot, 'opencv'))
+    // await exec(rmOpenCV, { cwd: dirs.opencvRoot })
   } catch (err) {
     log.error('install', 'failed to clean opencv source folder:', err)
-    log.error('install', 'command was: %s', rmOpenCV)
+    // log.error('install', 'command was: %s', rmOpenCV)
     log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv'))
   }
 
-  const rmOpenCVContrib = getRmDirCmd('opencv_contrib')
+  // const rmOpenCVContrib = getRmDirCmd('opencv_contrib')
   try {
-    await exec(rmOpenCVContrib, { cwd: dirs.opencvRoot })
+    await primraf(path.join(dirs.opencvRoot, 'opencv_contrib'))
+    // await exec(rmOpenCVContrib, { cwd: dirs.opencvRoot })
   } catch (err) {
     log.error('install', 'failed to clean opencv_contrib source folder:', err)
-    log.error('install', 'command was: %s', rmOpenCV)
+    // log.error('install', 'command was: %s', rmOpenCV)
     log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv_contrib'))
   }
 }
