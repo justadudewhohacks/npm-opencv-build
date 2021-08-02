@@ -1,9 +1,20 @@
+import { EncodingOption, PathLike } from 'fs';
 import { OpencvModule } from './types';
 
 const worldModule = 'world';
 
+interface tsType {
+  realpathSync(path: PathLike, options?: EncodingOption): string;
+  readdirSync(path: PathLike): string[];
+  existsSync(path: PathLike): boolean;
+}
+
+interface tsPath {
+  resolve(...pathSegments: string[]): string;
+}
+
 export function getLibsFactory(
-  args: { opencvModules: string[], isWin: () => boolean, isOSX: () => boolean, fs: any, path: any }
+  args: { opencvModules: string[], isWin: () => boolean, isOSX: () => boolean, fs: tsType, path: tsPath }
 ): (libDir: string) => OpencvModule[] {
 
   const { opencvModules, isWin, isOSX, fs, path } = args
@@ -12,12 +23,26 @@ export function getLibsFactory(
     return isWin() ? 'opencv_' : 'libopencv_'
   }
 
-  function getLibSuffix() {
-    return isWin() ? 'lib' : (isOSX() ? 'dylib' : 'so')
+  /**
+   * @returns lib extention based on current OS
+   */
+  function getLibSuffix(): 'lib' | 'dylib' | 'so' {
+    if (isWin())
+      return 'lib'
+    if (isOSX())
+      return 'dylib'
+    return 'so'
   }
 
-  function getLibNameRegex(opencvModuleName: string) {
-    return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`)
+  /**
+   * build a regexp matching os lib file
+   * @param opencvModuleName 
+   * @returns 
+   */
+  function getLibNameRegex(opencvModuleName: string): RegExp {
+    // const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`;
+    const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*.${getLibSuffix()}$`;
+    return new RegExp(regexp)
   }
 
   function createLibResolver(libDir: string): (libFile: string) => string | undefined {
@@ -30,10 +55,11 @@ export function getLibsFactory(
     }
 
     function matchLibName(libFile: string, opencvModuleName: string) {
-      return !!(libFile.match(getLibNameRegex(opencvModuleName)) || [])[0]
+      const regexp = getLibNameRegex(opencvModuleName);
+      return !!(libFile.match(regexp) || [])[0]
     }
 
-    const libFiles = fs.readdirSync(libDir) as string[]
+    const libFiles: string[] = fs.readdirSync(libDir)
 
     return function (opencvModuleName: string) {
       return getLibAbsPath(libFiles.find(libFile => matchLibName(libFile, opencvModuleName)))

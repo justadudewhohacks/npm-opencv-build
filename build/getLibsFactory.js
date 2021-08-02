@@ -7,11 +7,25 @@ function getLibsFactory(args) {
     function getLibPrefix() {
         return isWin() ? 'opencv_' : 'libopencv_';
     }
+    /**
+     * @returns lib extention based on current OS
+     */
     function getLibSuffix() {
-        return isWin() ? 'lib' : (isOSX() ? 'dylib' : 'so');
+        if (isWin())
+            return 'lib';
+        if (isOSX())
+            return 'dylib';
+        return 'so';
     }
+    /**
+     * build a regexp matching os lib file
+     * @param opencvModuleName
+     * @returns
+     */
     function getLibNameRegex(opencvModuleName) {
-        return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`);
+        // const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`;
+        const regexp = `^${getLibPrefix()}${opencvModuleName}[0-9.]*.${getLibSuffix()}$`;
+        return new RegExp(regexp);
     }
     function createLibResolver(libDir) {
         function getLibAbsPath(libFile) {
@@ -20,7 +34,8 @@ function getLibsFactory(args) {
                 : undefined);
         }
         function matchLibName(libFile, opencvModuleName) {
-            return !!(libFile.match(getLibNameRegex(opencvModuleName)) || [])[0];
+            const regexp = getLibNameRegex(opencvModuleName);
+            return !!(libFile.match(regexp) || [])[0];
         }
         const libFiles = fs.readdirSync(libDir);
         return function (opencvModuleName) {

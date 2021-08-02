@@ -15,4 +15,14 @@ export declare function getCwd(): string;
 export declare function readEnvsFromPackageJson(): {
     [key: string]: string | boolean | number;
 };
+export interface OpenCVBuildOption {
+    autoBuildBuildCuda?: string;
+    autoBuildFlags?: string;
+    autoBuildOpencvVersion?: string;
+    autoBuildWithoutContrib?: string;
+    disableAutoBuild?: string;
+    opencvIncludeDir?: string;
+    opencvLibDir?: string;
+    opencvBinDir?: string;
+}
 export declare function applyEnvsFromPackageJson(): void;
