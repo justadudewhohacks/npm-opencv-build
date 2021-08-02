@@ -8,8 +8,7 @@
     "clean": "rimraf build",
     "build": "tsc",
     "cleanbuild": "rimraf build && tsc",
-    "postinstall": "npm run build",
-    "install": "node ./build/main.js",
+    "postinstall": "npm run build && node ./build/main.js",
     "prepare": "npm run build",
     "test": "mocha --recursive ./test"
   },
