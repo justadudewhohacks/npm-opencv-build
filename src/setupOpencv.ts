@@ -67,6 +67,7 @@ function getSharedCmakeFlags(): string[] {
   return defaultCmakeFlags
     .concat(conditionalFlags)
     .concat(parseAutoBuildFlags())
+    // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
 }
 
 function getWinCmakeFlags(msversion: string): string[] {
@@ -148,7 +149,9 @@ export async function setupOpencv(): Promise<void> {
   await getRunBuildCmd(msbuildPath)()
 
   writeAutoBuildFile()
-
+// cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
+// -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
+// -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
   /**
    * DELETE TMP build dirs
    */

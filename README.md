@@ -44,3 +44,18 @@ The following environment variables can be passed:
 - opencvIncludeDir
 - opencvLibDir
 - opencvBinDir
+
+
+
+
+## build test
+
+```bash
+OPENCV4NODEJS_AUTOBUILD_FLAGS=-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi
+npm run build && OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=3.4.15 OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB=1 npm run do-install
+```
+
+
+```bash
+npm run build && OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=4.5.0 OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB=1 npm run do-install
+```
