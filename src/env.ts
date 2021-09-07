@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import dirs from './dirs';
-import { AutoBuildFile } from './types';
 import * as log from 'npmlog';
+
 
 export function isAutoBuildDisabled() {
   return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
@@ -21,11 +20,6 @@ export function autoBuildFlags(): string {
   return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || ''
 }
 
-// last: '3.4.15'
-export function opencvVersion() {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6'
-}
-
 export function numberOfCoresAvailable() {
   return os.cpus().length
 }
@@ -37,23 +31,6 @@ export function parseAutoBuildFlags(): string[] {
     return flagStr.split(' ')
   }
   return []
-}
-
-export function readAutoBuildFile(): AutoBuildFile | undefined {
-  try {
-    const fileExists = fs.existsSync(dirs.autoBuildFile)
-    if (fileExists) {
-      const autoBuildFile = JSON.parse(fs.readFileSync(dirs.autoBuildFile).toString()) as AutoBuildFile
-      if (!autoBuildFile.opencvVersion || !('autoBuildFlags' in autoBuildFile) || !Array.isArray(autoBuildFile.modules)) {
-        throw new Error('auto-build.json has invalid contents')
-      }
-      return autoBuildFile
-    }
-    log.info('readAutoBuildFile', 'file does not exists: %s', dirs.autoBuildFile, dirs.autoBuildFile)
-  } catch (err) {
-    log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', dirs.autoBuildFile, err.toString())
-  }
-  return undefined
 }
 
 export function getCwd() {

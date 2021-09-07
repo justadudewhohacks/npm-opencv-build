@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rimraf build",
     "build": "tsc",
+    "build3x": "tsc && node ./build/main.js --keepsource",
     "do-install": "node ./build/main.js",
     "cleanbuild": "rimraf build && tsc",
     "postinstall": "npm run do-install",

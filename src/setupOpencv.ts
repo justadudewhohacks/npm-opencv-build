@@ -67,7 +67,7 @@ function getSharedCmakeFlags(): string[] {
   return defaultCmakeFlags
     .concat(conditionalFlags)
     .concat(parseAutoBuildFlags())
-    // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
+  // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
 }
 
 function getWinCmakeFlags(msversion: string): string[] {
@@ -113,6 +113,12 @@ function writeAutoBuildFile(): AutoBuildFile {
 }
 
 export async function setupOpencv(): Promise<void> {
+  let keepSource = false;
+  const { argv } = process;
+  if (argv) {
+    if (argv.includes('--keepsources') || argv.includes('--keep-sources') || argv.includes('--keepsource') || argv.includes('--keep-source'))
+      keepSource = true;
+  }
   const msbuild = await getMsbuildIfWin()
   let cMakeFlags: string[] = [];
   let msbuildPath: string | undefined = undefined;
@@ -133,14 +139,14 @@ export async function setupOpencv(): Promise<void> {
   await primraf(dirs.opencvSrc);
   await primraf(dirs.opencvContribSrc);
 
-  fs.mkdirSync(dirs.opencvBuild, {recursive: true});
+  fs.mkdirSync(dirs.opencvBuild, { recursive: true });
 
   if (isWithoutContrib()) {
     log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
   } else {
-    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
+    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
   }
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
+  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
 
   const cmakeArgs = getCmakeArgs(cMakeFlags)
   log.info('install', 'running cmake %s', cmakeArgs)
@@ -149,23 +155,25 @@ export async function setupOpencv(): Promise<void> {
   await getRunBuildCmd(msbuildPath)()
 
   writeAutoBuildFile()
-// cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
-// -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
-// -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
-  /**
-   * DELETE TMP build dirs
-   */
-  try {
-    await primraf(dirs.opencvSrc)
-  } catch (err) {
-    log.error('install', 'failed to clean opencv source folder:', err)
-    log.error('install', 'consider removing the folder yourself: %s', dirs.opencvSrc)
-  }
+  // cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
+  // -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
+  // -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
+  if (!keepSource) {
+    /**
+     * DELETE TMP build dirs
+     */
+    try {
+      await primraf(dirs.opencvSrc)
+    } catch (err) {
+      log.error('install', 'failed to clean opencv source folder:', err)
+      log.error('install', 'consider removing the folder yourself: %s', dirs.opencvSrc)
+    }
 
-  try {
-    await primraf(dirs.opencvContribSrc)
-  } catch (err) {
-    log.error('install', 'failed to clean opencv_contrib source folder:', err)
-    log.error('install', 'consider removing the folder yourself: %s', dirs.opencvContribSrc)
+    try {
+      await primraf(dirs.opencvContribSrc)
+    } catch (err) {
+      log.error('install', 'failed to clean opencv_contrib source folder:', err)
+      log.error('install', 'consider removing the folder yourself: %s', dirs.opencvContribSrc)
+    }
   }
 }
