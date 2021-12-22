@@ -26,13 +26,15 @@ export class BuildContext {
         }
         this.opencvVersion = OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || DEFAULT_OPENCV_VERSION;
         let opt = env.autoBuildFlags() || '';
-
+        
         if (!opt) {
             log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
         } else {
             log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${formatNumber("%s")}`, opt);
         }
 
+        if (env.buildWithCuda()) opt+='cuda'
+        if (env.isWithoutContrib()) opt+='noContrib'
         if (opt) {
             opt = '-' + crypto.createHash('md5').update(opt).digest('hex').substring(0, 5);
         }

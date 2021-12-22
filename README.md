@@ -5,14 +5,15 @@
 
 A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build [*opencv4nodejs*](https://github.com/UrielCh/opencv4nodejs).
 
-## Forked changes
+## Changes in this fork
 
 - Each OPENCV_VERSION will be build in his own directory.
-- Each AUTOBUILD_FLAGS will be build in his own directory. (massive time gain durring dev)
+- Each AUTOBUILD_FLAGS will be build in his own directory. (induce massive time gain during development)
 - Script output is now colorized.
 - Add some usefull log.
 - Big code refactor.
-- Add comment in code.
+- Enfoce typing.
+- Add comments and documentations.
 
 ## Install
 

@@ -1,7 +1,7 @@
 {
   "name": "@u4/opencv-build",
   "version": "0.2.0",
-  "description": "A simple script to auto build recent OpenCV + contrib version via npm",
+  "description": "A simple script to auto build recent OpenCV + contrib version via npm 2021 Edition",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
@@ -23,7 +23,10 @@
     "build",
     "opencv4nodejs"
   ],
-  "author": "justadudewhohacks",
+  "contributors": [
+    "Uriel Chemouni <uchemouni@gmail.com> (https://urielch.github.io/)",
+    "justadudewhohacks (https://github.com/justadudewhohacks)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/UrielCh/npm-opencv-build/issues"
@@ -41,5 +44,8 @@
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
     "typescript": "^4.5.4"
-  }
+  },
+  "files": [
+    "build"
+  ]
 }
