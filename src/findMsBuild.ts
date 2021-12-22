@@ -1,6 +1,6 @@
-import * as log from 'npmlog';
-import * as path from 'path';
-import * as fs from 'fs';
+import log from 'npmlog';
+import path from 'path';
+import fs from 'fs';
 import { exec, execFile } from './utils';
 
 export interface pathVersion {
