@@ -12,6 +12,7 @@
     "cleanbuild": "rimraf build && tsc",
     "postinstall": "tsc && npm run do-install",
     "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "mocha --recursive ./test"
   },
   "repository": {
