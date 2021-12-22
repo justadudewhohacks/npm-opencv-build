@@ -62,4 +62,4 @@ Object.defineProperty(exports, "BuildContext", { enumerable: true, get: function
 /**
  * list available module + path as OpencvModule[]
  */
-exports.getLibs = getLibsFactory_1.getLibsFactory({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path, fs });
+exports.getLibs = (0, getLibsFactory_1.getLibsFactory)({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path, fs });

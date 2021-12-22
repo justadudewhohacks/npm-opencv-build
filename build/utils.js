@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -46,7 +37,7 @@ function spawn(cmd, args, options) {
     npmlog_1.default.silly('install', 'spawning:', cmd, args);
     return new Promise(function (resolve, reject) {
         try {
-            const child = child_process_1.default.spawn(cmd, args, Object.assign({ stdio: 'inherit' }, options));
+            const child = child_process_1.default.spawn(cmd, args, { stdio: 'inherit', ...options });
             child.on('exit', function (code) {
                 if (typeof code !== 'number') {
                     code = null;
@@ -64,29 +55,23 @@ function spawn(cmd, args, options) {
     });
 }
 exports.spawn = spawn;
-function requireCmd(cmd, hint) {
-    return __awaiter(this, void 0, void 0, function* () {
-        npmlog_1.default.info('install', `executing: ${cmd}`);
-        try {
-            const stdout = yield exec(cmd);
-            npmlog_1.default.info('install', `${cmd}: ${stdout}`);
-        }
-        catch (err) {
-            const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`;
-            throw new Error(errMessage);
-        }
-    });
+async function requireCmd(cmd, hint) {
+    npmlog_1.default.info('install', `executing: ${cmd}`);
+    try {
+        const stdout = await exec(cmd);
+        npmlog_1.default.info('install', `${cmd}: ${stdout}`);
+    }
+    catch (err) {
+        const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`;
+        throw new Error(errMessage);
+    }
 }
-function requireGit() {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield requireCmd('git --version', 'git is required');
-    });
+async function requireGit() {
+    await requireCmd('git --version', 'git is required');
 }
 exports.requireGit = requireGit;
-function requireCmake() {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield requireCmd('cmake --version', 'cmake is required to build opencv');
-    });
+async function requireCmake() {
+    await requireCmd('cmake --version', 'cmake is required to build opencv');
 }
 exports.requireCmake = requireCmake;
 function isWin() {
@@ -101,31 +86,29 @@ function isUnix() {
     return !isWin() && !isOSX();
 }
 exports.isUnix = isUnix;
-function isCudaAvailable() {
-    return __awaiter(this, void 0, void 0, function* () {
-        npmlog_1.default.info('install', 'Check if CUDA is available & what version...');
-        if (isWin()) {
-            try {
-                yield requireCmd('nvcc --version', 'CUDA availability check');
-                return true;
-            }
-            catch (err) {
-                npmlog_1.default.info('install', 'Seems like CUDA is not installed.');
-                return false;
-            }
-        }
-        // Because NVCC is not installed by default & requires an extra install step,
-        // this is work around that always works
-        const cudaVersionFilePath = path_1.default.resolve('/usr/local/cuda/version.txt');
-        if (fs_1.default.existsSync(cudaVersionFilePath)) {
-            const content = fs_1.default.readFileSync(cudaVersionFilePath, 'utf8');
-            npmlog_1.default.info('install', content);
+async function isCudaAvailable() {
+    npmlog_1.default.info('install', 'Check if CUDA is available & what version...');
+    if (isWin()) {
+        try {
+            await requireCmd('nvcc --version', 'CUDA availability check');
             return true;
         }
-        else {
-            npmlog_1.default.info('install', 'CUDA version file could not be found.');
+        catch (err) {
+            npmlog_1.default.info('install', 'Seems like CUDA is not installed.');
             return false;
         }
-    });
+    }
+    // Because NVCC is not installed by default & requires an extra install step,
+    // this is work around that always works
+    const cudaVersionFilePath = path_1.default.resolve('/usr/local/cuda/version.txt');
+    if (fs_1.default.existsSync(cudaVersionFilePath)) {
+        const content = fs_1.default.readFileSync(cudaVersionFilePath, 'utf8');
+        npmlog_1.default.info('install', content);
+        return true;
+    }
+    else {
+        npmlog_1.default.info('install', 'CUDA version file could not be found.');
+        return false;
+    }
 }
 exports.isCudaAvailable = isCudaAvailable;

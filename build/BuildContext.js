@@ -10,6 +10,7 @@ const fs_1 = __importDefault(require("fs"));
 const npmlog_1 = __importDefault(require("npmlog"));
 const picocolors_1 = __importDefault(require("picocolors"));
 class BuildContext {
+    opencvVersion;
     constructor() {
         /**
          * legacy version: 3.4.6
@@ -48,10 +49,10 @@ class BuildContext {
         return path_1.default.join(this.opencvInclude, 'opencv4');
     }
     get opencvLibDir() {
-        return utils_1.isWin() ? path_1.default.join(this.opencvBuild, 'lib/Release') : path_1.default.join(this.opencvBuild, 'lib');
+        return (0, utils_1.isWin)() ? path_1.default.join(this.opencvBuild, 'lib/Release') : path_1.default.join(this.opencvBuild, 'lib');
     }
     get opencvBinDir() {
-        return utils_1.isWin() ? path_1.default.join(this.opencvBuild, 'bin/Release') : path_1.default.join(this.opencvBuild, 'bin');
+        return (0, utils_1.isWin)() ? path_1.default.join(this.opencvBuild, 'bin/Release') : path_1.default.join(this.opencvBuild, 'bin');
     }
     get autoBuildFile() {
         return path_1.default.join(this.opencvRoot, 'auto-build.json');

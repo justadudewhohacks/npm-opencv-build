@@ -46,7 +46,9 @@ function checkInstalledLibs(ctxt: BuildContext, autoBuildFile: AutoBuildFile) {
   return hasLibs
 }
 
-export async function install(ctxt: BuildContext) {
+export async function install(ctxt?: BuildContext) {
+  if (!ctxt)
+    ctxt = new BuildContext();
   // if project directory has a package.json containing opencv4nodejs variables
   // apply these variables to the process environment
   applyEnvsFromPackageJson()

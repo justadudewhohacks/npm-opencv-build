@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "outDir": "build",
     "module": "commonjs",
-    "target": "ES2016",
+    "target": "ESNEXT",
     "moduleResolution": "node",
     "typeRoots": [
       "typings",

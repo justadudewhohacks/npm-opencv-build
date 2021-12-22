@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -26,7 +17,7 @@ const npmlog_1 = __importDefault(require("npmlog"));
 /**
  * called from `npm run do-install` triggered by postinstall script
  */
-const getLibs = getLibsFactory_1.getLibsFactory({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path: path_1.default, fs: fs_1.default });
+const getLibs = (0, getLibsFactory_1.getLibsFactory)({ isWin: utils_1.isWin, isOSX: utils_1.isOSX, opencvModules: constants_1.opencvModules, path: path_1.default, fs: fs_1.default });
 function checkInstalledLibs(ctxt, autoBuildFile) {
     let hasLibs = true;
     npmlog_1.default.info('install', 'checking for opencv libraries');
@@ -46,61 +37,61 @@ function checkInstalledLibs(ctxt, autoBuildFile) {
     });
     return hasLibs;
 }
-function install(ctxt) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // if project directory has a package.json containing opencv4nodejs variables
-        // apply these variables to the process environment
-        env_1.applyEnvsFromPackageJson();
-        if (env_1.isAutoBuildDisabled()) {
-            npmlog_1.default.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set');
-            npmlog_1.default.info('install', 'skipping auto build...');
-            return;
+async function install(ctxt) {
+    if (!ctxt)
+        ctxt = new BuildContext_1.BuildContext();
+    // if project directory has a package.json containing opencv4nodejs variables
+    // apply these variables to the process environment
+    (0, env_1.applyEnvsFromPackageJson)();
+    if ((0, env_1.isAutoBuildDisabled)()) {
+        npmlog_1.default.info('install', 'OPENCV4NODEJS_DISABLE_AUTOBUILD is set');
+        npmlog_1.default.info('install', 'skipping auto build...');
+        return;
+    }
+    npmlog_1.default.info('install', 'if you want to use an own OpenCV installation set OPENCV4NODEJS_DISABLE_AUTOBUILD');
+    // prevent rebuild on every install
+    const autoBuildFile = ctxt.readAutoBuildFile();
+    if (autoBuildFile) {
+        npmlog_1.default.info('install', `found auto-build.json: ${ctxt.autoBuildFile}`);
+        if (autoBuildFile.opencvVersion !== ctxt.opencvVersion) {
+            npmlog_1.default.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=${ctxt.opencvVersion}`);
         }
-        npmlog_1.default.info('install', 'if you want to use an own OpenCV installation set OPENCV4NODEJS_DISABLE_AUTOBUILD');
-        // prevent rebuild on every install
-        const autoBuildFile = ctxt.readAutoBuildFile();
-        if (autoBuildFile) {
-            npmlog_1.default.info('install', `found auto-build.json: ${ctxt.autoBuildFile}`);
-            if (autoBuildFile.opencvVersion !== ctxt.opencvVersion) {
-                npmlog_1.default.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=${ctxt.opencvVersion}`);
-            }
-            else if (autoBuildFile.autoBuildFlags !== env_1.autoBuildFlags()) {
-                npmlog_1.default.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but OPENCV4NODEJS_AUTOBUILD_FLAGS=${env_1.autoBuildFlags()}`);
-            }
-            else {
-                const hasLibs = checkInstalledLibs(ctxt, autoBuildFile);
-                if (hasLibs) {
-                    npmlog_1.default.info('install', 'found all libraries');
-                    return;
-                }
-                else {
-                    npmlog_1.default.info('install', 'missing some libraries');
-                }
-            }
+        else if (autoBuildFile.autoBuildFlags !== (0, env_1.autoBuildFlags)()) {
+            npmlog_1.default.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but OPENCV4NODEJS_AUTOBUILD_FLAGS=${(0, env_1.autoBuildFlags)()}`);
         }
         else {
-            npmlog_1.default.info('install', `failed to find auto-build.json: ${ctxt.autoBuildFile}`);
+            const hasLibs = checkInstalledLibs(ctxt, autoBuildFile);
+            if (hasLibs) {
+                npmlog_1.default.info('install', 'found all libraries');
+                return;
+            }
+            else {
+                npmlog_1.default.info('install', 'missing some libraries');
+            }
         }
-        npmlog_1.default.info('install', '');
-        npmlog_1.default.info('install', 'running install script...');
-        npmlog_1.default.info('install', '');
-        npmlog_1.default.info('install', 'opencv version: %s', ctxt.opencvVersion);
-        npmlog_1.default.info('install', 'with opencv contrib: %s', env_1.isWithoutContrib() ? 'no' : 'yes');
-        npmlog_1.default.info('install', 'custom build flags: %s', env_1.autoBuildFlags());
-        npmlog_1.default.info('install', '');
-        try {
-            yield utils_1.requireGit();
-            yield utils_1.requireCmake();
-            const ctxt = new BuildContext_1.BuildContext();
-            yield setupOpencv_1.setupOpencv(ctxt);
-        }
-        catch (err) {
-            if (err.toString)
-                npmlog_1.default.error('install', err.toString());
-            else
-                npmlog_1.default.error('install', JSON.stringify(err));
-            process.exit(1);
-        }
-    });
+    }
+    else {
+        npmlog_1.default.info('install', `failed to find auto-build.json: ${ctxt.autoBuildFile}`);
+    }
+    npmlog_1.default.info('install', '');
+    npmlog_1.default.info('install', 'running install script...');
+    npmlog_1.default.info('install', '');
+    npmlog_1.default.info('install', 'opencv version: %s', ctxt.opencvVersion);
+    npmlog_1.default.info('install', 'with opencv contrib: %s', (0, env_1.isWithoutContrib)() ? 'no' : 'yes');
+    npmlog_1.default.info('install', 'custom build flags: %s', (0, env_1.autoBuildFlags)());
+    npmlog_1.default.info('install', '');
+    try {
+        await (0, utils_1.requireGit)();
+        await (0, utils_1.requireCmake)();
+        const ctxt = new BuildContext_1.BuildContext();
+        await (0, setupOpencv_1.setupOpencv)(ctxt);
+    }
+    catch (err) {
+        if (err.toString)
+            npmlog_1.default.error('install', err.toString());
+        else
+            npmlog_1.default.error('install', JSON.stringify(err));
+        process.exit(1);
+    }
 }
 exports.install = install;
