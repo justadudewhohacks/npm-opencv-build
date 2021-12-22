@@ -10,7 +10,7 @@
     "build3x": "tsc && node ./build/main.js --keepsource",
     "do-install": "node ./build/main.js",
     "cleanbuild": "rimraf build && tsc",
-    "postinstall": "npm run do-install",
+    "postinstall": "tsc && npm run do-install",
     "prepare": "npm run build",
     "test": "mocha --recursive ./test"
   },
@@ -31,6 +31,7 @@
   "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme",
   "dependencies": {
     "npmlog": "^5.0.0",
+    "picocolors": "^1.0.0",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {

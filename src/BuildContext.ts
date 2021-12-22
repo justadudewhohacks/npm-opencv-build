@@ -1,8 +1,9 @@
-import * as path from 'path';
+import path from 'path';
 import { isWin } from './utils';
 import { AutoBuildFile } from './types';
-import * as fs from 'fs';
-import * as log from 'npmlog';
+import fs from 'fs';
+import log from 'npmlog';
+import pc from 'picocolors'
 
 export class BuildContext {
     public opencvVersion: string;
@@ -11,7 +12,12 @@ export class BuildContext {
          * legacy version: 3.4.6
          * current #.x version: 3.4.15
          */
-        this.opencvVersion = process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6';
+        const DEFAULT_OPENCV_VERSION = '3.4.16'
+        if (!process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION) {
+            console.log(`${pc.bold(pc.yellow("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION"))} is not defined using default verison ${pc.green(DEFAULT_OPENCV_VERSION)}`)
+        }
+        this.opencvVersion = process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || DEFAULT_OPENCV_VERSION;
+        console.log(`Workdir will be: ${pc.green(this.opencvRoot)}`)
     }
 
     get rootDir(): string {

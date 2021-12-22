@@ -1,21 +1,19 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
 import { getLibs } from '.';
+import { BuildContext } from './BuildContext';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
-import dirs from './dirs';
 import {
   autoBuildFlags,
   buildWithCuda,
   isWithoutContrib,
   numberOfCoresAvailable,
-  opencvVersion,
   parseAutoBuildFlags,
 } from './env';
 import { findMsBuild, pathVersion } from './findMsBuild';
 import { AutoBuildFile } from './types';
 import { isCudaAvailable, isWin, spawn } from './utils';
-import * as log from 'npmlog';
-import * as rimraf from 'rimraf';
+import log from 'npmlog';
+import rimraf from 'rimraf';
 import { promisify } from 'util';
 
 const primraf = promisify(rimraf);
@@ -28,17 +26,17 @@ function getMsbuildCmd(sln: string): string[] {
   ]
 }
 
-function getRunBuildCmd(msbuildExe?: string): () => Promise<void> {
+function getRunBuildCmd(ctxt: BuildContext, msbuildExe?: string): () => Promise<void> {
   if (msbuildExe) {
     return async () => {
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: dirs.opencvBuild })
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: dirs.opencvBuild })
+      await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: ctxt.opencvBuild })
+      await spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: ctxt.opencvBuild })
     }
   }
   return async () => {
-    await spawn('make', ['install', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
+    await spawn('make', ['install', `-j${numberOfCoresAvailable()}`], { cwd: ctxt.opencvBuild })
     // revert the strange archiving of libopencv.so going on with make install
-    await spawn('make', ['all', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
+    await spawn('make', ['all', `-j${numberOfCoresAvailable()}`], { cwd: ctxt.opencvBuild })
   }
 }
 
@@ -51,12 +49,12 @@ function getCudaCmakeFlags(): string[] {
   ];
 }
 
-function getSharedCmakeFlags(): string[] {
+function getSharedCmakeFlags(ctxt: BuildContext): string[] {
   let conditionalFlags = isWithoutContrib()
     ? []
     : [
       '-DOPENCV_ENABLE_NONFREE=ON',
-      `-DOPENCV_EXTRA_MODULES_PATH=${dirs.opencvContribModules}`
+      `-DOPENCV_EXTRA_MODULES_PATH=${ctxt.opencvContribModules}`
     ]
 
   if (buildWithCuda() && isCudaAvailable()) {
@@ -64,13 +62,13 @@ function getSharedCmakeFlags(): string[] {
     conditionalFlags = conditionalFlags.concat(getCudaCmakeFlags());
   }
 
-  return defaultCmakeFlags
+  return defaultCmakeFlags(ctxt)
     .concat(conditionalFlags)
     .concat(parseAutoBuildFlags())
   // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
 }
 
-function getWinCmakeFlags(msversion: string): string[] {
+function getWinCmakeFlags(ctxt: BuildContext, msversion: string): string[] {
   const cmakeVsCompiler = (cmakeVsCompilers as any)[msversion]
   const cmakeArch = (cmakeArchs as any)[process.arch]
 
@@ -84,11 +82,11 @@ function getWinCmakeFlags(msversion: string): string[] {
   return [
     '-G',
     `${cmakeVsCompiler}${cmakeArch}`
-  ].concat(getSharedCmakeFlags())
+  ].concat(getSharedCmakeFlags(ctxt))
 }
 
-function getCmakeArgs(cmakeFlags: string[]): string[] {
-  return [dirs.opencvSrc].concat(cmakeFlags)
+function getCmakeArgs(ctxt: BuildContext, cmakeFlags: string[]): string[] {
+  return [ctxt.opencvSrc].concat(cmakeFlags)
 }
 
 async function getMsbuildIfWin(): Promise<pathVersion | undefined> {
@@ -100,19 +98,19 @@ async function getMsbuildIfWin(): Promise<pathVersion | undefined> {
   return undefined;
 }
 
-function writeAutoBuildFile(): AutoBuildFile {
+function writeAutoBuildFile(ctxt: BuildContext): AutoBuildFile {
   const autoBuildFile: AutoBuildFile = {
-    opencvVersion: opencvVersion(),
+    opencvVersion: ctxt.opencvVersion,
     autoBuildFlags: autoBuildFlags(),
-    modules: getLibs(dirs.opencvLibDir)
+    modules: getLibs(ctxt.opencvLibDir)
   }
-  log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
+  log.info('install', 'writing auto-build file into directory: %s', ctxt.autoBuildFile)
   log.info('install', JSON.stringify(autoBuildFile))
-  fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
+  fs.writeFileSync(ctxt.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
   return autoBuildFile;
 }
 
-export async function setupOpencv(): Promise<void> {
+export async function setupOpencv(ctxt: BuildContext): Promise<void> {
   let keepSource = false;
   const { argv } = process;
   if (argv) {
@@ -126,35 +124,35 @@ export async function setupOpencv(): Promise<void> {
   if (isWin()) {
     if (!msbuild)
       throw Error('Error getting Ms Build info');
-    cMakeFlags = getWinCmakeFlags("" + msbuild.version);
+    cMakeFlags = getWinCmakeFlags(ctxt, "" + msbuild.version);
     msbuildPath = msbuild.path;
   } else {
-    cMakeFlags = getSharedCmakeFlags();
+    cMakeFlags = getSharedCmakeFlags(ctxt);
   }
 
-  const tag = opencvVersion()
-  log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
+  const tag = ctxt.opencvVersion
+  log.info('install', 'installing opencv version %s into directory: %s', tag, ctxt.opencvRoot)
 
-  await primraf(dirs.opencvBuild);
-  await primraf(dirs.opencvSrc);
-  await primraf(dirs.opencvContribSrc);
+  await primraf(ctxt.opencvBuild);
+  await primraf(ctxt.opencvSrc);
+  await primraf(ctxt.opencvContribSrc);
 
-  fs.mkdirSync(dirs.opencvBuild, { recursive: true });
+  fs.mkdirSync(ctxt.opencvBuild, { recursive: true });
 
   if (isWithoutContrib()) {
     log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
   } else {
-    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
+    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl], { cwd: ctxt.opencvRoot })
   }
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
+  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl], { cwd: ctxt.opencvRoot })
 
-  const cmakeArgs = getCmakeArgs(cMakeFlags)
+  const cmakeArgs = getCmakeArgs(ctxt, cMakeFlags)
   log.info('install', 'running cmake %s', cmakeArgs)
-  await spawn('cmake', cmakeArgs, { cwd: dirs.opencvBuild })
+  await spawn('cmake', cmakeArgs, { cwd: ctxt.opencvBuild })
   log.info('install', 'starting build...')
-  await getRunBuildCmd(msbuildPath)()
+  await getRunBuildCmd(ctxt, msbuildPath)()
 
-  writeAutoBuildFile()
+  writeAutoBuildFile(ctxt)
   // cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
   // -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
   // -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
@@ -163,17 +161,17 @@ export async function setupOpencv(): Promise<void> {
      * DELETE TMP build dirs
      */
     try {
-      await primraf(dirs.opencvSrc)
+      await primraf(ctxt.opencvSrc)
     } catch (err) {
       log.error('install', 'failed to clean opencv source folder:', err)
-      log.error('install', 'consider removing the folder yourself: %s', dirs.opencvSrc)
+      log.error('install', 'consider removing the folder yourself: %s', ctxt.opencvSrc)
     }
 
     try {
-      await primraf(dirs.opencvContribSrc)
+      await primraf(ctxt.opencvContribSrc)
     } catch (err) {
       log.error('install', 'failed to clean opencv_contrib source folder:', err)
-      log.error('install', 'consider removing the folder yourself: %s', dirs.opencvContribSrc)
+      log.error('install', 'consider removing the folder yourself: %s', ctxt.opencvContribSrc)
     }
   }
 }

@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 
 import { opencvModules } from './constants';
 import {
@@ -14,7 +14,11 @@ import { AutoBuildFile } from './types';
 import { isOSX, isWin, requireCmake, requireGit } from './utils';
 import { BuildContext } from './BuildContext';;
 
-import * as log from 'npmlog';
+import log from 'npmlog';
+
+/**
+ * called from `npm run do-install` triggered by postinstall script
+ */
 
 const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
 
@@ -59,12 +63,12 @@ export async function install(ctxt: BuildContext) {
   if (autoBuildFile) {
     log.info('install', `found auto-build.json: ${ctxt.autoBuildFile}`)
 
-    if (autoBuildFile.opencvVersion !== opencvVersion()) {
-      log.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=${opencvVersion()}`)
+    if (autoBuildFile.opencvVersion !== ctxt.opencvVersion) {
+      log.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=${ctxt.opencvVersion}`)
     } else if (autoBuildFile.autoBuildFlags !== autoBuildFlags()) {
       log.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but OPENCV4NODEJS_AUTOBUILD_FLAGS=${autoBuildFlags()}`)
     } else {
-      const hasLibs = checkInstalledLibs(autoBuildFile)
+      const hasLibs = checkInstalledLibs(ctxt, autoBuildFile)
       if (hasLibs) {
         log.info('install', 'found all libraries')
         return
@@ -73,13 +77,13 @@ export async function install(ctxt: BuildContext) {
       }
     }
   } else {
-    log.info('install', `failed to find auto-build.json: ${dirs.autoBuildFile}`)
+    log.info('install', `failed to find auto-build.json: ${ctxt.autoBuildFile}`)
   }
 
   log.info('install', '')
   log.info('install', 'running install script...')
   log.info('install', '')
-  log.info('install', 'opencv version: %s', opencvVersion())
+  log.info('install', 'opencv version: %s', ctxt.opencvVersion)
   log.info('install', 'with opencv contrib: %s', isWithoutContrib() ? 'no' : 'yes')
   log.info('install', 'custom build flags: %s', autoBuildFlags())
   log.info('install', '')
@@ -87,8 +91,11 @@ export async function install(ctxt: BuildContext) {
   try {
     await requireGit()
     await requireCmake()
-    await setupOpencv()
-  } catch(err) {
+
+    const ctxt = new BuildContext()
+
+    await setupOpencv(ctxt)
+  } catch (err) {
     if (err.toString)
       log.error('install', err.toString())
     else

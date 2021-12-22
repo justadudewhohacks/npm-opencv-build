@@ -1,4 +1,4 @@
-import dirs from './dirs';
+import { BuildContext } from "./BuildContext"
 
 // export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz'
 
@@ -40,8 +40,8 @@ export const cmakeArchs = {
   'arm': ' ARM'
 }
 
-export const defaultCmakeFlags = [
-  `-DCMAKE_INSTALL_PREFIX=${dirs.opencvBuild}`,
+export const defaultCmakeFlags = (ctxt: BuildContext) => [
+  `-DCMAKE_INSTALL_PREFIX=${ctxt.opencvBuild}`,
   '-DCMAKE_BUILD_TYPE=Release',
   '-DBUILD_EXAMPLES=OFF',
   '-DBUILD_DOCS=OFF',

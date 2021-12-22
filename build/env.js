@@ -1,11 +1,29 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyEnvsFromPackageJson = exports.readEnvsFromPackageJson = exports.getCwd = exports.readAutoBuildFile = exports.parseAutoBuildFlags = exports.numberOfCoresAvailable = exports.opencvVersion = exports.autoBuildFlags = exports.isWithoutContrib = exports.buildWithCuda = exports.isAutoBuildDisabled = void 0;
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const dirs_1 = require("./dirs");
-const log = require("npmlog");
+exports.applyEnvsFromPackageJson = exports.readEnvsFromPackageJson = exports.getCwd = exports.parseAutoBuildFlags = exports.numberOfCoresAvailable = exports.autoBuildFlags = exports.isWithoutContrib = exports.buildWithCuda = exports.isAutoBuildDisabled = void 0;
+const fs = __importStar(require("fs"));
+const os = __importStar(require("os"));
+const path = __importStar(require("path"));
+const log = __importStar(require("npmlog"));
 function isAutoBuildDisabled() {
     return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD;
 }
@@ -22,11 +40,6 @@ function autoBuildFlags() {
     return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || '';
 }
 exports.autoBuildFlags = autoBuildFlags;
-// last: '3.4.15'
-function opencvVersion() {
-    return process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || '3.4.6';
-}
-exports.opencvVersion = opencvVersion;
 function numberOfCoresAvailable() {
     return os.cpus().length;
 }
@@ -40,24 +53,6 @@ function parseAutoBuildFlags() {
     return [];
 }
 exports.parseAutoBuildFlags = parseAutoBuildFlags;
-function readAutoBuildFile() {
-    try {
-        const fileExists = fs.existsSync(dirs_1.default.autoBuildFile);
-        if (fileExists) {
-            const autoBuildFile = JSON.parse(fs.readFileSync(dirs_1.default.autoBuildFile).toString());
-            if (!autoBuildFile.opencvVersion || !('autoBuildFlags' in autoBuildFile) || !Array.isArray(autoBuildFile.modules)) {
-                throw new Error('auto-build.json has invalid contents');
-            }
-            return autoBuildFile;
-        }
-        log.info('readAutoBuildFile', 'file does not exists: %s', dirs_1.default.autoBuildFile, dirs_1.default.autoBuildFile);
-    }
-    catch (err) {
-        log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', dirs_1.default.autoBuildFile, err.toString());
-    }
-    return undefined;
-}
-exports.readAutoBuildFile = readAutoBuildFile;
 function getCwd() {
     const cwd = process.env.INIT_CWD || process.cwd();
     if (!cwd) {

@@ -1,7 +1,7 @@
-import * as child_process from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as log from 'npmlog';
+import child_process from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import log from 'npmlog';
 
 export function exec(cmd: string, options?: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'executing:', cmd)

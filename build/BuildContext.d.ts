@@ -1,4 +1,7 @@
-export declare class Dirs {
+import { AutoBuildFile } from './types';
+export declare class BuildContext {
+    opencvVersion: string;
+    constructor();
     get rootDir(): string;
     get opencvRoot(): string;
     get opencvSrc(): string;
@@ -10,6 +13,6 @@ export declare class Dirs {
     get opencvLibDir(): string;
     get opencvBinDir(): string;
     get autoBuildFile(): string;
+    readAutoBuildFile(): AutoBuildFile | undefined;
 }
-declare const singleton: Dirs;
-export default singleton;
+export default BuildContext;

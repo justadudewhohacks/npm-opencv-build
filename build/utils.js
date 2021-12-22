@@ -8,16 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isCudaAvailable = exports.isUnix = exports.isOSX = exports.isWin = exports.requireCmake = exports.requireGit = exports.spawn = exports.execFile = exports.exec = void 0;
-const child_process = require("child_process");
-const fs = require("fs");
-const path = require("path");
-const log = require("npmlog");
+const child_process_1 = __importDefault(require("child_process"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const npmlog_1 = __importDefault(require("npmlog"));
 function exec(cmd, options) {
-    log.silly('install', 'executing:', cmd);
+    npmlog_1.default.silly('install', 'executing:', cmd);
     return new Promise(function (resolve, reject) {
-        child_process.exec(cmd, options, function (err, stdout, stderr) {
+        child_process_1.default.exec(cmd, options, function (err, stdout, stderr) {
             const _err = err || stderr;
             if (_err)
                 return reject(_err);
@@ -27,9 +30,9 @@ function exec(cmd, options) {
 }
 exports.exec = exec;
 function execFile(cmd, args, options) {
-    log.silly('install', 'executing:', cmd, args);
+    npmlog_1.default.silly('install', 'executing:', cmd, args);
     return new Promise(function (resolve, reject) {
-        const child = child_process.execFile(cmd, args, options, function (err, stdout, stderr) {
+        const child = child_process_1.default.execFile(cmd, args, options, function (err, stdout, stderr) {
             const _err = err || stderr;
             if (_err)
                 return reject(_err);
@@ -40,10 +43,10 @@ function execFile(cmd, args, options) {
 }
 exports.execFile = execFile;
 function spawn(cmd, args, options) {
-    log.silly('install', 'spawning:', cmd, args);
+    npmlog_1.default.silly('install', 'spawning:', cmd, args);
     return new Promise(function (resolve, reject) {
         try {
-            const child = child_process.spawn(cmd, args, Object.assign({ stdio: 'inherit' }, options));
+            const child = child_process_1.default.spawn(cmd, args, Object.assign({ stdio: 'inherit' }, options));
             child.on('exit', function (code) {
                 if (typeof code !== 'number') {
                     code = null;
@@ -63,10 +66,10 @@ function spawn(cmd, args, options) {
 exports.spawn = spawn;
 function requireCmd(cmd, hint) {
     return __awaiter(this, void 0, void 0, function* () {
-        log.info('install', `executing: ${cmd}`);
+        npmlog_1.default.info('install', `executing: ${cmd}`);
         try {
             const stdout = yield exec(cmd);
-            log.info('install', `${cmd}: ${stdout}`);
+            npmlog_1.default.info('install', `${cmd}: ${stdout}`);
         }
         catch (err) {
             const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`;
@@ -100,27 +103,27 @@ function isUnix() {
 exports.isUnix = isUnix;
 function isCudaAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
-        log.info('install', 'Check if CUDA is available & what version...');
+        npmlog_1.default.info('install', 'Check if CUDA is available & what version...');
         if (isWin()) {
             try {
                 yield requireCmd('nvcc --version', 'CUDA availability check');
                 return true;
             }
             catch (err) {
-                log.info('install', 'Seems like CUDA is not installed.');
+                npmlog_1.default.info('install', 'Seems like CUDA is not installed.');
                 return false;
             }
         }
         // Because NVCC is not installed by default & requires an extra install step,
         // this is work around that always works
-        const cudaVersionFilePath = path.resolve('/usr/local/cuda/version.txt');
-        if (fs.existsSync(cudaVersionFilePath)) {
-            const content = fs.readFileSync(cudaVersionFilePath, 'utf8');
-            log.info('install', content);
+        const cudaVersionFilePath = path_1.default.resolve('/usr/local/cuda/version.txt');
+        if (fs_1.default.existsSync(cudaVersionFilePath)) {
+            const content = fs_1.default.readFileSync(cudaVersionFilePath, 'utf8');
+            npmlog_1.default.info('install', content);
             return true;
         }
         else {
-            log.info('install', 'CUDA version file could not be found.');
+            npmlog_1.default.info('install', 'CUDA version file could not be found.');
             return false;
         }
     });

@@ -6,6 +6,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
+    "esModuleInterop": true,
     "outDir": "build",
     "module": "commonjs",
     "target": "ES2016",

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultCmakeFlags = exports.cmakeArchs = exports.cmakeVsCompilers = exports.opencvModules = exports.opencvContribRepoUrl = exports.opencvRepoUrl = void 0;
-const dirs_1 = require("./dirs");
 // export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz'
 exports.opencvRepoUrl = 'https://github.com/opencv/opencv.git';
 exports.opencvContribRepoUrl = 'https://github.com/opencv/opencv_contrib.git';
@@ -37,8 +36,8 @@ exports.cmakeArchs = {
     'ia32': '',
     'arm': ' ARM'
 };
-exports.defaultCmakeFlags = [
-    `-DCMAKE_INSTALL_PREFIX=${dirs_1.default.opencvBuild}`,
+const defaultCmakeFlags = (ctxt) => [
+    `-DCMAKE_INSTALL_PREFIX=${ctxt.opencvBuild}`,
     '-DCMAKE_BUILD_TYPE=Release',
     '-DBUILD_EXAMPLES=OFF',
     '-DBUILD_DOCS=OFF',
@@ -78,3 +77,4 @@ exports.defaultCmakeFlags = [
     '-DBUILD_opencv_xphoto=OFF',
     '-DWITH_VTK=OFF'
 ];
+exports.defaultCmakeFlags = defaultCmakeFlags;

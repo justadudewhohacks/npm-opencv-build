@@ -1,3 +1,4 @@
+import { BuildContext } from "./BuildContext";
 export declare const opencvRepoUrl = "https://github.com/opencv/opencv.git";
 export declare const opencvContribRepoUrl = "https://github.com/opencv/opencv_contrib.git";
 export declare const opencvModules: string[];
@@ -13,4 +14,4 @@ export declare const cmakeArchs: {
     ia32: string;
     arm: string;
 };
-export declare const defaultCmakeFlags: string[];
+export declare const defaultCmakeFlags: (ctxt: BuildContext) => string[];
