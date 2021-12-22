@@ -1,16 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 
-import { opencvModules } from './constants';
+import { opencvModules } from './constants.js';
 // import BuildContext from './BuildContext';
-import { getLibsFactory } from './getLibsFactory';
-import { isOSX, isWin } from './utils';
+import { getLibsFactory } from './getLibsFactory.js';
+import { isOSX, isWin } from './utils.js';
 
-export { opencvModules } from './constants';
-export { isAutoBuildDisabled, readEnvsFromPackageJson, applyEnvsFromPackageJson } from './env';
-export { isOSX, isWin, isUnix } from './utils';
+export { opencvModules } from './constants.js';
+export { isAutoBuildDisabled, readEnvsFromPackageJson, applyEnvsFromPackageJson } from './env.js';
+export { isOSX, isWin, isUnix } from './utils.js';
 
-export { BuildContext } from './BuildContext';;
+export { BuildContext } from './BuildContext.js';
 
 /**
  * opencv include directory
@@ -36,4 +36,4 @@ export { BuildContext } from './BuildContext';;
  * list available module + path as OpencvModule[]
  */
 export const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
-export { OpencvModule, AutoBuildFile } from './types'
+export type { OpencvModule, AutoBuildFile } from './types.js'

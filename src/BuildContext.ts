@@ -1,6 +1,6 @@
 import path from 'path';
-import { isWin } from './utils';
-import { AutoBuildFile } from './types';
+import { isWin } from './utils.js';
+import type { AutoBuildFile } from './types.js';
 import fs from 'fs';
 import log from 'npmlog';
 import pc from 'picocolors'

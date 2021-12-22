@@ -1,17 +1,17 @@
 import fs from 'fs';
-import { getLibs } from '.';
-import { BuildContext } from './BuildContext';
-import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
+import { getLibs } from './index.js';
+import { BuildContext } from './BuildContext.js';
+import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants.js';
 import {
   autoBuildFlags,
   buildWithCuda,
   isWithoutContrib,
   numberOfCoresAvailable,
   parseAutoBuildFlags,
-} from './env';
-import { findMsBuild, pathVersion } from './findMsBuild';
-import { AutoBuildFile } from './types';
-import { isCudaAvailable, isWin, spawn } from './utils';
+} from './env.js';
+import { findMsBuild, pathVersion } from './findMsBuild.js';
+import type { AutoBuildFile } from './types.js';
+import { isCudaAvailable, isWin, spawn } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';

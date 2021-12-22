@@ -1,7 +1,7 @@
 import log from 'npmlog';
 import path from 'path';
 import fs from 'fs';
-import { exec, execFile } from './utils';
+import { exec, execFile } from './utils.js';
 
 export interface pathVersion {
   version: number;

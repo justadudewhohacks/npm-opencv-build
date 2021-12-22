@@ -1,5 +1,5 @@
 import { EncodingOption, PathLike } from 'fs';
-import { OpencvModule } from './types';
+import type { OpencvModule } from './types.js';
 
 const worldModule = 'world';
 

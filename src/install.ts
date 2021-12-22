@@ -1,18 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 
-import { opencvModules } from './constants';
+import { opencvModules } from './constants.js';
 import {
   applyEnvsFromPackageJson,
   autoBuildFlags,
   isAutoBuildDisabled,
   isWithoutContrib,
-} from './env';
-import { getLibsFactory } from './getLibsFactory';
-import { setupOpencv } from './setupOpencv';
-import { AutoBuildFile } from './types';
-import { isOSX, isWin, requireCmake, requireGit } from './utils';
-import { BuildContext } from './BuildContext';;
+} from './env.js';
+import { getLibsFactory } from './getLibsFactory.js';
+import { setupOpencv } from './setupOpencv.js';
+import type { AutoBuildFile } from './types.js';
+import { isOSX, isWin, requireCmake, requireGit } from './utils.js';
+import { BuildContext } from './BuildContext.js';
 
 import log from 'npmlog';
 

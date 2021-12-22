@@ -1,4 +1,4 @@
-import { BuildContext } from "./BuildContext"
+import { BuildContext } from "./BuildContext.js"
 
 // export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz'
 
