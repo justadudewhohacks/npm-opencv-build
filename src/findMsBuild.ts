@@ -2,6 +2,8 @@ import log from 'npmlog';
 import path from 'path';
 import fs from 'fs';
 import { exec, execFile } from './utils.js';
+// import { fileURLToPath } from 'url';
+// import { dirname } from 'path';
 
 export interface pathVersion {
   version: number;
@@ -11,6 +13,10 @@ export interface pathVersion {
 /* this codesnippet is partly taken from the node-gyp source: https://github.com/nodejs/node-gyp */
 async function findVs2017(): Promise<pathVersion> {
   const ps = path.join(process.env.SystemRoot as string, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+
+  // const __filename = fileURLToPath(import.meta.url);
+  // const __dirname = dirname(__filename);
+
   const args = ['-ExecutionPolicy', 'Unrestricted', '-Command',
     '&{Add-Type -Path \'' + path.join(__dirname, '../Find-VS2017.cs') +
     '\'; [VisualStudioConfiguration.Main]::Query()}']

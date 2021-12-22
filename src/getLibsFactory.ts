@@ -52,20 +52,20 @@ export function getLibsFactory(
       return fs.realpathSync(path.resolve(libDir, libFile))
     }
 
-    function matchLibName(libFile: string, regexp: RegExp) {
+    function matchLibName(libFile: string, regexp: RegExp): boolean {
       return !!(libFile.match(regexp) || [])[0]
     }
 
     const libFiles: string[] = fs.readdirSync(libDir)
 
-    return function (opencvModuleName: string) {
+    return function (opencvModuleName: string): string | undefined {
       const regexp = getLibNameRegex(opencvModuleName);
       const matchs = libFiles.find(libFile => matchLibName(libFile, regexp));
       return getLibAbsPath(matchs);
     }
   }
 
-  return function (libDir: string) {
+  return function (libDir: string): OpencvModule[] {
     if (!fs.existsSync(libDir)) {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }

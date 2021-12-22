@@ -2,64 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import log from 'npmlog';
-
-
-export function isAutoBuildDisabled() {
-  return !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD
-}
-
-export function buildWithCuda() : boolean {
-  return !!process.env.OPENCV4NODEJS_BUILD_CUDA || false;
-}
-
-export function isWithoutContrib() {
-  return !!process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB
-}
-
-export function autoBuildFlags(): string {
-  return process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || ''
-}
-
-export function numberOfCoresAvailable() {
-  return os.cpus().length
-}
-
-export function parseAutoBuildFlags(): string[] {
-  const flagStr = autoBuildFlags()
-  if (typeof(flagStr) === 'string' && flagStr.length) {
-    log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', flagStr)
-    return flagStr.split(' ')
-  }
-  return []
-}
-
-export function getCwd() {
-  const cwd = process.env.INIT_CWD || process.cwd()
-  if (!cwd) {
-    throw new Error('process.env.INIT_CWD || process.cwd() is undefined or empty')
-  }
-  return cwd
-}
-
-function parsePackageJson() {
-  const absPath = path.resolve(getCwd(), 'package.json')
-  if (!fs.existsSync(absPath)) {
-    return null
-  }
-  log.info('config', `looking for opencv4nodejs option from ${absPath}`);
-  return JSON.parse(fs.readFileSync(absPath).toString())
-}
-
-/**
- * get opencv4nodejs section from package.json if available
- * @returns opencv4nodejs customs
- */
-export function readEnvsFromPackageJson(): {[key:string]: string | boolean | number} {
-  const rootPackageJSON = parsePackageJson()
-  return rootPackageJSON
-    ? (rootPackageJSON.opencv4nodejs || {})
-    : {}
-}
+import { highlight } from './utils';
 
 export interface OpenCVBuildOption {
   autoBuildBuildCuda?: string;
@@ -72,61 +15,115 @@ export interface OpenCVBuildOption {
   opencvBinDir?: string;
 }
 
-export function applyEnvsFromPackageJson() {
-  let envs: OpenCVBuildOption = {};
-  try {
-    envs = readEnvsFromPackageJson()
-  } catch (err) {
-    log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
-    log.error('applyEnvsFromPackageJson', err)
-  }
+const env = {
+  isAutoBuildDisabled: (): boolean => !!process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD,
+  buildWithCuda: (): boolean => !!process.env.OPENCV4NODEJS_BUILD_CUDA || false,
+  isWithoutContrib: (): boolean => !!process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB,
+  autoBuildFlags: (): string => process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS || '',
+  numberOfCoresAvailable: (): number => os.cpus().length,
 
-  const envKeys = Object.keys(envs)
-  if (envKeys.length) {
-    log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
-    envKeys.forEach(key => log.info('applyEnvsFromPackageJson', `${key}: ${(envs as any)[key]}`))
-  }
+  parseAutoBuildFlags: (): string[] => {
+    const flagStr = env.autoBuildFlags()
+    if (typeof (flagStr) === 'string' && flagStr.length) {
+      log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', flagStr)
+      return flagStr.split(' ')
+    }
+    return []
+  },
 
-  const {
-    autoBuildBuildCuda,
-    autoBuildFlags,
-    autoBuildOpencvVersion,
-    autoBuildWithoutContrib,
-    disableAutoBuild,
-    opencvIncludeDir,
-    opencvLibDir,
-    opencvBinDir
-  } = envs
+  getCwd: (): string => {
+    const cwd = process.env.INIT_CWD || process.cwd()
+    if (!cwd) {
+      throw new Error('process.env.INIT_CWD || process.cwd() is undefined or empty')
+    }
+    return cwd
+  },
 
-  if (autoBuildFlags) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = '' + autoBuildFlags
-  }
+  parsePackageJson: (): { file: string, data: any } | null => {
+    const absPath = path.resolve(env.getCwd(), 'package.json')
+    if (!fs.existsSync(absPath)) {
+      return null
+    }
+    log.info('config', `looking for opencv4nodejs option from ${absPath}`);
+    const data = JSON.parse(fs.readFileSync(absPath).toString())
+    return { file: absPath, data };
+  },
 
-  if (autoBuildBuildCuda) {
-    process.env.OPENCV4NODEJS_BUILD_CUDA = '' + autoBuildBuildCuda
-  }
+  /**
+   * get opencv4nodejs section from package.json if available
+   * @returns opencv4nodejs customs
+   */
+  readEnvsFromPackageJson: (): { [key: string]: string | boolean | number } => {
+    const rootPackageJSON = env.parsePackageJson()
+    if (rootPackageJSON && rootPackageJSON.data) {
+      if (rootPackageJSON.data.opencv4nodejs) {
+        log.info('config', `found opencv4nodejs section in ${highlight(rootPackageJSON.file)}`);
+        return rootPackageJSON.data.opencv4nodejs
+      } else {
+        log.info('config', `no opencv4nodejs section found in ${highlight(rootPackageJSON.file)}`);
+      }
+    }
+    return {};
+  },
 
-  if (autoBuildOpencvVersion) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = '' + autoBuildOpencvVersion
-  }
+  applyEnvsFromPackageJson: () => {
+    let envs: OpenCVBuildOption = {};
+    try {
+      envs = env.readEnvsFromPackageJson()
+    } catch (err) {
+      log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
+      log.error('applyEnvsFromPackageJson', err)
+    }
 
-  if (autoBuildWithoutContrib) {
-    process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = '' + autoBuildWithoutContrib
-  }
+    const envKeys = Object.keys(envs)
+    if (envKeys.length) {
+      log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
+      envKeys.forEach(key => log.info('applyEnvsFromPackageJson', `${key}: ${(envs as any)[key]}`))
+    }
 
-  if (disableAutoBuild) {
-    process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = '' + disableAutoBuild
-  }
+    const {
+      autoBuildBuildCuda,
+      autoBuildFlags,
+      autoBuildOpencvVersion,
+      autoBuildWithoutContrib,
+      disableAutoBuild,
+      opencvIncludeDir,
+      opencvLibDir,
+      opencvBinDir
+    } = envs
 
-  if (opencvIncludeDir) {
-    process.env.OPENCV_INCLUDE_DIR = '' + opencvIncludeDir
-  }
+    if (autoBuildFlags) {
+      process.env.OPENCV4NODEJS_AUTOBUILD_FLAGS = '' + autoBuildFlags
+    }
 
-  if (opencvLibDir) {
-    process.env.OPENCV_LIB_DIR = '' + opencvLibDir
-  }
+    if (autoBuildBuildCuda) {
+      process.env.OPENCV4NODEJS_BUILD_CUDA = '' + autoBuildBuildCuda
+    }
 
-  if (opencvBinDir) {
-    process.env.OPENCV_BIN_DIR = '' + opencvBinDir
+    if (autoBuildOpencvVersion) {
+      process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION = '' + autoBuildOpencvVersion
+    }
+
+    if (autoBuildWithoutContrib) {
+      process.env.OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB = '' + autoBuildWithoutContrib
+    }
+
+    if (disableAutoBuild) {
+      process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = '' + disableAutoBuild
+    }
+
+    if (opencvIncludeDir) {
+      process.env.OPENCV_INCLUDE_DIR = '' + opencvIncludeDir
+    }
+
+    if (opencvLibDir) {
+      process.env.OPENCV_LIB_DIR = '' + opencvLibDir
+    }
+
+    if (opencvBinDir) {
+      process.env.OPENCV_BIN_DIR = '' + opencvBinDir
+    }
   }
 }
+
+export default env;

@@ -3,28 +3,51 @@ import { isWin } from './utils.js';
 import type { AutoBuildFile } from './types.js';
 import fs from 'fs';
 import log from 'npmlog';
-import pc from 'picocolors'
+import { highlight, formatNumber } from './utils';
+import env from './env.js';
+import crypto from 'crypto';
 
+// import { fileURLToPath } from 'url';
+// import { dirname } from 'path';
 export class BuildContext {
     public opencvVersion: string;
+    public optHash: string;;
     constructor() {
         /**
          * legacy version: 3.4.6
          * current #.x version: 3.4.15
          */
         const DEFAULT_OPENCV_VERSION = '3.4.16'
-        if (!process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION) {
-            console.log(`${pc.bold(pc.yellow("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION"))} is not defined using default verison ${pc.green(DEFAULT_OPENCV_VERSION)}`)
+        const { OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION } = process.env;
+        if (!OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION) {
+            log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION")} is not defined using default verison ${formatNumber(DEFAULT_OPENCV_VERSION)}`)
+        } else {
+            log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION")} is defined using verison ${formatNumber(OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION)}`)
         }
-        this.opencvVersion = process.env.OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || DEFAULT_OPENCV_VERSION;
-        console.log(`Workdir will be: ${pc.green(this.opencvRoot)}`)
+        this.opencvVersion = OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || DEFAULT_OPENCV_VERSION;
+        let opt = env.autoBuildFlags() || '';
+
+        if (!opt) {
+            log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
+        } else {
+            log.info('init', `${highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${formatNumber("%s")}`, opt);
+        }
+
+        if (opt) {
+            opt = '-' + crypto.createHash('md5').update(opt).digest('hex').substring(0, 5);
+        }
+
+        this.optHash = opt
+        log.info('init', `${highlight("Workdir")} will be: ${formatNumber("%s")}`, this.opencvRoot)
     }
 
     get rootDir(): string {
+        // const __filename = fileURLToPath(import.meta.url);
+        // const __dirname = dirname(__filename);
         return path.resolve(__dirname, '../');
     }
     get opencvRoot(): string {
-        return path.join(this.rootDir, `opencv-${this.opencvVersion}`)
+        return path.join(this.rootDir, `opencv-${this.opencvVersion}${this.optHash}`)
         // return path.join(this.rootDir, `opencv`)
     }
     get opencvSrc(): string {

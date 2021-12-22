@@ -26,7 +26,7 @@ export const opencvModules = [
   'ximgproc'
 ]
 
-export const cmakeVsCompilers = {
+export const cmakeVsCompilers: { [version: string]: string } = {
   '10': 'Visual Studio 10 2010',
   '11': 'Visual Studio 11 2012',
   '12': 'Visual Studio 12 2013',
@@ -34,7 +34,7 @@ export const cmakeVsCompilers = {
   '15': 'Visual Studio 15 2017'
 }
 
-export const cmakeArchs = {
+export const cmakeArchs: { [arch: string]: string } = {
   'x64': ' Win64',
   'ia32': '',
   'arm': ' ARM'

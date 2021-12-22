@@ -11,6 +11,7 @@
     "module": "commonjs",
     "target": "ESNEXT",
     "moduleResolution": "node",
+    "sourceMap": true,
     "typeRoots": [
       "typings",
       "node_modules/@types"

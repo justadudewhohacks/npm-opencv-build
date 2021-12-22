@@ -2,6 +2,15 @@ import child_process from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import log from 'npmlog';
+import pc from 'picocolors'
+
+export function highlight(text: string): string {
+  return pc.bold(pc.yellow(text));
+}
+
+export function formatNumber(text: string): string {
+  return pc.bold(pc.green(text));
+}
 
 export function exec(cmd: string, options?: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'executing:', cmd)
@@ -48,11 +57,12 @@ export function spawn(cmd: string, args: string[], options?: child_process.ExecO
   })
 }
 
-async function requireCmd(cmd: string, hint: string) {
+async function requireCmd(cmd: string, hint: string): Promise<string> {
   log.info('install', `executing: ${cmd}`)
   try {
     const stdout = await exec(cmd)
-    log.info('install', `${cmd}: ${stdout}`)
+    log.verbose('install', `${cmd}: ${stdout.trim()}`)
+    return stdout;
   } catch (err) {
     const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`
     throw new Error(errMessage)
@@ -60,11 +70,21 @@ async function requireCmd(cmd: string, hint: string) {
 }
 
 export async function requireGit() {
-  await requireCmd('git --version', 'git is required')
+  const out = await requireCmd('git --version', 'git is required')  
+  const version = out.match(/version [\d.\w]+/)
+  if (version) {
+    // log.info('install', `git version ${version[0]}`)
+    log.info('install', `git Version ${formatNumber("%s")} found`, version[0]);
+  }
 }
 
 export async function requireCmake() {
-  await requireCmd('cmake --version', 'cmake is required to build opencv')
+  const out = await requireCmd('cmake --version', 'cmake is required to build opencv')
+  const version = out.match(/version [\d.\w]+/)
+  if (version) {
+    // log.info('install', `git version ${version[0]}`)
+    log.info('install', `cmake Version ${formatNumber("%s")} found`, version[0]);
+  }
 }
 
 export function isWin () {
