@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { getLibs } from './index.js';
+import { getLibs } from './getLibs.js';
 import { BuildContext } from './BuildContext.js';
 import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants.js';
 import env from './env.js';

@@ -1,19 +1,23 @@
-import fs from 'fs';
-import path from 'path';
 
 import { opencvModules } from './constants.js';
-// import BuildContext from './BuildContext';
+import BuildContext from './BuildContext';
 import { getLibsFactory } from './getLibsFactory.js';
-import { isOSX, isWin } from './utils.js';
-
-export { opencvModules } from './constants.js';
-export { default as env } from './env.js';
-export { isOSX, isWin, isUnix } from './utils.js';
-
-export { BuildContext } from './BuildContext.js';
+import { isOSX, isWin, isUnix } from './utils.js';
+import { getLibs } from './getLibs.js';
+import { default as env } from './env.js';
 
 /**
  * list available module + path as OpencvModule[]
  */
-export const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
 export type { OpencvModule, AutoBuildFile } from './types.js'
+
+export { default as env } from './env.js';
+
+export default  {
+ opencvModules,
+ BuildContext,
+ getLibsFactory,
+ isOSX, isWin, isUnix,
+ getLibs,
+ env,
+}
