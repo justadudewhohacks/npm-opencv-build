@@ -5,7 +5,7 @@ import env from './env.js';
 import { getLibsFactory } from './getLibsFactory.js';
 import { setupOpencv } from './setupOpencv.js';
 import type { AutoBuildFile } from './types.js';
-import { isOSX, isWin, requireCmake, requireGit, highlight } from './utils.js';
+import { isOSX, isWin, requireCmake, requireGit, highlight, formatNumber, light } from './utils.js';
 import { BuildContext } from './BuildContext.js';
 
 import log from 'npmlog';
@@ -34,7 +34,7 @@ function checkInstalledLibs(ctxt: BuildContext, autoBuildFile: AutoBuildFile): b
     }
     const foundLib = installedLibs.find(lib => lib.opencvModule === opencvModule)
     hasLibs = hasLibs && !!foundLib
-    log.info('install', 'lib %s: %s', opencvModule, foundLib ? foundLib.libPath : 'not found')
+    log.info('install', `lib ${formatNumber("%s")}: ${light("%s")}`, opencvModule, foundLib ? foundLib.libPath : 'not found')
   })
 
   return hasLibs

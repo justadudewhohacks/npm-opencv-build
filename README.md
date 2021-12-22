@@ -1,9 +1,20 @@
+# npm-opencv-build
+
 [![Build Status](https://travis-ci.org/justadudewhohacks/npm-opencv-build.svg?branch=master)](http://travis-ci.org/justadudewhohacks/npm-opencv-build)
 [![Build status](https://ci.appveyor.com/api/projects/status/uv8n2sruno95rxtq/branch/master?svg=true)](https://ci.appveyor.com/project/justadudewhohacks/npm-opencv-build/branch/master)
 
 A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build [*opencv4nodejs*](https://github.com/UrielCh/opencv4nodejs).
 
-# Install
+## Forked changes
+
+- Each OPENCV_VERSION will be build in his own directory.
+- Each AUTOBUILD_FLAGS will be build in his own directory. (massive time gain durring dev)
+- Script output is now colorized.
+- Add some usefull log.
+- Big code refactor.
+- Add comment in code.
+
+## Install
 
 ``` bash
 npm install opencv-build
@@ -15,11 +26,10 @@ npm install opencv-build
 
 ### Windows
 
-- windows build tools or Visual Studio: run in a adminstrator powershell:
+for old nodejs
 
 ``` bash
 npm install --global windows-build-tools
-setx OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION 4.5.4
 ```
 
 ## Environment Variables
@@ -30,21 +40,65 @@ It's possible to specify build environment variables by inserting them into the 
 {
   "opencv4nodejs": {
     "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc",
-    "autoBuildOpencvVersion": "4.1.0"
+    "autoBuildOpencvVersion": "4.5.4"
   }
 }
 ```
 
-The following environment variables can be passed:
+The following opencv4nodejs parameters can be passed:
 
-- autoBuildBuildCuda
-- autoBuildFlags
-- autoBuildOpencvVersion
-- autoBuildWithoutContrib
-- disableAutoBuild
-- opencvIncludeDir
-- opencvLibDir
-- opencvBinDir
+### autoBuildBuildCuda
+
+Can be set using the environment variables *OPENCV4NODEJS_BUILD_CUDA*
+
+set any value to enable, the following cMake flag will be added:
+
+- DWITH_CUDA=ON
+- DBUILD_opencv_cudacodec=OFF // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
+- DCUDA_FAST_MATH=ON // optional
+- DWITH_CUBLAS=ON // optional
+
+### autoBuildFlags
+
+Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_FLAGS*
+
+Append option to CMake flags.
+
+### autoBuildOpencvVersion
+
+Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION*
+
+Choose the openCV version you want to build default value is `3.4.16`.
+
+### autoBuildWithoutContrib
+
+Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB*
+
+Set any value to enable, this option will skip openCV Contribs.
+
+### disableAutoBuild
+
+Can be set using the environment variables *OPENCV4NODEJS_DISABLE_AUTOBUILD*
+
+Set any value to disable compilation from sources.
+
+### opencvIncludeDir
+
+Can be set using the environment variables *OPENCV_INCLUDE_DIR*
+
+Not used in the this build package, should only be used if `disableAutoBuild` is set.
+
+### opencvLibDir
+
+Can be set using the environment variables *OPENCV_LIB_DIR*
+
+Not used in the this build package, should only be used if `disableAutoBuild` is set.
+
+### opencvBinDir
+
+Can be set using the environment variables *OPENCV_BIN_DIR*
+
+Not used in the this build package, should only be used if `disableAutoBuild` is set.
 
 ## build test
 

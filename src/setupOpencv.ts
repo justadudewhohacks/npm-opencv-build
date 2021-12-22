@@ -103,7 +103,7 @@ function writeAutoBuildFile(ctxt: BuildContext): AutoBuildFile {
     autoBuildFlags: env.autoBuildFlags(),
     modules: getLibs(ctxt.opencvLibDir)
   }
-  log.info(`install', 'writing auto-build file into directory: ${highlight("%s")}`, ctxt.autoBuildFile)
+  log.info('install', `writing auto-build file into directory: ${highlight("%s")}`, ctxt.autoBuildFile)
   // log.info('install', JSON.stringify(autoBuildFile))
   fs.writeFileSync(ctxt.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
   return autoBuildFile;
@@ -145,7 +145,7 @@ export async function setupOpencv(ctxt: BuildContext): Promise<void> {
   fs.mkdirSync(ctxt.opencvBuild, { recursive: true });
 
   if (env.isWithoutContrib()) {
-    log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
+    log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
   } else {
     log.info('install', `git clone ${opencvContribRepoUrl}`)
     await spawn('git', ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl], { cwd: ctxt.opencvRoot })

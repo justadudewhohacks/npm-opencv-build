@@ -44,7 +44,7 @@ const env = {
     if (!fs.existsSync(absPath)) {
       return null
     }
-    log.info('config', `looking for opencv4nodejs option from ${absPath}`);
+    log.info('config', `looking for opencv4nodejs option from ${highlight("%s")}`, absPath);
     const data = JSON.parse(fs.readFileSync(absPath).toString())
     return { file: absPath, data };
   },

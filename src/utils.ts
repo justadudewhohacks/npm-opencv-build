@@ -8,6 +8,10 @@ export function highlight(text: string): string {
   return pc.bold(pc.yellow(text));
 }
 
+export function light(text: string): string {
+  return pc.yellow(text);
+}
+
 export function formatNumber(text: string): string {
   return pc.bold(pc.green(text));
 }
