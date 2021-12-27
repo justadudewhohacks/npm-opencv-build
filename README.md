@@ -11,6 +11,7 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 - OpenCV build can now be configured with `new OpenCVBuilder(new OpenCVBuildEnv({version: "3.4.16", autoBuildBuildCuda: true, autoBuildWithoutContrib: false, })).install()`
 - Each OPENCV_VERSION will be build in his own directory.
 - Each AUTOBUILD_FLAGS will be build in his own directory. (induce massive time gain during development)
+- if MSBuild.exe localisation for VS 2019
 - Script output is now colorized.
 - Add some usefull log.
 - Big code refactor.

@@ -105,9 +105,9 @@ export class OpenCVBuilder {
         log.info('install', '')
         log.info('install', 'running install script...')
         log.info('install', '')
-        log.info('install', 'opencv version: %s', this.env.opencvVersion)
-        log.info('install', 'with opencv contrib: %s', this.env.isWithoutContrib ? 'no' : 'yes')
-        log.info('install', 'custom build flags: %s', this.env.autoBuildFlags)
+        log.info('install', `opencv version: ${utils.formatNumber('%s')}`, this.env.opencvVersion)
+        log.info('install', `with opencv contrib: ${utils.formatNumber('%s')}`, this.env.isWithoutContrib ? 'no' : 'yes')
+        log.info('install', `custom build flags: ${utils.formatNumber('%s')}`, this.env.autoBuildFlags)
         log.info('install', '')
       
         try {
