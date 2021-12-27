@@ -77,7 +77,6 @@ export async function requireGit() {
   const out = await requireCmd('git --version', 'git is required')  
   const version = out.match(/version [\d.\w]+/)
   if (version) {
-    // log.info('install', `git version ${version[0]}`)
     log.info('install', `git Version ${formatNumber("%s")} found`, version[0]);
   }
 }
@@ -86,7 +85,6 @@ export async function requireCmake() {
   const out = await requireCmd('cmake --version', 'cmake is required to build opencv')
   const version = out.match(/version [\d.\w]+/)
   if (version) {
-    // log.info('install', `git version ${version[0]}`)
     log.info('install', `cmake Version ${formatNumber("%s")} found`, version[0]);
   }
 }

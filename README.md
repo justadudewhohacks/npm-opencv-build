@@ -7,6 +7,8 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 
 ## Changes in this fork
 
+- OpenCV build is not triggered by npm install but by `new OpenCVBuilder().install()`
+- OpenCV build can now be configured with `new OpenCVBuilder(new OpenCVBuildEnv({version: "3.4.16", autoBuildBuildCuda: true, autoBuildWithoutContrib: false, })).install()`
 - Each OPENCV_VERSION will be build in his own directory.
 - Each AUTOBUILD_FLAGS will be build in his own directory. (induce massive time gain during development)
 - Script output is now colorized.
@@ -85,21 +87,15 @@ Set any value to disable compilation from sources.
 
 ### opencvIncludeDir
 
-Can be set using the environment variables *OPENCV_INCLUDE_DIR*
-
-Not used in the this build package, should only be used if `disableAutoBuild` is set.
+Over write the *OPENCV_INCLUDE_DIR* environment variables
 
 ### opencvLibDir
 
-Can be set using the environment variables *OPENCV_LIB_DIR*
-
-Not used in the this build package, should only be used if `disableAutoBuild` is set.
+Over write the *OPENCV_LIB_DIR* environment variables
 
 ### opencvBinDir
 
-Can be set using the environment variables *OPENCV_BIN_DIR*
-
-Not used in the this build package, should only be used if `disableAutoBuild` is set.
+Over write the *OPENCV_BIN_DIR* environment variables
 
 ## build test
 

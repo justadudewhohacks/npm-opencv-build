@@ -1,4 +1,4 @@
-import { BuildContext } from './BuildContext.js';
+import { OpenCVBuilder } from './OpenCVBuilder.js';
 import log from 'npmlog';
 
 if (process.env.npm_config_loglevel === 'silly') {
@@ -8,4 +8,4 @@ if (process.env.npm_config_loglevel === 'silly') {
 /**
  * called from `npm run do-install` triggered by postinstall script
  */
-new BuildContext().install();
+new OpenCVBuilder().install();

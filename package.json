@@ -1,6 +1,6 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2021 Edition",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -11,7 +11,7 @@
     "build3x": "tsc && node ./build/main.js --keepsource",
     "do-install": "node ./build/main.js",
     "cleanbuild": "rimraf build && tsc",
-    "postinstall": "npm run do-install",
+    "postinstallDISABLED": "npm run do-install",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "test": "mocha --recursive ./test"
