@@ -9,6 +9,8 @@ import { promisify } from 'util';
 
 const primraf = promisify(rimraf);
 
+const protect = (txt: string): string => {if (txt.includes(' ')) { return `"${txt}"` } else { return txt }}
+
 export class SetupOpencv {
   constructor(private readonly builder: OpenCVBuilder) { }
 
@@ -23,14 +25,18 @@ export class SetupOpencv {
   private getRunBuildCmd(msbuildExe?: string): () => Promise<void> {
     const env = this.builder.env;
     if (msbuildExe) {
+      if (!fs.existsSync(msbuildExe)) {
+        log.error('install', 'invalid msbuildExe path" %s', msbuildExe);
+        throw Error('invalid msbuildExe path ' + msbuildExe);
+      }
+
       return async () => {
         const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
-        const protect = (txt: string): string => {if (txt.includes(' ')) { return `"${txt}"` } else { return txt }}
-        log.info('install', 'spawning in %s: %s %s', env.opencvBuild, msbuildExe, buildSLN.map(protect).join(' '));
+        log.info('install', 'spawning in %s: %s %s', protect(env.opencvBuild), protect(msbuildExe), buildSLN.map(protect).join(' '));
         await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
 
         const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
-        log.info('install', 'spawning in %s: %s %s', env.opencvBuild, msbuildExe, buildVcxproj.map(protect).join(' '));
+        log.info('install', 'spawning in %s: %s %s', protect(env.opencvBuild), protect(msbuildExe), buildVcxproj.map(protect).join(' '));
         await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
       }
     }
@@ -98,7 +104,6 @@ export class SetupOpencv {
     if (isWin()) {
       const msbuild = await findMsBuild()
       log.info('install', `using msbuild: ${formatNumber("%s")} path: ${highlight("%s")}`, msbuild.version, msbuild.path)
-
       return msbuild
     }
     return undefined;
@@ -167,7 +172,7 @@ export class SetupOpencv {
     await spawn('git', ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl], { cwd: env.opencvRoot })
 
     const cmakeArgs = this.getCmakeArgs(cMakeFlags)
-    log.info('install', 'running cmake %s', cmakeArgs.join(' '))
+    log.info('install', 'running in %s cmake %s', protect(env.opencvBuild), cmakeArgs.map(protect).join(' '))
     await spawn('cmake', cmakeArgs, { cwd: env.opencvBuild })
     log.info('install', 'starting build...')
     await this.getRunBuildCmd(msbuildPath)()
