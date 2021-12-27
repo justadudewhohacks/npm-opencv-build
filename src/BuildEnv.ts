@@ -98,7 +98,7 @@ export class OpenCVBuildEnv {
         const envKeys = Object.keys(packageEnv)
         if (envKeys.length) {
             log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
-            envKeys.forEach((key: keyof OpenCVPackageBuildOptions) => log.info('applyEnvsFromPackageJson', `${key}: ${packageEnv[key]}`))
+            envKeys.forEach((key: keyof OpenCVPackageBuildOptions) => log.info('applyEnvsFromPackageJson', `${highlight(key)}: ${utils.formatNumber(packageEnv[key] || '')}`))
         }
 
         this.autoBuildFlags = this.resolveValue(opts, packageEnv, 'autoBuildFlags', 'OPENCV4NODEJS_AUTOBUILD_FLAGS');
@@ -178,12 +178,16 @@ export class OpenCVBuildEnv {
     /**
      * openCV uniq version prostfix, used to avoid build path colision.
      */
+    private logOnce = false;
     get optHash(): string {
         let optArgs = this.autoBuildFlags;
-        if (!optArgs) {
-            log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
-        } else {
-            log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${utils.formatNumber("%s")}`, optArgs);
+        if (!this.logOnce) {
+            if (!optArgs) {
+                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
+            } else {
+                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${utils.formatNumber("%s")}`, optArgs);
+            }
+            this.logOnce = true;
         }
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'

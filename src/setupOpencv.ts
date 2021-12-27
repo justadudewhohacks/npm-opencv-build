@@ -24,13 +24,22 @@ export class SetupOpencv {
     const env = this.builder.env;
     if (msbuildExe) {
       return async () => {
-        await spawn(`${msbuildExe}`, this.getMsbuildCmd('./OpenCV.sln'), { cwd: env.opencvBuild })
-        await spawn(`${msbuildExe}`, this.getMsbuildCmd('./INSTALL.vcxproj'), { cwd: env.opencvBuild })
+        const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
+        const protect = (txt: string): string => {if (txt.includes(' ')) { return `"${txt}"` } else { return txt }}
+        log.info('install', 'spawning in %s: %s %s', env.opencvBuild, msbuildExe, buildSLN.map(protect).join(' '));
+        await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
+
+        const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
+        log.info('install', 'spawning in %s: %s %s', env.opencvBuild, msbuildExe, buildVcxproj.map(protect).join(' '));
+        await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
       }
     }
+
     return async () => {
+      log.info('install', 'spawning in %s: make', env.opencvBuild);
       await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
       // revert the strange archiving of libopencv.so going on with make install
+      log.info('install', 'spawning in %s: make all', env.opencvBuild);
       await spawn('make', ['all', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
     }
   }
