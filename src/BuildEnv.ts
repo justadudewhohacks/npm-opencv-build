@@ -26,7 +26,7 @@ export interface OpenCVPackageBuildOptions {
  * highest priority values
  */
 export interface OpenCVParamBuildOptions {
-    version?: string;
+    autoBuildOpencvVersion?: string;
     autoBuildBuildCuda?: boolean;
     autoBuildWithoutContrib?: boolean;
     disableAutoBuild?: boolean;
@@ -66,33 +66,29 @@ export class OpenCVBuildEnv {
 
     constructor(opts?: OpenCVParamBuildOptions) {
         opts = opts || {};
-        if (opts.version) {
-            this.opencvVersion = opts.version;
-        } else {
-            const DEFAULT_OPENCV_VERSION = '3.4.16'
-            const { OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION } = process.env;
-            if (!OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION) {
-                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION")} is not defined using default verison ${utils.formatNumber(DEFAULT_OPENCV_VERSION)}`)
-            } else {
-                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION")} is defined using verison ${utils.formatNumber(OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION)}`)
-            }
-            this.opencvVersion = OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION || DEFAULT_OPENCV_VERSION;
-        }
-        // get project Root path to looks for package.json for opencv4nodejs section
-        if (process.env.INIT_CWD) {
-            log.info('init', `${utils.highlight("INIT_CWD")} is defined overwriting root path to  ${utils.highlight(process.env.INIT_CWD)}`)
-        }
+        const DEFAULT_OPENCV_VERSION = '3.4.6'
         this.rootcwd = opts.rootcwd || process.env.INIT_CWD || process.cwd()
-        if (!fs.existsSync(this.rootcwd)) {
-            throw new Error(`${this.rootcwd} does not exist`)
-        }
-
+        // get project Root path to looks for package.json for opencv4nodejs section
         let packageEnv: OpenCVPackageBuildOptions = {};
         try {
             packageEnv = this.readEnvsFromPackageJson()
         } catch (err) {
             log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
             log.error('applyEnvsFromPackageJson', err)
+        }
+
+        this.opencvVersion = this.resolveValue(opts, packageEnv, 'autoBuildOpencvVersion', 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION');
+        if (!this.opencvVersion) {
+            log.info('init', `no openCV version given using default verison ${utils.formatNumber(DEFAULT_OPENCV_VERSION)}`)
+        } else {
+            log.info('init', `using openCV verison ${utils.formatNumber(this.opencvVersion)}`)
+        }
+
+        if (process.env.INIT_CWD) {
+            log.info('init', `${utils.highlight("INIT_CWD")} is defined overwriting root path to  ${utils.highlight(process.env.INIT_CWD)}`)
+        }
+        if (!fs.existsSync(this.rootcwd)) {
+            throw new Error(`${this.rootcwd} does not exist`)
         }
 
         const envKeys = Object.keys(packageEnv)
@@ -195,6 +191,12 @@ export class OpenCVBuildEnv {
             optArgs = '-' + crypto.createHash('md5').update(optArgs).digest('hex').substring(0, 5);
         }
         return optArgs;
+    }
+
+    public listBuild(): string[] {
+        const rootDir = this.rootcwd;
+        const versions = fs.readdirSync(rootDir).filter(n => n.startsWith('opencv')).filter(n=>fs.existsSync(path.join(rootDir, n, 'auto-build.json')));
+        return versions;
     }
 
     get rootDir(): string {
