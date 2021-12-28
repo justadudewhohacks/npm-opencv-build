@@ -36,6 +36,13 @@ for old nodejs
 npm install --global windows-build-tools
 ```
 
+## OpenCVBuildEnv options
+
+A `prebuild` options can be provide to avoid any recompilation, acceptex values are: `"latestBuild"`, `"latestVersion"`, `"oldestBuild"`, `"oldestVersion"`.
+the `prebuild` option intend to be use at runtime.
+
+all the argument used to be provided in the `opencv4nodejs` section of a package.json can also be provide in OpenCVBuildEnv Options.
+
 ## Environment Variables
 
 It's possible to specify build environment variables by inserting them into the `package.json` where the dependency is declared an object like:

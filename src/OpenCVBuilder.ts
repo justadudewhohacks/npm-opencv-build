@@ -27,24 +27,6 @@ export class OpenCVBuilder {
     this.getLibs = new getLibsFactory(this)
   }
 
-  private readAutoBuildFile(): AutoBuildFile | undefined {
-    const autoBuildFile = this.env.autoBuildFile
-    try {
-      const fileExists = fs.existsSync(autoBuildFile)
-      if (fileExists) {
-        const autoBuildFileData = JSON.parse(fs.readFileSync(autoBuildFile).toString()) as AutoBuildFile
-        if (!autoBuildFileData.opencvVersion || !('autoBuildFlags' in autoBuildFileData) || !Array.isArray(autoBuildFileData.modules)) {
-          throw new Error('auto-build.json has invalid contents')
-        }
-        return autoBuildFileData
-      }
-      log.info('readAutoBuildFile', 'file does not exists: %s', autoBuildFile)
-    } catch (err) {
-      log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', autoBuildFile, err.toString())
-    }
-    return undefined
-  }
-
   private checkInstalledLibs(autoBuildFile: AutoBuildFile): boolean {
     let hasLibs = true
 
@@ -81,7 +63,7 @@ export class OpenCVBuilder {
     log.info('install', `if you want to use an own OpenCV installation set ${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')}`)
 
     // prevent rebuild on every install
-    const autoBuildFile = this.readAutoBuildFile()
+    const autoBuildFile = this.env.readAutoBuildFile()
     if (autoBuildFile) {
       log.info('install', `found auto-build.json: ${utils.highlight(this.env.autoBuildFile)}`)
 

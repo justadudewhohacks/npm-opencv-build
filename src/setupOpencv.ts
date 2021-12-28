@@ -118,7 +118,8 @@ export class SetupOpencv {
     const autoBuildFile: AutoBuildFile = {
       opencvVersion: env.opencvVersion,
       autoBuildFlags: env.autoBuildFlags,
-      modules: this.builder.getLibs.getLibs()
+      modules: this.builder.getLibs.getLibs(),
+      env: this.builder.env.dumpEnv(),
     }
     log.info('install', `writing auto-build file into directory: ${highlight("%s")}`, env.autoBuildFile)
     // log.info('install', JSON.stringify(autoBuildFile))
