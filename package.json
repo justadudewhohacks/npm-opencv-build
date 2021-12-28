@@ -1,6 +1,6 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2021 Edition",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
