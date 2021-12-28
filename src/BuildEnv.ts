@@ -121,6 +121,7 @@ export class OpenCVBuildEnv {
 
         this.opencvVersion = this.resolveValue(opts, packageEnv, 'autoBuildOpencvVersion', 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION');
         if (!this.opencvVersion) {
+            this.opencvVersion = DEFAULT_OPENCV_VERSION;
             log.info('init', `no openCV version given using default verison ${utils.formatNumber(DEFAULT_OPENCV_VERSION)}`)
         } else {
             log.info('init', `using openCV verison ${utils.formatNumber(this.opencvVersion)}`)
