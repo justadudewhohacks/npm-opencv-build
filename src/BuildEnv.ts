@@ -102,7 +102,9 @@ export class OpenCVBuildEnv {
             this.isAutoBuildDisabled = autoBuildFile.env.isAutoBuildDisabled;
             this.isWithoutContrib = autoBuildFile.env.isWithoutContrib;
             this.opencvVersion = autoBuildFile.env.opencvVersion;
-
+            if (!this.opencvVersion) {
+                throw Error('autobuild file is corrupted, opencvVersion is missing in ' + builds[0].autobuild);
+            }
             process.env.OPENCV_BIN_DIR = autoBuildFile.env.OPENCV_BIN_DIR;
             process.env.OPENCV_INCLUDE_DIR = autoBuildFile.env.OPENCV_INCLUDE_DIR;
             process.env.OPENCV_LIB_DIR = autoBuildFile.env.OPENCV_LIB_DIR;
