@@ -231,17 +231,13 @@ export class OpenCVBuildEnv {
     /**
      * openCV uniq version prostfix, used to avoid build path colision.
      */
-    private logOnce = false;
     get optHash(): string {
         let optArgs = this.autoBuildFlags;
-        if (!this.logOnce) {
-            if (!optArgs) {
-                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
-            } else {
-                log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${utils.formatNumber("%s")}`, optArgs);
-            }
-            this.logOnce = true;
-        }
+        // if (!optArgs) {
+        //     log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
+        // } else {
+        //     log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is defined, as ${utils.formatNumber("%s")}`, optArgs);
+        // }
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'
         if (optArgs) {
@@ -251,9 +247,9 @@ export class OpenCVBuildEnv {
     }
 
     public listBuild(): Array<{ autobuild: string, dir: string, date: Date }> {
-        const rootDir = this.rootcwd;
+        const rootDir = this.rootDir;
         const versions = fs.readdirSync(rootDir)
-            .filter(n => n.startsWith('opencv'))
+            .filter(n => n.startsWith('opencv-'))
             .map((n) => ({ autobuild: path.join(rootDir, n, 'auto-build.json'), dir: n }))
             .filter((n) => fs.existsSync(n.autobuild))
             .map(({ autobuild, dir }) => ({ autobuild, dir, date: fs.statSync(autobuild).mtime }))

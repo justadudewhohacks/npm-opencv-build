@@ -21,8 +21,8 @@ export class OpenCVBuilder {
      * legacy version: 3.4.6
      * current #.x version: 3.4.15
      */
-
-    log.info('init', `${utils.highlight("Workdir")} will be: ${utils.formatNumber("%s")}`, this.env.opencvRoot)
+    if (!opts || !opts.prebuild)
+      log.info('init', `${utils.highlight("Workdir")} will be: ${utils.formatNumber("%s")}`, this.env.opencvRoot)
     this.constant = new Constant(this)
     this.getLibs = new getLibsFactory(this)
   }
