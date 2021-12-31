@@ -12,6 +12,8 @@ import { AutoBuildFile, EnvSummery } from './types.js';
  * Middle priority values
  */
 export interface OpenCVPackageBuildOptions {
+    rootcwd?: string;
+    buildRoot?: string;
     autoBuildBuildCuda?: string;
     autoBuildFlags?: string;
     autoBuildOpencvVersion?: string;
@@ -22,20 +24,36 @@ export interface OpenCVPackageBuildOptions {
     opencvBinDir?: string;
 }
 
+interface ArgInfo {
+    arg: string;
+    conf: keyof OpenCVPackageBuildOptions;
+    env: string;
+    isBool: boolean;
+    doc: string;
+}
+
+export const ALLARGS = {
+    version: { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
+    flags: { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
+    root: { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
+    buildRoot: { arg: 'buildRoot', conf: 'buildRoot', env: 'OPENCV_BUILD_ROOT', isBool: false, doc: 'OpenCV build directory' } as ArgInfo,
+    cuda: { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
+    nocontrib: { arg: 'nocontrib', conf: 'autoBuildWithoutContrib', env: 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB', isBool: true, doc: 'Do not compile Contrib modules' } as ArgInfo,
+    nobuild: { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
+    incDir: { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
+    libDir: { arg: 'libDir', conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
+    binDir: { arg: 'binDir', conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
+}
+
+export const genHelp = (): string => {
+    return Object.values(ALLARGS).map(a => {
+        const name = `--${a.arg}${!a.isBool ? ' <value>' : ''}`;
+    return `   ${name.padEnd(20)} ${a.doc.padEnd(40)} (${a.env} env variable)`}
+    ).join('\n');
+}
+
 export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
     let out: OpenCVBuildEnvParams = {};
-    const argMapStr = {
-        'version': 'autoBuildOpencvVersion',
-        'flags': 'autoBuildFlags',
-        'root': 'rootcwd',
-        'buildRoot': 'buildRoot',
-        'buildroot': 'buildRoot',
-    } as { [key: string]: 'autoBuildOpencvVersion' | 'autoBuildFlags' | 'rootcwd' | 'buildRoot' };
-    const argMapBool = {
-        'cuda': 'autoBuildBuildCuda',
-        'nocontrib': 'autoBuildWithoutContrib',
-        'nobuild': 'disableAutoBuild',
-    } as { [key: string]: 'autoBuildBuildCuda' | 'autoBuildWithoutContrib' | 'disableAutoBuild' };
     for (let i = 0; i < args.length; i++) {
         let arg = args[i];
         if (arg.startsWith('--')) {
@@ -47,21 +65,16 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
         }
         const p = arg.indexOf('=');
         const name = ((p === -1) ? arg : arg.substring(0, p));
-        const bootfield = argMapBool[name];
-        if (bootfield) {
-            out[bootfield] = true;
+        const info = ALLARGS[name as keyof typeof ALLARGS];
+        if (!info)
+            continue;
+        if (info.isBool) {
+            out[info.conf as keyof OpenCVBuildEnvParamsBool] = true;
             continue;
         }
-        const stringfield = argMapStr[name];
-        if (stringfield) {
-            if (p > 0) {
-                out[stringfield] = arg.substring(p + 1);
-                continue;
-            }
-            const val = args[++i];
-            if (val)
-                out[stringfield] = val;
-        }
+        const val = (p > 0) ? arg.substring(p + 1) : args[++i];
+        if (val)
+            out[info.conf as keyof OpenCVBuildEnvParamsString] = val;
     }
     // encvIncludeDir?: string;
     // opencvLibDir?: string;
@@ -73,26 +86,25 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
  * options passed to OpenCVBuildEnv constructor
  * highest priority values
  */
-export interface OpenCVBuildEnvParams {
-    // is defined find a working local prbuild version
-    // latestBuild: latest build Date
-    // latestVersion: higthest version number
-    prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion',
-    autoBuildOpencvVersion?: string;
+export interface OpenCVBuildEnvParamsBool {
     autoBuildBuildCuda?: boolean;
     autoBuildWithoutContrib?: boolean;
     disableAutoBuild?: boolean;
+}
+
+
+export interface OpenCVBuildEnvParamsString {
+    autoBuildOpencvVersion?: string;
     autoBuildFlags?: string;
-    // legacy path to package.json dir
     rootcwd?: string;
-    // Build directory
     buildRoot?: string;
     opencvIncludeDir?: string;
     opencvLibDir?: string;
     opencvBinDir?: string;
 }
-
-type CommonKey = keyof OpenCVBuildEnvParams & keyof OpenCVPackageBuildOptions;
+export interface OpenCVBuildEnvParams extends OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
+    prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion',
+}
 
 export class OpenCVBuildEnv {
     public opencvVersion: string;
@@ -109,17 +121,18 @@ export class OpenCVBuildEnv {
     // Path to find package.json legacy option
     public packageRoot: string;
 
-    private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions, key: CommonKey, envName: string): string {
-        if (key in opts) {
-            if (typeof opts[key] === 'boolean') {
-                return opts[key] ? '1' : '';
+
+    private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions, info: ArgInfo): string {
+        if (info.conf in opts) {
+            if (info.isBool) {
+                return opts[info.conf] ? '1' : '';
             } else
-                return opts[key] as string || '';
+                return opts[info.conf] as string || '';
         } else {
-            if (packageEnv[key]) {
-                return packageEnv[key] || '';
+            if (packageEnv[info.conf]) {
+                return packageEnv[info.conf] || '';
             } else {
-                return process.env[envName] || '';
+                return process.env[info.env] || '';
             }
         }
     }
@@ -183,7 +196,7 @@ export class OpenCVBuildEnv {
             log.error('applyEnvsFromPackageJson', err)
         }
 
-        this.opencvVersion = this.resolveValue(opts, packageEnv, 'autoBuildOpencvVersion', 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION');
+        this.opencvVersion = this.resolveValue(opts, packageEnv, ALLARGS.version);
         if (!this.opencvVersion) {
             this.opencvVersion = DEFAULT_OPENCV_VERSION;
             log.info('init', `no openCV version given using default verison ${utils.formatNumber(DEFAULT_OPENCV_VERSION)}`)
@@ -195,7 +208,10 @@ export class OpenCVBuildEnv {
             log.info('init', `${utils.highlight("INIT_CWD")} is defined overwriting root path to  ${utils.highlight(process.env.INIT_CWD)}`)
         }
         if (!fs.existsSync(this.buildRoot)) {
-            throw new Error(`${this.buildRoot} does not exist`)
+            fs.mkdirSync(this.buildRoot);
+            if (!fs.existsSync(this.buildRoot)) {
+                throw new Error(`${this.buildRoot} can not be create`)
+            }
         }
 
         const envKeys = Object.keys(packageEnv)
@@ -204,21 +220,21 @@ export class OpenCVBuildEnv {
             envKeys.forEach((key: keyof OpenCVPackageBuildOptions) => log.info('applyEnvsFromPackageJson', `${highlight(key)}: ${utils.formatNumber(packageEnv[key] || '')}`))
         }
 
-        this.autoBuildFlags = this.resolveValue(opts, packageEnv, 'autoBuildFlags', 'OPENCV4NODEJS_AUTOBUILD_FLAGS');
-        this.buildWithCuda = !!this.resolveValue(opts, packageEnv, 'autoBuildBuildCuda', 'OPENCV4NODEJS_BUILD_CUDA');
-        this.isWithoutContrib = !!this.resolveValue(opts, packageEnv, 'autoBuildWithoutContrib', 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB');
-        this.isAutoBuildDisabled = !!this.resolveValue(opts, packageEnv, 'disableAutoBuild', 'OPENCV4NODEJS_DISABLE_AUTOBUILD');
+        this.autoBuildFlags = this.resolveValue(opts, packageEnv, ALLARGS.flags);
+        this.buildWithCuda = !!this.resolveValue(opts, packageEnv, ALLARGS.cuda);
+        this.isWithoutContrib = !!this.resolveValue(opts, packageEnv, ALLARGS.nocontrib);
+        this.isAutoBuildDisabled = !!this.resolveValue(opts, packageEnv, ALLARGS.nobuild);
 
-        const OPENCV_INCLUDE_DIR = this.resolveValue(opts, packageEnv, 'opencvIncludeDir', 'OPENCV_INCLUDE_DIR');
+        const OPENCV_INCLUDE_DIR = this.resolveValue(opts, packageEnv, ALLARGS.incDir);
         if (OPENCV_INCLUDE_DIR && process.env.OPENCV_INCLUDE_DIR !== OPENCV_INCLUDE_DIR) {
             process.env.OPENCV_INCLUDE_DIR = OPENCV_INCLUDE_DIR;
         }
-        const OPENCV_LIB_DIR = this.resolveValue(opts, packageEnv, 'opencvLibDir', 'OPENCV_LIB_DIR');
+        const OPENCV_LIB_DIR = this.resolveValue(opts, packageEnv, ALLARGS.libDir);
         if (OPENCV_LIB_DIR && process.env.OPENCV_LIB_DIR !== OPENCV_LIB_DIR) {
             process.env.OPENCV_LIB_DIR = OPENCV_LIB_DIR;
         }
 
-        const OPENCV_BIN_DIR = this.resolveValue(opts, packageEnv, 'opencvBinDir', 'OPENCV_BIN_DIR');
+        const OPENCV_BIN_DIR = this.resolveValue(opts, packageEnv, ALLARGS.binDir);
         if (OPENCV_BIN_DIR && process.env.OPENCV_BIN_DIR !== OPENCV_BIN_DIR) {
             process.env.OPENCV_BIN_DIR = OPENCV_BIN_DIR;
         }

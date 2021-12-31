@@ -1,4 +1,3 @@
-// import { EncodingOption, PathLike } from 'fs';
 import OpenCVBuilder from './OpenCVBuilder.js';
 import type { OpencvModule } from './types.js';
 
@@ -17,8 +16,8 @@ export class getLibsFactory {
   }
 
   /**
- * @returns lib extention based on current OS
- */
+   * @returns lib extention based on current OS
+   */
   get getLibSuffix(): 'lib' | 'dylib' | 'so' {
     if (isWin())
       return 'lib'
@@ -28,10 +27,10 @@ export class getLibsFactory {
   }
 
   /**
- * build a regexp matching os lib file
- * @param opencvModuleName 
- * @returns 
- */
+   * build a regexp matching os lib file
+   * @param opencvModuleName 
+   * @returns 
+   */
   getLibNameRegex(opencvModuleName: string): RegExp {
     const regexp = `^${this.getLibPrefix}${opencvModuleName}[0-9.]*\.${this.getLibSuffix}$`;
     return new RegExp(regexp)

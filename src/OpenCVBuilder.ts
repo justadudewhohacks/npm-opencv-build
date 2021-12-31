@@ -5,7 +5,7 @@ import log from 'npmlog';
 import { getLibsFactory } from './getLibsFactory.js';
 import { SetupOpencv } from './setupOpencv.js';
 import { Constant } from './constants.js';
-import { args2Option, OpenCVBuildEnv, OpenCVBuildEnvParams } from './BuildEnv.js';
+import { args2Option, genHelp, OpenCVBuildEnv, OpenCVBuildEnvParams } from './BuildEnv.js';
 
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
@@ -17,6 +17,11 @@ export class OpenCVBuilder {
 
   constructor(opts?: OpenCVBuildEnvParams | string[]) {
     if (Array.isArray(opts)) {
+      if (opts.includes('--help') || opts.includes('-h')) {
+        console.log('npm-opencv-build usage:')
+        console.log(genHelp())
+        process.exit(1);
+      }
       opts = args2Option(opts);
     }
     this.env = new OpenCVBuildEnv(opts)
