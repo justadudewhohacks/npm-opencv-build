@@ -1,4 +1,4 @@
-# @u4/npm-opencv-build
+# @u4/opencv-build
 
 [![NPM Version](https://img.shields.io/npm/v/@u4/opencv-build.svg?style=flat)](https://www.npmjs.org/package/@u4/opencv-build)
 [![Build Status](https://travis-ci.org/justadudewhohacks/npm-opencv-build.svg?branch=master)](http://travis-ci.org/justadudewhohacks/npm-opencv-build)
