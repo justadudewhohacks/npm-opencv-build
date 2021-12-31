@@ -5,7 +5,7 @@
 
 A simple script to auto build recent OpenCV + contrib version via npm. This script is used to auto build [*opencv4nodejs*](https://github.com/UrielCh/opencv4nodejs).
 
-## Changes in this fork
+## Main changes from the original project
 
 - OpenCV build is explicitly build by `./bin/main.js` or it's alias `opencv-build-npm` and accepting parametes see `opencv-build-npm --help`
 - OpenCV build can now be configured with `new OpenCVBuilder({autoBuildOpencvVersion: "3.4.16", autoBuildBuildCuda: true, autoBuildWithoutContrib: false }).install()`
@@ -18,6 +18,8 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 - Big code refactor.
 - Enfoce typing.
 - Add comments and documentations.
+
+Each OpenCV build will take around 2Gb on your drive, so I recommand you to define the `OPENCV_BUILD_ROOT` environement variable to avoid duplicate buildsand avoid node_modules auto flushs.
 
 ## Install
 
@@ -179,10 +181,9 @@ Over write the *OPENCV_BIN_DIR* environment variables
 ## build test
 
 ```bash
-OPENCV4NODEJS_AUTOBUILD_FLAGS=-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi
-npm run build && OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=3.4.15 OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB=1 npm run do-install
+opencv-build-npm --flags="-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi" --version=3.4.15 --nocontrib
 ```
 
 ```bash
-npm run build && OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=4.5.4 OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB=1 npm run do-install
+opencv-build-npm --version=4.5.4 --nocontrib
 ```
