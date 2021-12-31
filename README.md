@@ -45,13 +45,13 @@ npm install --global windows-build-tools
 It's possible to specify build environment variables by passing argument to the builder script
 
 ```bash
-node build/main.js --version 4.5.4 --buildRoot ~/openCV
+node lib/main.js --version 4.5.4 --buildRoot ~/openCV
 ```
 
 with flags, do not forget the quotes `"`
 
 ```bash
-node build/main.js --version 4.5.4 --buildRoot ~/openCV --flags "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+node lib/main.js --version 4.5.4 --buildRoot ~/openCV --flags "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
 ```
 
 Using the bin alias
