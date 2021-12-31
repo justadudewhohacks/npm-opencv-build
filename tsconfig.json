@@ -7,13 +7,12 @@
     "noImplicitThis": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "outDir": "build",
+    "outDir": "lib",
     "module": "commonjs",
     "target": "ESNEXT",
     "moduleResolution": "node",
     "sourceMap": true,
     "typeRoots": [
-      "typings",
       "node_modules/@types"
     ]
   },

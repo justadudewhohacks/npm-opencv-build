@@ -7,6 +7,7 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 
 ## Changes in this fork
 
+- OpenCV build is explecitly build by `./build/main.js` and can take all options as parameters ex: `./build/main.js`
 - OpenCV build is not triggered by npm install but by `new OpenCVBuilder().install()`
 - OpenCV build can now be configured with `new OpenCVBuilder({autoBuildOpencvVersion: "3.4.16", autoBuildBuildCuda: true, autoBuildWithoutContrib: false }).install()`
 - Each OPENCV_VERSION will be build in his own directory.
@@ -38,14 +39,17 @@ npm install --global windows-build-tools
 
 ## OpenCVBuildEnv options
 
-A `prebuild` options can be provide to avoid any recompilation, acceptex values are: `"latestBuild"`, `"latestVersion"`, `"oldestBuild"`, `"oldestVersion"`.
-the `prebuild` option intend to be use at runtime.
+It's possible to specify build environment variables by passing argument to the builder script 
 
-all the argument used to be provided in the `opencv4nodejs` section of a package.json can also be provide in OpenCVBuildEnv Options.
+```bash
+node build/main.js --version 4.5.4 --buildRoot ~/openCV
+```
 
-## Environment Variables
+```bash
+node build/main.js --version 4.5.4 --buildRoot ~/openCV --flags "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+```
 
-It's possible to specify build environment variables by inserting them into the `package.json` where the dependency is declared an object like:
+Or by inserting them into the `package.json` where the dependency is declared an object like:
 
 ```json
 {
@@ -56,42 +60,94 @@ It's possible to specify build environment variables by inserting them into the 
 }
 ```
 
-The following opencv4nodejs parameters can be passed:
+By using environement varaibles.
+
+```
+export OPENCV4NODEJS_AUTOBUILD_FLAGS="-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+export OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION="4.5.4"
+export OPENCV_BUILD_ROOT="~/openCV"
+
+node build/main.js
+```
+
+### prebuild
+
+the `prebuild` is a smart version selector, to avoid futher re-compilation, accepted values are:
+* `"latestBuild"` use the last built version
+* `"latestVersion"` use the highest version number built
+* `"oldestBuild"` use the olderst built version 
+* `"oldestVersion"` use the lowest version number built
+
+the `prebuild` option intend to be use at runtime, so you do not have to keep trak of the version you want to use.
+
+this parameter can only be provide in `OpenCVBuildEnv` constructor options.
+
+### autoBuildOpencvVersion
+
+Choose the openCV version you want to build, default is 3.4.6,
+
+This option value can be provide using:
+* The `--version` in build script
+* The `autoBuildOpencvVersion` options field provided to `OpenCVBuildEnv` constructor options.
+* The `autoBuildOpencvVersion` field in the current package.json `opencv4nodejs` object.
+* The `OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION` environement variable.
+
+### buildRoot
+
+The `buildRoot` is a the directory used to build openCV, Default value is the npm-opencv-build directory.
+You may want to use this value to persist your files out of your `node_modules` directory.
+
+This option value can be provide using:
+* The `--buildRoot` or `--buildroot` in build script
+* The `buildRoot` options field provided to `OpenCVBuildEnv` constructor options.
+* The `OPENCV_BUILD_ROOT` environement variable.
 
 ### autoBuildBuildCuda
 
-Can be set using the environment variables *OPENCV4NODEJS_BUILD_CUDA*
-
-set any value to enable, the following cMake flag will be added:
+Set any value to enable, the following cMake flag will be added:
 
 - DWITH_CUDA=ON
 - DBUILD_opencv_cudacodec=OFF // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
 - DCUDA_FAST_MATH=ON // optional
 - DWITH_CUBLAS=ON // optional
 
-### autoBuildFlags
+This option value can be enable using:
+* The `--cuda` in build script
+* The `autoBuildBuildCuda` options field provided to `OpenCVBuildEnv` constructor options.
+* The `autoBuildBuildCuda` field in the current package.json `opencv4nodejs` object.
+* The `OPENCV4NODEJS_BUILD_CUDA` environement variable.
 
-Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_FLAGS*
+### autoBuildFlags
 
 Append option to CMake flags.
 
-### autoBuildOpencvVersion
-
-Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION*
-
-Choose the openCV version you want to build default value is `3.4.16`.
+This option value can be enable using:
+* The `--flags` in build script
+* The `autoBuildFlags` options field provided to `OpenCVBuildEnv` constructor options.
+* The `autoBuildFlags` field in the current package.json `opencv4nodejs` object.
+* The `OPENCV4NODEJS_AUTOBUILD_FLAGS` environement variable.
 
 ### autoBuildWithoutContrib
 
-Can be set using the environment variables *OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB*
-
 Set any value to enable, this option will skip openCV Contribs.
+
+This option value can be enable using:
+* The `--nocontrib` in build script
+* The `autoBuildWithoutContrib` options field provided to `OpenCVBuildEnv` constructor options.
+* The `autoBuildWithoutContrib` field in the current package.json `opencv4nodejs` object.
+* The `OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB` environement variable.
 
 ### disableAutoBuild
 
-Can be set using the environment variables *OPENCV4NODEJS_DISABLE_AUTOBUILD*
-
 Set any value to disable compilation from sources.
+
+This option value can be enable using:
+* The `--nobuild` in build script
+* The `disableAutoBuild` options field provided to `OpenCVBuildEnv` constructor options.
+* The `disableAutoBuild` field in the current package.json `opencv4nodejs` object.
+* The `OPENCV4NODEJS_DISABLE_AUTOBUILD` environement variable.
+
+Can be set using the environment variables *OPENCV4NODEJS_DISABLE_AUTOBUILD*
 
 ### opencvIncludeDir
 
@@ -104,6 +160,7 @@ Over write the *OPENCV_LIB_DIR* environment variables
 ### opencvBinDir
 
 Over write the *OPENCV_BIN_DIR* environment variables
+
 
 ## build test
 

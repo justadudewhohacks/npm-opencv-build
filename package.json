@@ -1,20 +1,26 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2021 Edition",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
-  "publishConfig": {"access": "public"},
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rimraf build",
     "build": "tsc",
-    "build3x": "tsc && node ./build/main.js --keepsource",
-    "do-install": "node ./build/main.js",
+    "build3x": "tsc && node lib/main.js --keepsource",
+    "install_4.5.4": "opencv-build-npm --version 4.5.4 --root ~/openCV",
+    "do-install": "node lib/main.js",
     "cleanbuild": "rimraf build && tsc",
     "postinstallDISABLED": "npm run do-install",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "test": "mocha --recursive ./test"
+  },
+  "bin": {
+    "opencv-build-npm": "bin/main.js"
   },
   "repository": {
     "type": "git",
@@ -48,7 +54,7 @@
     "typescript": "^4.5.4"
   },
   "files": [
-    "build",
+    "lib",
     "Find-VS2017.cs"
   ]
 }

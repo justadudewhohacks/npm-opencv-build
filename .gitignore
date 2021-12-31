@@ -1,4 +1,4 @@
 opencv
 node_modules
 opencv-*/
-build/
+lib/

@@ -5,7 +5,7 @@ import log from 'npmlog';
 import { getLibsFactory } from './getLibsFactory.js';
 import { SetupOpencv } from './setupOpencv.js';
 import { Constant } from './constants.js';
-import { OpenCVBuildEnv, OpenCVParamBuildOptions } from './BuildEnv.js';
+import { args2Option, OpenCVBuildEnv, OpenCVBuildEnvParams } from './BuildEnv.js';
 
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
@@ -15,7 +15,10 @@ export class OpenCVBuilder {
   public readonly getLibs: getLibsFactory;
   public readonly env;
 
-  constructor(opts?: OpenCVParamBuildOptions) {
+  constructor(opts?: OpenCVBuildEnvParams | string[]) {
+    if (Array.isArray(opts)) {
+      opts = args2Option(opts);
+    }
     this.env = new OpenCVBuildEnv(opts)
     /**
      * legacy version: 3.4.6
