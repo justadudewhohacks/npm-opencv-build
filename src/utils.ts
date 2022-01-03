@@ -1,8 +1,15 @@
 import child_process from 'child_process';
 import fs from 'fs';
+import { EOL } from 'os';
 import path from 'path';
 import log from 'npmlog';
 import pc from 'picocolors'
+
+export const protect = (txt: string): string => {if (txt.includes(' ')) { return `"${txt}"` } else { return txt }}
+
+export function toExecCmd(bin: string, args: string[]) {
+  return `${protect(bin)} ${args.map(protect).join(' ')}`;
+}
 
 export function highlight(text: string): string {
   return pc.bold(pc.yellow(text));
@@ -17,7 +24,7 @@ export function formatNumber(text: string): string {
 }
 
 export function exec(cmd: string, options?: child_process.ExecOptions): Promise<string> {
-  log.silly('install', 'executing:', cmd)
+  log.silly('install', 'executing: %s', protect(cmd))
   return new Promise(function(resolve, reject) {
     child_process.exec(cmd, options, function(err, stdout, stderr) {
       const _err = err || stderr
@@ -27,8 +34,11 @@ export function exec(cmd: string, options?: child_process.ExecOptions): Promise<
   })
 }
 
+/**
+ * only used by findVs2017
+ */
 export function execFile(cmd: string, args: string[], options?: child_process.ExecOptions): Promise<string> {
-  log.silly('install', 'executing:', cmd, args)
+  log.silly('install', 'executing: %s %s', protect(cmd), args.map(protect).join(' '))
   return new Promise(function(resolve, reject) {
     const child = child_process.execFile(cmd, args, options, function(err, stdout, stderr) {
       const _err = err || stderr
@@ -39,8 +49,8 @@ export function execFile(cmd: string, args: string[], options?: child_process.Ex
   })
 }
 
-export function spawn(cmd: string, args: string[], options?: child_process.ExecOptions): Promise<string> {
-  log.silly('install', 'spawning:', cmd, args)
+export function spawn(cmd: string, args: string[], options: child_process.ExecOptions): Promise<string> {
+  log.silly('install', 'spawning:', protect(cmd), args.map(protect).join(' '))
   return new Promise(function(resolve, reject) {
     try {
       const child = child_process.spawn(cmd, args, { stdio: 'inherit', ...options})
@@ -49,7 +59,7 @@ export function spawn(cmd: string, args: string[], options?: child_process.ExecO
         if (typeof code !== 'number') {
           code = null
         }
-        const msg = 'child process exited with code ' + code + ' (for more info, set \'--loglevel silly\')'
+        const msg = `running: ${protect(cmd)} ${args.map(protect).join(' ')}${EOL}in ${options.cwd as string} exited with code ${code} (for more info, set \'--loglevel silly\')'`
         if (code !== 0) {
           return reject(msg)
         }
@@ -62,7 +72,7 @@ export function spawn(cmd: string, args: string[], options?: child_process.ExecO
 }
 
 async function requireCmd(cmd: string, hint: string): Promise<string> {
-  log.info('install', `executing: ${cmd}`)
+  log.info('install', `executing: ${pc.cyan('%s')}`, cmd)
   try {
     const stdout = await exec(cmd)
     log.verbose('install', `${cmd}: ${stdout.trim()}`)
@@ -75,17 +85,17 @@ async function requireCmd(cmd: string, hint: string): Promise<string> {
 
 export async function requireGit() {
   const out = await requireCmd('git --version', 'git is required')  
-  const version = out.match(/version [\d.\w]+/)
+  const version = out.match(/version ([\d.\w]+)/)
   if (version) {
-    log.info('install', `git Version ${formatNumber("%s")} found`, version[0]);
+    log.info('install', `git Version ${formatNumber("%s")} found`, version[1]);
   }
 }
 
 export async function requireCmake() {
   const out = await requireCmd('cmake --version', 'cmake is required to build opencv')
-  const version = out.match(/version [\d.\w]+/)
+  const version = out.match(/version ([\d.\w]+)/)
   if (version) {
-    log.info('install', `cmake Version ${formatNumber("%s")} found`, version[0]);
+    log.info('install', `cmake Version ${formatNumber("%s")} found`, version[1]);
   }
 }
 
