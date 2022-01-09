@@ -1,8 +1,8 @@
-import { OpenCVBuildEnv, OpenCVBuildEnvParams } from '../lib/BuildEnv'
-import { OpenCVBuilder } from '../lib/OpenCVBuilder'
-import { expect } from 'chai'
-import fs from 'fs';
+import { OpenCVBuildEnv, OpenCVBuildEnvParams, OpenCVBuilder } from '../lib/index'
+import chai, { expect } from 'chai'
 import path from 'path';
+
+chai.use(require('chai-string'));
 
 export class FakeOpenCVBuildEnv extends OpenCVBuildEnv {
   constructor(opts: OpenCVBuildEnvParams) {
@@ -15,82 +15,80 @@ export class FakeOpenCVBuildEnv extends OpenCVBuildEnv {
 }
 
 describe('libs', () => {
-  const root = __dirname;
   const env = new FakeOpenCVBuildEnv({});
   const builder = new OpenCVBuilder(env);
+  builder.getLibs.syncPath = false;
 
-  it('should find world .lib (win)', () => {
-    const worldLibFile = 'opencv_world340.lib'
-    const fp = path.join(root, worldLibFile);
-    fs.closeSync(fs.openSync(path.join(root, worldLibFile), 'w'));
-    const libFiles = [
-      worldLibFile
-    ]
+  it('should find world .lib (win) Fullpath test', () => {
+    const libFiles = [ 'opencv_world340.lib' ]
     env.setPlatform('win32')
-    const res = builder.getLibs.matchLib('world', root, libFiles);
-    expect(res).to.eq(fp)
-    fs.unlinkSync(fp)
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs();
+    expect(res).to.be.an('array').lengthOf(1)
+    expect(res[0].opencvModule).to.equal('world')
+    expect(res[0].libPath).to.equal(path.join(env.opencvLibDir, libFiles[0]))
   })
  
   it('should find world .so (unix)', () => {
-    const worldLibFile = 'libopencv_world.so'
-    const fp = path.join(root, worldLibFile);
-    fs.closeSync(fs.openSync(path.join(root, worldLibFile), 'w'));
-    const libFiles = [
-      worldLibFile
-    ]
+    const libFiles = [ 'libopencv_world.so' ]
     env.setPlatform('linux')
-    const res = builder.getLibs.matchLib('world', root, libFiles);
-    expect(res).to.eq(fp)
-    fs.unlinkSync(fp)
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs();
+    expect(res).to.be.an('array').lengthOf(1)
+    expect(res[0].opencvModule).to.equal('world')
+    expect(res[0].libPath).to.endWith(libFiles[0])
   })
 
   it('should find world .dylib (osX)', () => {
-    const worldLibFile = 'libopencv_world.dylib'
-    const fp = path.join(root, worldLibFile);
-    fs.closeSync(fs.openSync(path.join(root, worldLibFile), 'w'));
-    const libFiles = [
-      worldLibFile
-    ]
+    const libFiles = [ 'libopencv_world.dylib' ]
     env.setPlatform('darwin')
-    const res = builder.getLibs.matchLib('world', root, libFiles);
-    expect(res).to.eq(fp)
-    fs.unlinkSync(fp)
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs();
+    expect(res).to.be.an('array').lengthOf(1)
+    expect(res[0].opencvModule).to.equal('world')
+    expect(res[0].libPath).to.endWith(libFiles[0])
   })
 
-  // it('should find opencv .lib files', () => {
-  //   const coreLibFile = 'opencv_core340.lib'
-  //   const libFiles = [
-  //     coreLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles, { isWin: true })
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'core'))
-  //   expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.equal(coreLibFile)
-  // })
-  // it('should find opencv .so files', () => {
-  //   const coreLibFile = 'libopencv_core.so'
-  //   const libFiles = [
-  //     coreLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles)
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'core'))
-  //   expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.equal(coreLibFile)
-  // })
-  // it('should find opencv .dylib files', () => {
-  //   const coreLibFile = 'libopencv_core.dylib'
-  //   const libFiles = [
-  //     coreLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles, { isOSX: true })
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'core'))
-  //   expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.equal(coreLibFile)
-  // })
+  it('should find opencv .lib files', () => {
+    const coreLibFile = 'opencv_core340.lib'
+    const libFiles = [
+      coreLibFile
+    ]
+    //const getLibs = createFake(libFiles, { isWin: true })
+    env.setPlatform('win32')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'core'))
+    expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
+  })
+
+  it('should find opencv .so files', () => {
+    const coreLibFile = 'libopencv_core.so'
+    const libFiles = [
+      coreLibFile
+    ]
+    env.setPlatform('linux')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'core'))
+    expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
+  })
+  
+  it('should find opencv .dylib files', () => {
+    const coreLibFile = 'libopencv_core.dylib'
+    const libFiles = [
+      coreLibFile
+    ]
+    env.setPlatform('darwin')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'core'))
+    expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
+  })
+
   // it('should only link .lib files with exact name match', () => {
   //   const objdetectLibFile = 'opencv_objdetect340.lib'
   //   const dnnObjdetectLibFile = 'opencv_dnn_objdetect340.lib'

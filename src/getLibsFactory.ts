@@ -6,8 +6,24 @@ import path from 'path';
 const worldModule = 'world';
 
 export class getLibsFactory {
+  libFiles: string[] = [];
+  syncPath = true;
+
   constructor(private builder: OpenCVBuilder) {
   }
+
+  /**
+   * list en cache file iln lib folder
+   * @returns files in lib directory
+   */
+  private listFiles(): string[] {
+    if (this.libFiles && this.libFiles.length)
+      return this.libFiles;
+    const libDir = this.builder.env.opencvLibDir;
+    this.libFiles = fs.readdirSync(libDir)
+    return this.libFiles;
+  }
+
 
   get getLibPrefix(): string {
     return this.builder.env.isWin ? 'opencv_' : 'libopencv_'
@@ -38,9 +54,8 @@ export class getLibsFactory {
   }
 
   public resolveLib(opencvModuleName: string): string {
-    const env = this.builder.env;
-    const libDir = env.opencvLibDir;
-    const libFiles: string[] = fs.readdirSync(libDir)
+    const libDir = this.builder.env.opencvLibDir;
+    const libFiles: string[] = this.listFiles();
     return this.matchLib(opencvModuleName, libDir, libFiles);
   }
   /**
@@ -55,7 +70,10 @@ export class getLibsFactory {
     const match = libFiles.find((libFile: string) => !!(libFile.match(regexp) || [])[0]);
     if (!match)
       return '';
-    return fs.realpathSync(path.resolve(libDir, match))
+    let fullpath = path.resolve(libDir, match);
+    if (this.syncPath)
+      fullpath = fs.realpathSync(fullpath)
+    return fullpath
   }
 
   getLibs(): OpencvModule[] {
