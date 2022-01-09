@@ -30,5 +30,6 @@ test_script:
   # install and run tests of opencv-build
   - cd c:\projects\opencv-build
   - npm install
+  - npm link
   - opencv-build-npm --version 4.5.5
   - npm test
