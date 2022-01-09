@@ -139,7 +139,7 @@ export class OpenCVBuildEnv {
 
     constructor(opts?: OpenCVBuildEnvParams) {
         opts = opts || {};
-        const DEFAULT_OPENCV_VERSION = '3.4.6'
+        const DEFAULT_OPENCV_VERSION = '4.5.4'
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
 
         this.buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
