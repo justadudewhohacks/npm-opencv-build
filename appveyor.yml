@@ -10,7 +10,8 @@ init:
 
 environment:
   matrix:
-    - nodejs_version: 10
+    - nodejs_version: 14
+    - nodejs_version: 16
 
 clone_folder: c:\projects\opencv-build
 
@@ -28,16 +29,3 @@ test_script:
   - cd c:\projects\opencv-build
   - npm install
   - npm test
-
-  # install opencv4nodejs and run tests
-  - cd c:\projects
-  - git clone https://github.com/justadudewhohacks/opencv4nodejs
-  - cd opencv4nodejs
-  # uninstall npm version of opencv-build
-  - npm uninstall opencv-build
-  # install new opencv-build version
-  - npm install ../opencv-build
-  - npm install
-  - cd test
-  - npm install
-  - npm run test-appveyor
