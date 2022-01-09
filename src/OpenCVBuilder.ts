@@ -91,7 +91,7 @@ export class OpenCVBuilder {
         }
       }
     } else {
-      log.info('install', `failed to find auto-build.json: ${this.env.autoBuildFile}`)
+      // log.info('install', `failed to find auto-build.json: ${this.env.autoBuildFile}`)
     }
 
     log.info('install', '')
@@ -99,7 +99,7 @@ export class OpenCVBuilder {
     log.info('install', '')
     log.info('install', `opencv version: ${utils.formatNumber('%s')}`, this.env.opencvVersion)
     log.info('install', `with opencv contrib: ${utils.formatNumber('%s')}`, this.env.isWithoutContrib ? 'no' : 'yes')
-    log.info('install', `custom build flags: ${utils.formatNumber('%s')}`, this.env.autoBuildFlags)
+    log.info('install', `custom build flags: ${utils.formatNumber('%s')}`, this.env.autoBuildFlags || '< none >')
     log.info('install', '')
 
     try {

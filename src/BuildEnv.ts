@@ -150,7 +150,7 @@ export class OpenCVBuildEnv {
         if (opts.prebuild) {
             const builds = this.listBuild();
             if (!builds.length) {
-                throw Error('no build found');
+                throw Error(`No build found in ${this.rootDir} you should launch opencv-build-npm once`);
             }
             if (builds.length > 1) {
                 switch (opts.prebuild) {
