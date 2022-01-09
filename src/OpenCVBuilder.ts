@@ -15,21 +15,21 @@ export class OpenCVBuilder {
   public readonly getLibs: getLibsFactory;
   public readonly env;
 
-  constructor(opts?: OpenCVBuildEnvParams | string[]) {
+  constructor(opts?: OpenCVBuildEnv | OpenCVBuildEnvParams | string[]) {
     if (Array.isArray(opts)) {
-      if (opts.includes('--help') || opts.includes('-h')) {
+      opts = args2Option(opts);
+      if (opts.extra && (opts.extra.help || opts.extra.h)) {
         console.log('npm-opencv-build usage:')
         console.log(genHelp())
         process.exit(1);
       }
-      opts = args2Option(opts);
     }
-    this.env = new OpenCVBuildEnv(opts)
-    /**
-     * legacy version: 3.4.6
-     * current #.x version: 3.4.15
-     */
-    if (!opts || !opts.prebuild)
+    if (opts instanceof OpenCVBuildEnv) {
+      this.env = opts
+    } else {
+      this.env = new OpenCVBuildEnv(opts)
+    }
+    if (!this.env.prebuild)
       log.info('init', `${utils.highlight("Workdir")} will be: ${utils.formatNumber("%s")}`, this.env.opencvRoot)
     this.constant = new Constant(this)
     this.getLibs = new getLibsFactory(this)

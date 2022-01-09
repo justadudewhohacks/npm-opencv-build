@@ -99,7 +99,7 @@ export async function requireCmake() {
   }
 }
 
-export function isWin () {
+export function isWin() {
   return process.platform == 'win32'
 }
 

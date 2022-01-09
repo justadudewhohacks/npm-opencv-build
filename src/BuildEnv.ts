@@ -1,17 +1,17 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import * as utils from './utils.js';
 import log from 'npmlog';
-import { highlight } from './utils';
+import { highlight, formatNumber, isWin } from './utils';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
+import { isOSX } from '.';
 
 /**
  * options passed to OpenCVBuildEnv constructor
  * highest priority values
  */
- export interface OpenCVBuildEnvParamsBool {
+export interface OpenCVBuildEnvParamsBool {
     autoBuildBuildCuda?: boolean;
     autoBuildWithoutContrib?: boolean;
     disableAutoBuild?: boolean;
@@ -39,7 +39,7 @@ export type OpenCVPackageBuildOptions = { [key in boolKey | stringKey]?: string 
 
 export interface OpenCVBuildEnvParams extends OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion',
-    extra?: {[key:string]: string},
+    extra?: { [key: string]: string },
 }
 
 interface ArgInfo {
@@ -68,7 +68,8 @@ export const genHelp = (): string => {
     return Object.values(ALLARGS).map(a => {
         const name = `--${a.arg}${!a.isBool ? ' <value>' : ''}`;
         const envWay = a.env ? ` (${a.env} env variable)` : '';
-    return `   ${name.padEnd(20)} ${a.doc.padEnd(40)}${envWay}`}
+        return `   ${name.padEnd(20)} ${a.doc.padEnd(40)}${envWay}`
+    }
     ).join('\n');
 }
 /**
@@ -77,7 +78,7 @@ export const genHelp = (): string => {
  * @returns and openCVBuildEnvParams object containing an extra object with all unknown args
  */
 export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
-    let out: OpenCVBuildEnvParams = {extra:{}};
+    let out: OpenCVBuildEnvParams = { extra: {} };
     for (let i = 0; i < args.length; i++) {
         let arg = args[i];
         if (arg.startsWith('--')) {
@@ -92,7 +93,7 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
         const info = ALLARGS[name as keyof typeof ALLARGS];
         if (!info) {
             // keep unknown args in extras
-            const val = (p > 0) ? arg.substring(p + 1) : '1';
+            const val = (p > 0) ? arg.substring(p + 1) : (i + 1 < args.length) ? args[i + 1] : '1';
             if (out.extra)
                 out.extra[name] = val;
             continue;
@@ -110,6 +111,7 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
 }
 
 export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
+    public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
     public opencvVersion: string;
     public buildWithCuda: boolean = false;
     public isWithoutContrib: boolean = false;
@@ -125,6 +127,8 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     // Path to find package.json legacy option
     public packageRoot: string;
 
+    protected _isWindows: boolean;
+    protected _isOsX: boolean;
 
     private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions, info: ArgInfo): string {
         if (info.conf in opts) {
@@ -144,8 +148,10 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     constructor(opts?: OpenCVBuildEnvParams) {
         opts = opts || {};
         const DEFAULT_OPENCV_VERSION = '4.5.4'
+        this.prebuild = opts.prebuild;
+        this._isWindows = isWin();
+        this._isOsX = isOSX();
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
-
         this.buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
         if (this.buildRoot[0] === '~') {
             this.buildRoot = path.join(os.homedir(), this.buildRoot.slice(1));
@@ -204,13 +210,13 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         this.opencvVersion = this.resolveValue(opts, packageEnv, ALLARGS.version);
         if (!this.opencvVersion) {
             this.opencvVersion = DEFAULT_OPENCV_VERSION;
-            log.info('init', `no openCV version given using default verison ${utils.formatNumber(DEFAULT_OPENCV_VERSION)}`)
+            log.info('init', `no openCV version given using default verison ${formatNumber(DEFAULT_OPENCV_VERSION)}`)
         } else {
-            log.info('init', `using openCV verison ${utils.formatNumber(this.opencvVersion)}`)
+            log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
         }
 
         if (process.env.INIT_CWD) {
-            log.info('init', `${utils.highlight("INIT_CWD")} is defined overwriting root path to  ${utils.highlight(process.env.INIT_CWD)}`)
+            log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to  ${highlight(process.env.INIT_CWD)}`)
         }
         if (!fs.existsSync(this.buildRoot)) {
             fs.mkdirSync(this.buildRoot);
@@ -222,7 +228,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         const envKeys = Object.keys(packageEnv)
         if (envKeys.length) {
             log.info('applyEnvsFromPackageJson', 'the following opencv4nodejs environment variables are set in the package.json:')
-            envKeys.forEach((key: keyof OpenCVPackageBuildOptions) => log.info('applyEnvsFromPackageJson', `${highlight(key)}: ${utils.formatNumber(packageEnv[key] || '')}`))
+            envKeys.forEach((key: keyof OpenCVPackageBuildOptions) => log.info('applyEnvsFromPackageJson', `${highlight(key)}: ${formatNumber(packageEnv[key] || '')}`))
         }
 
         this.autoBuildFlags = this.resolveValue(opts, packageEnv, ALLARGS.flags);
@@ -339,6 +345,15 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         return versions;
     }
 
+    get isWin(): boolean {
+        return this._isWindows;
+    }
+
+    get isOSX(): boolean {
+        return this._isOsX;
+    }
+    
+
     get rootDir(): string {
         // const __filename = fileURLToPath(import.meta.url);
         // const __dirname = dirname(__filename);
@@ -367,10 +382,10 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         return path.join(this.opencvInclude, 'opencv4')
     }
     get opencvLibDir(): string {
-        return utils.isWin() ? path.join(this.opencvBuild, 'lib/Release') : path.join(this.opencvBuild, 'lib')
+        return this.isWin ? path.join(this.opencvBuild, 'lib/Release') : path.join(this.opencvBuild, 'lib')
     }
     get opencvBinDir(): string {
-        return utils.isWin() ? path.join(this.opencvBuild, 'bin/Release') : path.join(this.opencvBuild, 'bin')
+        return this.isWin ? path.join(this.opencvBuild, 'bin/Release') : path.join(this.opencvBuild, 'bin')
     }
     get autoBuildFile(): string {
         return path.join(this.opencvRoot, 'auto-build.json')
