@@ -5,7 +5,7 @@ import path from 'path';
 import log from 'npmlog';
 import pc from 'picocolors'
 
-export const protect = (txt: string): string => {if (txt.includes(' ')) { return `"${txt}"` } else { return txt }}
+export const protect = (txt: string): string => { if (txt.includes(' ')) { return `"${txt}"` } else { return txt } }
 
 export function toExecCmd(bin: string, args: string[]) {
   return `${protect(bin)} ${args.map(protect).join(' ')}`;
@@ -25,8 +25,8 @@ export function formatNumber(text: string): string {
 
 export function exec(cmd: string, options?: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'executing: %s', protect(cmd))
-  return new Promise(function(resolve, reject) {
-    child_process.exec(cmd, options, function(err, stdout, stderr) {
+  return new Promise(function (resolve, reject) {
+    child_process.exec(cmd, options, function (err, stdout, stderr) {
       const _err = err || stderr
       if (_err) return reject(_err)
       return resolve(stdout.toString())
@@ -39,8 +39,8 @@ export function exec(cmd: string, options?: child_process.ExecOptions): Promise<
  */
 export function execFile(cmd: string, args: string[], options?: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'executing: %s %s', protect(cmd), args.map(protect).join(' '))
-  return new Promise(function(resolve, reject) {
-    const child = child_process.execFile(cmd, args, options, function(err, stdout, stderr) {
+  return new Promise(function (resolve, reject) {
+    const child = child_process.execFile(cmd, args, options, function (err, stdout, stderr) {
       const _err = err || stderr
       if (_err) return reject(_err)
       return resolve(stdout.toString())
@@ -51,9 +51,9 @@ export function execFile(cmd: string, args: string[], options?: child_process.Ex
 
 export function spawn(cmd: string, args: string[], options: child_process.ExecOptions): Promise<string> {
   log.silly('install', 'spawning:', protect(cmd), args.map(protect).join(' '))
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     try {
-      const child = child_process.spawn(cmd, args, { stdio: 'inherit', ...options})
+      const child = child_process.spawn(cmd, args, { stdio: 'inherit', ...options })
 
       child.on('exit', function (code) {
         if (typeof code !== 'number') {
@@ -65,7 +65,7 @@ export function spawn(cmd: string, args: string[], options: child_process.ExecOp
         }
         return resolve(msg)
       })
-    } catch(err) {
+    } catch (err) {
       return reject(err)
     }
   })
@@ -84,7 +84,7 @@ async function requireCmd(cmd: string, hint: string): Promise<string> {
 }
 
 export async function requireGit() {
-  const out = await requireCmd('git --version', 'git is required')  
+  const out = await requireCmd('git --version', 'git is required')
   const version = out.match(/version ([\d.\w]+)/)
   if (version) {
     log.info('install', `git Version ${formatNumber("%s")} found`, version[1]);
@@ -99,22 +99,14 @@ export async function requireCmake() {
   }
 }
 
-export function isWin() {
-  return process.platform == 'win32'
-}
-
-export function isOSX() {
-  return process.platform == 'darwin'
-}
-
-export function isUnix() {
-  return !isWin() && !isOSX()
-}
-
+/**
+ * looks for cuda lib
+ * @returns 
+ */
 export async function isCudaAvailable() {
   log.info('install', 'Check if CUDA is available & what version...');
 
-  if (isWin()) {
+  if (process.platform == 'win32') {
     try {
       await requireCmd('nvcc --version', 'CUDA availability check');
       return true;
@@ -126,15 +118,24 @@ export async function isCudaAvailable() {
 
   // Because NVCC is not installed by default & requires an extra install step,
   // this is work around that always works
-  const cudaVersionFilePath = path.resolve('/usr/local/cuda/version.txt');
+  const cudeFileTxt = '/usr/local/cuda/version.txt';
+  const cudeFileJson = '/usr/local/cuda/version.json';
+  const cudaVersionFilePathTxt = path.resolve(cudeFileTxt);
+  const cudaVersionFilePathJson = path.resolve(cudeFileJson);
 
-  if (fs.existsSync(cudaVersionFilePath)) {
-    const content = fs.readFileSync(cudaVersionFilePath, 'utf8');
+  if (fs.existsSync(cudaVersionFilePathTxt)) {
+    const content = fs.readFileSync(cudaVersionFilePathTxt, 'utf8');
     log.info('install', content);
     return true;
-  } else {
-    log.info('install', 'CUDA version file could not be found.');
-    return false;
   }
+
+  if (fs.existsSync(cudaVersionFilePathJson)) {
+    const content = fs.readFileSync(cudaVersionFilePathJson, 'utf8');
+    log.info('install', content);
+    return true;
+  }
+
+  log.info('install', `CUDA version file could not be found in /usr/local/cuda/version.{txt,json}.`);
+  return false;
+
 }
- 

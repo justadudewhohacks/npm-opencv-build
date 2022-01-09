@@ -3,7 +3,7 @@ import { EOL } from 'os';
 import { OpenCVBuilder } from './OpenCVBuilder.js';
 import { findMsBuild, pathVersion } from './findMsBuild.js';
 import type { AutoBuildFile } from './types.js';
-import { formatNumber, highlight, isCudaAvailable, isWin, protect, spawn, toExecCmd } from './utils.js';
+import { formatNumber, highlight, isCudaAvailable, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
@@ -100,7 +100,7 @@ export class SetupOpencv {
   }
 
   private async getMsbuildIfWin(): Promise<pathVersion | undefined> {
-    if (isWin()) {
+    if (this.builder.env.isWin) {
       const msbuild = await findMsBuild()
       log.info('install', `using msbuild: ${formatNumber("%s")} path: ${highlight("%s")}`, msbuild.version, msbuild.path)
       return msbuild
@@ -139,7 +139,7 @@ export class SetupOpencv {
     let cMakeFlags: string[] = [];
     let msbuildPath: string | undefined = undefined;
     // Get cmake flags here to check for CUDA early on instead of the start of the building process
-    if (isWin()) {
+    if (env.isWin) {
       if (!msbuild)
         throw Error('Error getting Ms Build info');
       cMakeFlags = this.getWinCmakeFlags("" + msbuild.version);

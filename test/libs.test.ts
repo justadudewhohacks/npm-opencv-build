@@ -5,30 +5,18 @@ import fs from 'fs';
 import path from 'path';
 
 export class FakeOpenCVBuildEnv extends OpenCVBuildEnv {
-  constructor(opts: OpenCVBuildEnvParams, os: 'win' | 'osX' | 'unix') {
+  constructor(opts: OpenCVBuildEnvParams) {
     super(opts);
-    this.setOs(os)
   }
 
-  public setOs(os: 'win' | 'osX' | 'unix') {
-    if (os == 'win') {
-      super._isWindows = true;
-      super._isOsX = false;
-    }
-    else if (os == 'osX') {
-      super._isWindows = false;
-      super._isOsX = true;
-    }
-    else if (os == 'unix') {
-      super._isWindows = false;
-      super._isOsX = false;
-    }
+  public setPlatform(platform: NodeJS.Platform) {
+      super._platform = platform;
   }
 }
 
 describe('libs', () => {
   const root = __dirname;
-  const env = new FakeOpenCVBuildEnv({}, 'win');
+  const env = new FakeOpenCVBuildEnv({});
   const builder = new OpenCVBuilder(env);
 
   it('should find world .lib (win)', () => {
@@ -38,7 +26,7 @@ describe('libs', () => {
     const libFiles = [
       worldLibFile
     ]
-    env.setOs('win')
+    env.setPlatform('win32')
     const res = builder.getLibs.matchLib('world', root, libFiles);
     expect(res).to.eq(fp)
     fs.unlinkSync(fp)
@@ -51,7 +39,7 @@ describe('libs', () => {
     const libFiles = [
       worldLibFile
     ]
-    env.setOs('unix')
+    env.setPlatform('linux')
     const res = builder.getLibs.matchLib('world', root, libFiles);
     expect(res).to.eq(fp)
     fs.unlinkSync(fp)
@@ -64,7 +52,7 @@ describe('libs', () => {
     const libFiles = [
       worldLibFile
     ]
-    env.setOs('osX')
+    env.setPlatform('darwin')
     const res = builder.getLibs.matchLib('world', root, libFiles);
     expect(res).to.eq(fp)
     fs.unlinkSync(fp)

@@ -17,11 +17,14 @@ export class getLibsFactory {
    * @returns lib extention based on current OS
    */
   get getLibSuffix(): 'lib' | 'dylib' | 'so' {
-    if (this.builder.env.isWin)
-      return 'lib'
-    if (this.builder.env.isOSX)
-      return 'dylib'
-    return 'so'
+    switch (this.builder.env.platform) {
+      case 'win32':
+        return 'lib'
+      case 'darwin':
+        return 'dylib'
+      default:
+        return 'so'
+    }
   }
 
   /**

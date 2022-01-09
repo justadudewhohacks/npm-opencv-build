@@ -2,10 +2,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import log from 'npmlog';
-import { highlight, formatNumber, isWin } from './utils';
+import { highlight, formatNumber } from './utils';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
-import { isOSX } from '.';
 
 /**
  * options passed to OpenCVBuildEnv constructor
@@ -126,9 +125,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     public buildRoot: string;
     // Path to find package.json legacy option
     public packageRoot: string;
-
-    protected _isWindows: boolean;
-    protected _isOsX: boolean;
+    protected _platform: NodeJS.Platform;
 
     private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions, info: ArgInfo): string {
         if (info.conf in opts) {
@@ -149,8 +146,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         opts = opts || {};
         const DEFAULT_OPENCV_VERSION = '4.5.4'
         this.prebuild = opts.prebuild;
-        this._isWindows = isWin();
-        this._isOsX = isOSX();
+        this._platform = process.platform;
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
         this.buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
         if (this.buildRoot[0] === '~') {
@@ -345,14 +341,13 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         return versions;
     }
 
-    get isWin(): boolean {
-        return this._isWindows;
-    }
+    get platform(): NodeJS.Platform {
+        return this._platform;
+    }    
 
-    get isOSX(): boolean {
-        return this._isOsX;
+    get isWin(): boolean {
+        return this.platform === 'win32'
     }
-    
 
     get rootDir(): string {
         // const __filename = fileURLToPath(import.meta.url);

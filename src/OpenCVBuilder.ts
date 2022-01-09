@@ -13,7 +13,7 @@ export class OpenCVBuilder {
   // public readonly opencvVersion: string;
   public readonly constant: Constant;
   public readonly getLibs: getLibsFactory;
-  public readonly env;
+  public readonly env: OpenCVBuildEnv;
 
   constructor(opts?: OpenCVBuildEnv | OpenCVBuildEnvParams | string[]) {
     if (Array.isArray(opts)) {
