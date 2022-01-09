@@ -28,13 +28,30 @@ Each OpenCV build will take around 2Gb on your drive, so I recommand you to defi
 npm install opencv-build
 ```
 
+## usage
+
+```bash
+npm-opencv-build usage:
+   --version <value>    OpenCV version                           (OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION env variable)
+   --flags <value>      OpenCV cMake Build flags                 (OPENCV4NODEJS_AUTOBUILD_FLAGS env variable)
+   --root <value>       OpenCV-build root directory (deprecated) (INIT_CWD env variable)
+   --buildRoot <value>  OpenCV build directory                   (OPENCV_BUILD_ROOT env variable)
+   --cuda               Enable cuda in OpenCV build              (OPENCV4NODEJS_BUILD_CUDA env variable)
+   --nocontrib          Do not compile Contrib modules           (OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB env variable)
+   --nobuild            Do build OpenCV                          (OPENCV4NODEJS_DISABLE_AUTOBUILD env variable)
+   --incDir <value>     OpenCV include directory                 (OPENCV_INCLUDE_DIR env variable)
+   --libDir <value>     OpenCV library directory                 (OPENCV_LIB_DIR env variable)
+   --binDir <value>     OpenCV bin directory                     (OPENCV_BIN_DIR env variable)
+   --keepsources        Keepsources OpenCV source after build
+```
+
 ## Requirements
 
 - cmake
 
 ### Windows
 
-for old nodejs
+for nodejs <= 12
 
 ``` bash
 npm install --global windows-build-tools
