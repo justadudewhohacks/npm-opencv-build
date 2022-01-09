@@ -3,7 +3,7 @@ platform:
 
 image:
   # - Visual Studio 2015
-  - Visual Studio 2017
+  # - Visual Studio 2017
   - Visual Studio 2019
 
 init:
@@ -17,8 +17,8 @@ environment:
 clone_folder: c:\projects\opencv-build
 
 install:
-  - cmd: choco upgrade --yes chocolatey
-  - cmd: choco install cmake -y -v
+  # - choco upgrade --yes chocolatey
+  - choco install cmake -y
   # - cmd: choco upgrade cmake -v
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
@@ -30,4 +30,5 @@ test_script:
   # install and run tests of opencv-build
   - cd c:\projects\opencv-build
   - npm install
+  - opencv-build-npm --version 4.5.5
   - npm test
