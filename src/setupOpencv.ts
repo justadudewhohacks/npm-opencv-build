@@ -135,12 +135,6 @@ export class SetupOpencv {
   public async start(): Promise<void> {
     const execLog: string[] = [];
     const env = this.builder.env;
-    let keepSource = false;
-    const { argv } = process;
-    if (argv) {
-      if (argv.includes('--keepsources') || argv.includes('--keep-sources') || argv.includes('--keepsource') || argv.includes('--keep-source'))
-        keepSource = true;
-    }
     const msbuild = await this.getMsbuildIfWin()
     let cMakeFlags: string[] = [];
     let msbuildPath: string | undefined = undefined;
@@ -163,14 +157,12 @@ export class SetupOpencv {
         if (v)
           execLog.push(`export ${k}=${protect(v)}`);
       }
-
-      execLog.push(toExecCmd('rimraf', [env.opencvBuild]))
-      await primraf(env.opencvBuild);
-      execLog.push(toExecCmd('rimraf', [env.opencvSrc]))
-      await primraf(env.opencvSrc);
-      execLog.push(toExecCmd('rimraf', [env.opencvContribSrc]))
-      await primraf(env.opencvContribSrc);
-
+      // clean up
+      const dirs = [env.opencvBuild, env.opencvSrc, env.opencvContribSrc];
+      execLog.push(toExecCmd('rimraf', dirs))
+      for (const dir of dirs)
+        await primraf(dir);
+      // ensure build dir exists
       execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
       fs.mkdirSync(env.opencvBuild, { recursive: true });
 
@@ -205,7 +197,7 @@ export class SetupOpencv {
     // cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
     // -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
     // -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
-    if (!keepSource) {
+    if (!env.keepsources) {
       /**
        * DELETE TMP build dirs
        */
