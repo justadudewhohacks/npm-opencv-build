@@ -29,7 +29,6 @@ async function findMSBuild(): Promise<pathVersion> {
     path: selected,
     version: Number(m[1])
   }
-  console.log(build)
   log.silly('find-msbuild', 'using following msbuild:')
   log.silly('find-msbuild', 'version:', build.version)
   log.silly('find-msbuild', 'path:', build.path)

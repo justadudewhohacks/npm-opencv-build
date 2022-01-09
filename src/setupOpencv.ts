@@ -89,10 +89,12 @@ export class SetupOpencv {
       throw new Error(`no cmake arch found for process.arch: ${process.arch}`)
     }
 
-    return [
-      '-G',
-      `${cmakeVsCompiler}${cmakeArch}`
-    ].concat(this.getSharedCmakeFlags())
+    let GFlag: string[] = [];
+    if (Number(msversion) <= 15)
+      GFlag = [ '-G', `${cmakeVsCompiler}${cmakeArch}` ];
+    else 
+      GFlag = [ '-G', `${cmakeVsCompiler}` ];
+    return GFlag.concat(this.getSharedCmakeFlags())
   }
 
   private getCmakeArgs(cmakeFlags: string[]): string[] {
