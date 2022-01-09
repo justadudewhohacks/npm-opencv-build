@@ -18,6 +18,7 @@ describe('libs', () => {
   const env = new FakeOpenCVBuildEnv({});
   const builder = new OpenCVBuilder(env);
   builder.getLibs.syncPath = false;
+  const opencvModules = builder.constant.opencvModules;
 
   it('should find world .lib (win) Fullpath test', () => {
     const libFiles = [ 'opencv_world340.lib' ]
@@ -58,7 +59,7 @@ describe('libs', () => {
     env.setPlatform('win32')
     builder.getLibs.libFiles = libFiles;
     const res = builder.getLibs.getLibs()
-    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
     expect(res.some(({ opencvModule }) => opencvModule === 'core'))
     expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
   })
@@ -71,7 +72,7 @@ describe('libs', () => {
     env.setPlatform('linux')
     builder.getLibs.libFiles = libFiles;
     const res = builder.getLibs.getLibs()
-    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
     expect(res.some(({ opencvModule }) => opencvModule === 'core'))
     expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
   })
@@ -84,52 +85,56 @@ describe('libs', () => {
     env.setPlatform('darwin')
     builder.getLibs.libFiles = libFiles;
     const res = builder.getLibs.getLibs()
-    expect(res).to.be.an('array').lengthOf(builder.constant.opencvModules.length)
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
     expect(res.some(({ opencvModule }) => opencvModule === 'core'))
     expect(res.find(l => l.opencvModule === 'core')).to.have.property('libPath').to.endWith(coreLibFile)
   })
 
-  // it('should only link .lib files with exact name match', () => {
-  //   const objdetectLibFile = 'opencv_objdetect340.lib'
-  //   const dnnObjdetectLibFile = 'opencv_dnn_objdetect340.lib'
-  //   const libFiles = [
-  //     objdetectLibFile,
-  //     dnnObjdetectLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles, { isWin: true })
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
-  //   expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.equal(objdetectLibFile)
-  //   expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
-  // })
-  // it('should only link .so files with exact name match', () => {
-  //   const objdetectLibFile = 'libopencv_objdetect.so'
-  //   const dnnObjdetectLibFile = 'libopencv_dnn_objdetect.so'
-  //   const libFiles = [
-  //     objdetectLibFile,
-  //     dnnObjdetectLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles)
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
-  //   expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.equal(objdetectLibFile)
-  //   expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
-  // })
-  // it('should only link .dylib files with exact name match', () => {
-  //   const objdetectLibFile = 'libopencv_objdetect.dylib'
-  //   const dnnObjdetectLibFile = 'libopencv_dnn_objdetect.dylib'
-  //   const libFiles = [
-  //     objdetectLibFile,
-  //     dnnObjdetectLibFile
-  //   ]
-  //   const getLibs = createFake(libFiles, { isOSX: true })
-  //   const res = getLibs()
-  //   expect(res).to.be.an('array').lengthOf(opencvModules.length)
-  //   expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
-  //   expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.equal(objdetectLibFile)
-  //   expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
-  // })
+  it('should only link .lib files with exact name match', () => {
+    const objdetectLibFile = 'opencv_objdetect340.lib'
+    const dnnObjdetectLibFile = 'opencv_dnn_objdetect340.lib'
+    const libFiles = [
+      objdetectLibFile,
+      dnnObjdetectLibFile
+    ]
+    env.setPlatform('win32')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
+    expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.endWith(objdetectLibFile)
+    expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
+  })
 
+  it('should only link .so files with exact name match', () => {
+    const objdetectLibFile = 'libopencv_objdetect.so'
+    const dnnObjdetectLibFile = 'libopencv_dnn_objdetect.so'
+    const libFiles = [
+      objdetectLibFile,
+      dnnObjdetectLibFile
+    ]
+    env.setPlatform('linux')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
+    expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.endWith(objdetectLibFile)
+    expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
+  })
+
+  it('should only link .dylib files with exact name match', () => {
+    const objdetectLibFile = 'libopencv_objdetect.dylib'
+    const dnnObjdetectLibFile = 'libopencv_dnn_objdetect.dylib'
+    const libFiles = [
+      objdetectLibFile,
+      dnnObjdetectLibFile
+    ]
+    env.setPlatform('darwin')
+    builder.getLibs.libFiles = libFiles;
+    const res = builder.getLibs.getLibs()
+    expect(res).to.be.an('array').lengthOf(opencvModules.length)
+    expect(res.some(({ opencvModule }) => opencvModule === 'objdetect'))
+    expect(res.find(l => l.opencvModule === 'objdetect')).to.have.property('libPath').to.endWith(objdetectLibFile)
+    expect(res.some(({ libPath }) => libPath === dnnObjdetectLibFile)).to.be.false
+  })
 })
