@@ -17,9 +17,9 @@ environment:
 clone_folder: c:\projects\opencv-build
 
 install:
-  # - choco upgrade --yes chocolatey
-  - choco install cmake -y
-  # - cmd: choco upgrade cmake -v
+  - cmd: choco upgrade --yes chocolatey
+  - cmd: choco install cmake -y
+  - cmd: choco upgrade cmake -v
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
   - SET PATH=%PATH%;C:\Program Files\CMake\bin;
