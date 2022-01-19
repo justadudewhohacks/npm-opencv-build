@@ -1,6 +1,6 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2022 Edition",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -62,7 +62,6 @@
     "typescript": "^4.5.4"
   },
   "files": [
-    "lib",
-    "Find-VS2017.cs"
+    "lib"
   ]
 }

@@ -12,7 +12,7 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 - Each OPENCV_VERSION will be build in his own directory.
 - Each AUTOBUILD_FLAGS will be build in his own directory. (induce massive time gain during development)
 - All build can now be build outside node_modules using `OPENCV_BUILD_ROOT` environement variable.
-- New MSBuild.exe localisation, tested with VS 2019
+- New MSBuild.exe localisation, also works with VS 2019
 - Script output is now colorized.
 - Add some usefull log.
 - Big code refactor.

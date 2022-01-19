@@ -1,5 +1,5 @@
 import log from 'npmlog';
-import { execFile } from './utils.js';
+import { execFile, formatNumber, light } from './utils.js';
 import blob from 'glob';
 import { promisify } from 'util';
 
@@ -12,13 +12,27 @@ export interface pathVersion {
  * @returns take the last MSBuild.exe version in PROGRAMFILES
  */
 async function findMSBuild(): Promise<pathVersion> {
-  const reg = `${process.env['PROGRAMFILES(X86)']}/Microsoft Visual Studio/2019/BuildTools/MSBuild/*/Bin/MSBuild.exe`;
   const pblob = promisify(blob)
-  const matches = await pblob(reg, {});
-  matches.sort();
-  if (!matches.length) {
-    return Promise.reject('no Microsoft Visual Studio found')
+
+  const progFiles = new Set([process.env.programfiles, process.env.ProgramW6432, process.env['programfiles(x86)']]);
+  const matches: string[] = [];
+
+  for (const progFile of progFiles) {
+    if (progFile) {
+      const reg = `${progFile}/Microsoft Visual Studio/*/BuildTools/MSBuild/*/Bin/MSBuild.exe`;
+      for (const m of await pblob(reg, {}))
+        matches.push(m);
+    }
   }
+  matches.sort();
+
+  if (!matches.length) {
+    return Promise.reject('no Microsoft Visual Studio found in program files directorys')
+  }
+  if (matches.length > 1) {
+    log.warn('find-msbuild', `find ${formatNumber('' + matches.length)} MSBuild version: [${matches.map(path => light(path)).join(', ')}]`)
+  }
+
   log.silly('find-msbuild', matches.join(', '));
   const selected = matches[matches.length - 1];
   const txt = await execFile(selected, ['/version']);
