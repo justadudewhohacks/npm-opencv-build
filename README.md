@@ -7,7 +7,7 @@ A simple script to auto build recent OpenCV + contrib version via npm. This scri
 
 ## Main changes from the original project
 
-- OpenCV build is explicitly build by `./bin/main.js` or it's alias `opencv-build-npm` and accepting parametes see `opencv-build-npm --help`
+- OpenCV is explicitly build with `opencv-build-npm` and accepting parametes see `opencv-build-npm --help`
 - OpenCV build can now be configured with `new OpenCVBuilder({autoBuildOpencvVersion: "3.4.16", autoBuildBuildCuda: true, autoBuildWithoutContrib: false }).install()`
 - Each OPENCV_VERSION will be build in his own directory.
 - Each AUTOBUILD_FLAGS will be build in his own directory. (induce massive time gain during development)

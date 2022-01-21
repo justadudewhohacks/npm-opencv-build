@@ -1,3 +1,8 @@
+# Changelog
+
+* V 0.4.2
+ - Change Typescript build target to ES2017 so it works with electron
+
 * V 0.4.1
  - drop old findVs2017 script
  - fix findMSBuild (was locked to vs 2019)

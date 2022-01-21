@@ -1,6 +1,5 @@
 import { OpenCVBuilder } from "./OpenCVBuilder.js"
 
-// export const OPENCV_CONTRIB_ARCHIVE = 'https://github.com/opencv/opencv_contrib/archive/3.4.6.tar.gz'
 export class Constant {
   constructor(private readonly builder: OpenCVBuilder) {
   }
