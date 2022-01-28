@@ -1,5 +1,9 @@
 # Changelog
 
+* V 0.4.3
+ - allow usage of all Microsoft buildtools editions. [issue 7](https://github.com/UrielCh/opencv4nodejs/issues/7)
+ - dump dependencies versions
+
 * V 0.4.2
  - Change Typescript build target to ES2017 so it works with electron
 
