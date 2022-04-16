@@ -9,7 +9,7 @@ image:
 
 init:
   - git config --global core.autocrlf true
-
+shallow_clone: true
 environment:
   matrix:
     #- nodejs_version: 14
@@ -19,8 +19,9 @@ clone_folder: c:\projects\opencv-build
 
 install:
   # no need to update cmake on "Visual Studio 2019" image
-  - cmd: choco upgrade --yes chocolatey
-  - cmd: ls "C:\Program Files (x86)"
+  # - cmd: choco upgrade --yes chocolatey
+  - cmd: ls "C:\Program Files (x86)\Microsoft Visual Studio 12.0"
+  - cmd: ls "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
   # - cmd: choco install cmake --version 3.23.0 -y
   #- ps: Install-Product node $env:nodejs_version x64
   #- node --version
