@@ -19,7 +19,7 @@ async function findMSBuild(): Promise<pathVersion> {
 
   for (const progFile of progFiles) {
     if (progFile) {
-      const reg = `${progFile}/Microsoft Visual Studio/*/*/MSBuild/*/Bin/MSBuild.exe`;
+      const reg = `${progFile.replace(/\\/g, '/')}/Microsoft Visual Studio/*/*/MSBuild/*/Bin/MSBuild.exe`;
       for (const m of await pblob(reg, {}))
         matches.push(m);
     }
