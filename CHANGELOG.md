@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.4.4
+ - fix disable autobuid
+
 * V 0.4.3
  - allow usage of all Microsoft buildtools editions. [issue 7](https://github.com/UrielCh/opencv4nodejs/issues/7)
  - dump dependencies versions
