@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { Stats } from 'fs';
 import os from 'os';
 import path from 'path';
 import log from 'npmlog';
@@ -286,6 +286,25 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         if (OPENCV_BIN_DIR && process.env.OPENCV_BIN_DIR !== OPENCV_BIN_DIR) {
             process.env.OPENCV_BIN_DIR = OPENCV_BIN_DIR;
         }
+
+        if (no_autobuild) {
+            for (const varname in ['OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR', 'OPENCV_BIN_DIR']) {
+                const value = process.env[varname];
+                if (!value) {
+                    throw new Error(`${varname} must be define if can not be create nobuild/disableAutoBuild/OPENCV4NODEJS_DISABLE_AUTOBUILD is set`);
+                }
+                let stats: Stats;
+                try {
+                    stats = fs.statSync(value);
+                } catch (e) {
+                    throw new Error(`${varname} is set to non existing "${value}"`);
+                }
+                if (!stats.isDirectory()) {
+                    throw new Error(`${varname} is set to "${value}", that should be a directory`);
+                }
+            }
+        }
+
     }
 
     public dumpEnv(): EnvSummery {
