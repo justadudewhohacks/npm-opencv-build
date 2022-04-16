@@ -20,7 +20,7 @@ clone_folder: c:\projects\opencv-build
 install:
   # no need to update cmake on "Visual Studio 2019" image
   - cmd: choco upgrade --yes chocolatey
-  - cmd: choco --no-progress install cmake --version 3.23.0 -y
+  - cmd: choco install cmake --version 3.23.0 -y
   # - cmd: choco --no-progress upgrade cmake -v
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
