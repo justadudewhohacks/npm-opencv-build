@@ -2,6 +2,7 @@ import OpenCVBuilder from './OpenCVBuilder.js';
 import type { OpencvModule } from './types.js';
 import fs from 'fs';
 import path from 'path';
+import { opencvModulesType } from './constants.js';
 
 const worldModule = 'world';
 
@@ -13,7 +14,7 @@ export class getLibsFactory {
   }
 
   /**
-   * list en cache file iln lib folder
+   * list en cache file in lib folder
    * @returns files in lib directory
    */
   private listFiles(): string[] {
@@ -24,7 +25,10 @@ export class getLibsFactory {
     return this.libFiles;
   }
 
-
+  /**
+   * lib files are prefixed differently on Unix / Windows base system.
+   * @returns current OS prefix
+   */
   get getLibPrefix(): string {
     return this.builder.env.isWin ? 'opencv_' : 'libopencv_'
   }
@@ -53,7 +57,10 @@ export class getLibsFactory {
     return new RegExp(regexp)
   }
 
-  public resolveLib(opencvModuleName: string): string {
+  /**
+   * find a lib
+   */
+  public resolveLib(opencvModuleName: opencvModulesType): string {
     const libDir = this.builder.env.opencvLibDir;
     const libFiles: string[] = this.listFiles();
     return this.matchLib(opencvModuleName, libDir, libFiles);
@@ -91,7 +98,7 @@ export class getLibsFactory {
     }
 
     return this.builder.constant.opencvModules.map(
-      (opencvModule: string) => ({
+      (opencvModule: opencvModulesType) => ({
         opencvModule,
         libPath: this.resolveLib(opencvModule)
       })

@@ -20,12 +20,36 @@ export interface OpenCVBuildEnvParamsBool {
 type boolKey = keyof OpenCVBuildEnvParamsBool;
 
 export interface OpenCVBuildEnvParamsString {
+    /**
+     * OpenCV-build root directory, deprecated in favor of buildRoot
+     */
     rootcwd?: string;
+    /**
+     * OpenCV build directory, this directory will be populate with a folder per build, permiting to reused previous build.
+     */
     buildRoot?: string;
+    /**
+     * OpenCV version to build
+     */
     autoBuildOpencvVersion?: string;
+    /**
+     * OpenCV cMake Build flags
+     */
     autoBuildFlags?: string;
+    /**
+     * OpenCV include directory
+     * looks like: opencv/build/include
+     */
     opencvIncludeDir?: string; // or external build apt / brew / yum / chocolatey...
+    /**
+     * OpenCV library directory
+     * looks like: opencv/build/.../lib
+     */
     opencvLibDir?: string; // never used based on opencvBuild path + OS postfix
+    /**
+     * OpenCV bin directory
+     * looks like: opencv/build/.../bin
+     */
     opencvBinDir?: string;// never used based on opencvBuild path + OS postfix
 }
 type stringKey = keyof OpenCVBuildEnvParamsString;
@@ -37,10 +61,16 @@ type stringKey = keyof OpenCVBuildEnvParamsString;
 export type OpenCVPackageBuildOptions = { [key in boolKey | stringKey]?: string };
 
 export interface OpenCVBuildEnvParams extends OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
+    /**
+     * Allow speedup API usage by allowing direct access to a preexisting build
+     */
     prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion',
     extra?: { [key: string]: string },
 }
 
+/**
+ * local args parser model
+ */
 interface ArgInfo {
     arg: string;
     conf: keyof OpenCVPackageBuildOptions;
@@ -49,6 +79,9 @@ interface ArgInfo {
     doc: string;
 }
 
+/**
+ * arguments data
+ */
 export const ALLARGS = {
     version: { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
     flags: { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
@@ -62,7 +95,10 @@ export const ALLARGS = {
     binDir: { arg: 'binDir', conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
     keepsources: { arg: 'keepsources', conf: 'keepsources', isBool: true, doc: 'Keepsources OpenCV source after build' } as ArgInfo,
 }
-
+/**
+ * generate help message
+ * @returns help message as text with colors
+ */
 export const genHelp = (): string => {
     return Object.values(ALLARGS).map(a => {
         const name = `--${a.arg}${!a.isBool ? ' <value>' : ''}`;
@@ -127,14 +163,14 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     public packageRoot: string;
     protected _platform: NodeJS.Platform;
 
-    private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions, info: ArgInfo): string {
+    private resolveValue(opts: OpenCVBuildEnvParams, packageEnv: OpenCVPackageBuildOptions | null, info: ArgInfo): string {
         if (info.conf in opts) {
             if (info.isBool) {
                 return opts[info.conf] ? '1' : '';
             } else
                 return opts[info.conf] as string || '';
         } else {
-            if (packageEnv[info.conf]) {
+            if (packageEnv && packageEnv[info.conf]) {
                 return packageEnv[info.conf] || '';
             } else {
                 return process.env[info.env] || '';
@@ -153,7 +189,18 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
             this.buildRoot = path.join(os.homedir(), this.buildRoot.slice(1));
         }
 
-        if (opts.prebuild) {
+        // get project Root path to looks for package.json for opencv4nodejs section
+        let packageEnv: OpenCVPackageBuildOptions = {};
+        try {
+            packageEnv = this.readEnvsFromPackageJson()
+        } catch (err) {
+            log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
+            log.error('applyEnvsFromPackageJson', err)
+        }
+
+        const no_autobuild = this.resolveValue(opts, packageEnv, ALLARGS.nobuild);
+
+        if (!no_autobuild && opts.prebuild) {
             const builds = this.listBuild();
             if (!builds.length) {
                 throw Error(`No build found in ${this.rootDir} you should launch opencv-build-npm once`);
@@ -193,31 +240,24 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
             return;
         }
 
-
-        // get project Root path to looks for package.json for opencv4nodejs section
-        let packageEnv: OpenCVPackageBuildOptions = {};
-        try {
-            packageEnv = this.readEnvsFromPackageJson()
-        } catch (err) {
-            log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
-            log.error('applyEnvsFromPackageJson', err)
-        }
-
-        this.opencvVersion = this.resolveValue(opts, packageEnv, ALLARGS.version);
-        if (!this.opencvVersion) {
-            this.opencvVersion = DEFAULT_OPENCV_VERSION;
-            log.info('init', `no openCV version given using default verison ${formatNumber(DEFAULT_OPENCV_VERSION)}`)
+        if (no_autobuild) {
+            this.opencvVersion = '0.0.0';
         } else {
-            log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
-        }
-
-        if (process.env.INIT_CWD) {
-            log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to  ${highlight(process.env.INIT_CWD)}`)
-        }
-        if (!fs.existsSync(this.buildRoot)) {
-            fs.mkdirSync(this.buildRoot);
+            this.opencvVersion = this.resolveValue(opts, packageEnv, ALLARGS.version);
+            if (!this.opencvVersion) {
+                this.opencvVersion = DEFAULT_OPENCV_VERSION;
+                log.info('init', `no openCV version given using default verison ${formatNumber(DEFAULT_OPENCV_VERSION)}`)
+            } else {
+                log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
+            }
+            if (process.env.INIT_CWD) {
+                log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to  ${highlight(process.env.INIT_CWD)}`)
+            }
             if (!fs.existsSync(this.buildRoot)) {
-                throw new Error(`${this.buildRoot} can not be create`)
+                fs.mkdirSync(this.buildRoot);
+                if (!fs.existsSync(this.buildRoot)) {
+                    throw new Error(`${this.buildRoot} can not be create`)
+                }
             }
         }
 
@@ -343,7 +383,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
 
     get platform(): NodeJS.Platform {
         return this._platform;
-    }    
+    }
 
     get isWin(): boolean {
         return this.platform === 'win32'
@@ -374,18 +414,20 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         return path.join(this.opencvBuild, 'include')
     }
     get opencv4Include(): string {
+        if (process.env.OPENCV_INCLUDE_DIR) return process.env.OPENCV_INCLUDE_DIR;
         return path.join(this.opencvInclude, 'opencv4')
     }
     get opencvLibDir(): string {
+        if (process.env.OPENCV_LIB_DIR) return process.env.OPENCV_LIB_DIR;
         return this.isWin ? path.join(this.opencvBuild, 'lib/Release') : path.join(this.opencvBuild, 'lib')
     }
     get opencvBinDir(): string {
+        if (process.env.OPENCV_BIN_DIR) return process.env.OPENCV_BIN_DIR;
         return this.isWin ? path.join(this.opencvBuild, 'bin/Release') : path.join(this.opencvBuild, 'bin')
     }
     get autoBuildFile(): string {
         return path.join(this.opencvRoot, 'auto-build.json')
     }
-
     public readAutoBuildFile(): AutoBuildFile | undefined {
         return this.readAutoBuildFile2(this.autoBuildFile);
     }

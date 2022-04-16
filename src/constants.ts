@@ -1,5 +1,28 @@
 import { OpenCVBuilder } from "./OpenCVBuilder.js"
 
+const opencvModules = [
+  'core',
+  'highgui',
+  'imgcodecs',
+  'imgproc',
+  'features2d',
+  'calib3d',
+  'photo',
+  'objdetect',
+  'ml',
+  'video',
+  'videoio',
+  'videostab',
+  'dnn',
+  'face',
+  'text',
+  'tracking',
+  'xfeatures2d',
+  'ximgproc'
+] as const;
+
+export type opencvModulesType = typeof opencvModules[number] | 'world';
+
 export class Constant {
   constructor(private readonly builder: OpenCVBuilder) {
   }
@@ -7,26 +30,7 @@ export class Constant {
   opencvRepoUrl = 'https://github.com/opencv/opencv.git'
   opencvContribRepoUrl = 'https://github.com/opencv/opencv_contrib.git'
 
-  opencvModules = [
-    'core',
-    'highgui',
-    'imgcodecs',
-    'imgproc',
-    'features2d',
-    'calib3d',
-    'photo',
-    'objdetect',
-    'ml',
-    'video',
-    'videoio',
-    'videostab',
-    'dnn',
-    'face',
-    'text',
-    'tracking',
-    'xfeatures2d',
-    'ximgproc'
-  ]
+  opencvModules = opencvModules;
 
   cmakeVsCompilers: { [version: string]: string } = {
     '10': 'Visual Studio 10 2010',
