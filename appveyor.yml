@@ -4,7 +4,8 @@ platform:
 image:
   # - Visual Studio 2015
   # - Visual Studio 2017
-  - Visual Studio 2019
+  # - Visual Studio 2019
+  - Visual Studio 2022
 
 init:
   - git config --global core.autocrlf true
@@ -17,9 +18,10 @@ environment:
 clone_folder: c:\projects\opencv-build
 
 install:
-  - cmd: choco upgrade --yes chocolatey
-  - cmd: choco install cmake -y
-  - cmd: choco upgrade cmake -v
+  # no need to update cmake on "Visual Studio 2019" image
+  #- cmd: choco --no-progress upgrade --yes chocolatey
+  #- cmd: choco --no-progress install cmake -y
+  #- cmd: choco --no-progress upgrade cmake -v
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
   - SET PATH=%PATH%;C:\Program Files\CMake\bin;
