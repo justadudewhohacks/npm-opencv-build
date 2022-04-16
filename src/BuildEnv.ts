@@ -288,10 +288,10 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         }
 
         if (no_autobuild) {
-            for (const varname in ['OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR', 'OPENCV_BIN_DIR']) {
+            for (const varname of ['OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR', 'OPENCV_BIN_DIR']) {
                 const value = process.env[varname];
                 if (!value) {
-                    throw new Error(`${varname} must be define if can not be create nobuild/disableAutoBuild/OPENCV4NODEJS_DISABLE_AUTOBUILD is set`);
+                    throw new Error(`${varname} must be define if can not be create nobuild / disableAutoBuild / OPENCV4NODEJS_DISABLE_AUTOBUILD is set`);
                 }
                 let stats: Stats;
                 try {

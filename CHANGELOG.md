@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.4.5
+ - fix OPENCV4NODEJS_DISABLE_AUTOBUILD
+
 * V 0.4.4
  - fix disable autobuid
 
