@@ -99,7 +99,7 @@ node build/main.js
 
 ### prebuild
 
-the `prebuild` is a smart version selector, to avoid futher re-compilation, accepted values are:
+The `prebuild` is a smart version selector, to avoid futher re-compilation, accepted values are:
 
 - `"latestBuild"` use the last built version
 - `"latestVersion"` use the highest version number built
@@ -108,11 +108,12 @@ the `prebuild` is a smart version selector, to avoid futher re-compilation, acce
 
 the `prebuild` option intend to be use at runtime, so you do not have to keep trak of the version you want to use.
 
-this parameter can only be provide in `OpenCVBuildEnv` constructor options.
+- this parameter can only be provide in `OpenCVBuildEnv` constructor options.
+- `prebuild` is ignored if OPENCV4NODEJS_DISABLE_AUTOBUILD env variable is set, or disableAutoBuild is set in package.json
 
 ### autoBuildOpencvVersion
 
-Choose the openCV version you want to build, default is 3.4.6,
+Choose the openCV version you want to build, default is 4.5.4,
 
 This option value can be provide using:
 
@@ -123,8 +124,8 @@ This option value can be provide using:
 
 ### buildRoot
 
-The `buildRoot` is a the directory used to build openCV, Default value is the npm-opencv-build directory.
-You may want to use this value to persist your files out of your `node_modules` directory.
+The `buildRoot` is the most important parameter, it define the directory used to build openCV, Default value is the npm-opencv-build directory.
+You generaly want to use this value to persist your build files out of your `node_modules` directory, and buy doing som share openCV built between your project.
 
 This option value can be provide using:
 
@@ -181,7 +182,7 @@ This option value can be enable using:
 - The `disableAutoBuild` field in the current package.json `opencv4nodejs` object.
 - The `OPENCV4NODEJS_DISABLE_AUTOBUILD` environement variable.
 
-Can be set using the environment variables *OPENCV4NODEJS_DISABLE_AUTOBUILD*
+Generaly you should prefer using the environment variables *OPENCV4NODEJS_DISABLE_AUTOBUILD*
 
 ### opencvIncludeDir
 
