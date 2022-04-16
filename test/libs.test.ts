@@ -15,7 +15,7 @@ export class FakeOpenCVBuildEnv extends OpenCVBuildEnv {
 }
 
 describe('libs', () => {
-  const env = new FakeOpenCVBuildEnv({});
+  const env = new FakeOpenCVBuildEnv({prebuild: 'latestBuild'});
   const builder = new OpenCVBuilder(env);
   builder.getLibs.syncPath = false;
   const opencvModules = builder.constant.opencvModules;
