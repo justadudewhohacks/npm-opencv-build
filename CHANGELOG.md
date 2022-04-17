@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.4.6
+ - add static methods in OpenCVBuildEnv.
+
 * V 0.4.5
  - fix OPENCV4NODEJS_DISABLE_AUTOBUILD
 

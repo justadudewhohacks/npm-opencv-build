@@ -192,7 +192,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         // get project Root path to looks for package.json for opencv4nodejs section
         let packageEnv: OpenCVPackageBuildOptions = {};
         try {
-            packageEnv = this.readEnvsFromPackageJson()
+            packageEnv = OpenCVBuildEnv.readEnvsFromPackageJson()
         } catch (err) {
             log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
             log.error('applyEnvsFromPackageJson', err)
@@ -337,7 +337,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     /**
      * extract opencv4nodejs section from package.json if available
      */
-    private parsePackageJson(): { file: string, data: any } | null {
+    private static parsePackageJson(): { file: string, data: any } | null {
         // const absPath = path.resolve(this.rootcwd, 'package.json')
         const absPath = path.resolve(process.cwd(), 'package.json')
         if (!fs.existsSync(absPath)) {
@@ -354,7 +354,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
      * get opencv4nodejs section from package.json if available
      * @returns opencv4nodejs customs
      */
-    private readEnvsFromPackageJson(): { [key: string]: string | boolean | number } {
+    public static readEnvsFromPackageJson(): { [key: string]: string | boolean | number } {
         const rootPackageJSON = this.parsePackageJson()
         if (!rootPackageJSON) {
             return {}
