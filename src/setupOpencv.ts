@@ -7,6 +7,7 @@ import { formatNumber, highlight, isCudaAvailable, protect, spawn, toExecCmd } f
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
+import path from 'path';
 
 const primraf = promisify(rimraf);
 
@@ -21,7 +22,7 @@ export class SetupOpencv {
     ]
   }
 
-  private getRunBuildCmd(msbuildExe?: string): () => Promise<void> {
+  private async runBuildCmd(msbuildExe?: string): Promise<void> {
     const env = this.builder.env;
     if (msbuildExe) {
       if (!fs.existsSync(msbuildExe)) {
@@ -29,18 +30,14 @@ export class SetupOpencv {
         throw Error('invalid msbuildExe path ' + msbuildExe);
       }
 
-      return async () => {
-        const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
-        log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildSLN));
-        await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
+      const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
+      log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildSLN));
+      await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
 
-        const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
-        log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildVcxproj));
-        await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
-      }
-    }
-
-    return async () => {
+      const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
+      log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildVcxproj));
+      await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
+    } else {
       log.info('install', 'spawning in %s: make', env.opencvBuild);
       await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
       // revert the strange archiving of libopencv.so going on with make install
@@ -91,9 +88,9 @@ export class SetupOpencv {
 
     let GFlag: string[] = [];
     if (Number(msversion) <= 15)
-      GFlag = [ '-G', `${cmakeVsCompiler}${cmakeArch}` ];
-    else 
-      GFlag = [ '-G', `${cmakeVsCompiler}` ];
+      GFlag = ['-G', `${cmakeVsCompiler}${cmakeArch}`];
+    else
+      GFlag = ['-G', `${cmakeVsCompiler}`];
     return GFlag.concat(this.getSharedCmakeFlags())
   }
 
@@ -132,7 +129,6 @@ export class SetupOpencv {
    * clone OpenCV repo
    * build OpenCV
    * delete source files
-   * @param ctxt 
    */
   public async start(): Promise<void> {
     const execLog: string[] = [];
@@ -177,6 +173,9 @@ export class SetupOpencv {
         execLog.push(toExecCmd('cd', [env.opencvRoot]))
         execLog.push(toExecCmd('git', args))
         await spawn('git', args, { cwd: env.opencvRoot })
+        const wechat = path.join(env.opencvRoot, 'opencv_contrib', 'modules', 'wechat_qrcode');
+        console.log('delete ', wechat);
+        rimraf.sync(wechat);
       }
       log.info('install', `git clone ${this.builder.constant.opencvRepoUrl}`)
       const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl];
@@ -189,7 +188,7 @@ export class SetupOpencv {
       execLog.push(toExecCmd('cmake', cmakeArgs))
       await spawn('cmake', cmakeArgs, { cwd: env.opencvBuild })
       log.info('install', 'starting build...')
-      await this.getRunBuildCmd(msbuildPath)()
+      await this.runBuildCmd(msbuildPath)
     } catch (e) {
       log.error(`Compilation failed, previous calls:${EOL}%s`, execLog.join(EOL));
       throw e;

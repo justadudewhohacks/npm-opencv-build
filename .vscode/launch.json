@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "install 3.4.16",
-            "program": "${workspaceFolder}/src/main.ts",
+            "program": "${workspaceFolder}/bin/main.js",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "env": {
@@ -20,13 +20,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "install 4.5.4",
-            "program": "${workspaceFolder}/src/main.ts",
+            "name": "install 4.5.3",
+            "program": "${workspaceFolder}/bin/main.js",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "env": {
-                "OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION": "4.5.4",
-                "OPENCV4NODEJS_AUTOBUILD_FLAGS": "-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi,face,text",
+                "OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION": "4.5.3",
+                // "OPENCV4NODEJS_AUTOBUILD_FLAGS": "-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi,face,text",
             },
             "console": "integratedTerminal"
         }

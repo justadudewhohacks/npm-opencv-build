@@ -52,7 +52,7 @@ export class Constant {
     return [
       `-DCMAKE_INSTALL_PREFIX=${this.builder.env.opencvBuild}`,
       '-DCMAKE_BUILD_TYPE=Release',
-      '-DBUILD_EXAMPLES=OFF',
+      '-DBUILD_EXAMPLES=OFF', // do not build opencv_contrib samples
       '-DBUILD_DOCS=OFF',
       '-DBUILD_TESTS=OFF',
       '-DBUILD_PERF_TESTS=OFF',

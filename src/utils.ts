@@ -49,12 +49,24 @@ export function execFile(cmd: string, args: string[], options?: child_process.Ex
   })
 }
 
-export function spawn(cmd: string, args: string[], options: child_process.ExecOptions): Promise<string> {
+export function spawn(cmd: string, args: string[], options: child_process.ExecOptions, filters?: {filterStderr?: (data: Buffer) => void, filterStdout?: (data: Buffer) => void }): Promise<string> {
+  filters = filters || {};
+
+  let filterStdout = filters.filterStdout;
+  if (!filterStdout)
+    filterStdout = (data: Buffer) => console.log(data.toString().trim());
+
+  // const filterStdout = filters.filterStdout || (data) => console.log(data);
+  let filterStderr = filters.filterStderr;
+  if (!filterStderr)
+  filterStderr = (data: Buffer) => console.error(data.toString().trim());
+
   log.silly('install', 'spawning:', protect(cmd), args.map(protect).join(' '))
   return new Promise(function (resolve, reject) {
     try {
-      const child = child_process.spawn(cmd, args, { stdio: 'inherit', ...options })
-
+      const child = child_process.spawn(cmd, args, { stdio: ['inherit', 'pipe', 'pipe'], ...options })
+      child.stderr.on('data', filterStderr as any);
+      child.stdout.on('data', filterStdout as any);
       child.on('exit', function (code) {
         if (typeof code !== 'number') {
           code = null
@@ -137,5 +149,4 @@ export async function isCudaAvailable() {
 
   log.info('install', `CUDA version file could not be found in /usr/local/cuda/version.{txt,json}.`);
   return false;
-
 }

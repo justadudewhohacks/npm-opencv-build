@@ -251,7 +251,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
                 log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
             }
             if (process.env.INIT_CWD) {
-                log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to  ${highlight(process.env.INIT_CWD)}`)
+                log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to ${highlight(process.env.INIT_CWD)}`)
             }
             if (!fs.existsSync(this.buildRoot)) {
                 fs.mkdirSync(this.buildRoot);
