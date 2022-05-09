@@ -15,6 +15,7 @@ export interface OpenCVBuildEnvParamsBool {
     autoBuildWithoutContrib?: boolean;
     disableAutoBuild?: boolean;
     keepsources?: boolean;
+    'dry-run'?: boolean;
 }
 
 type boolKey = keyof OpenCVBuildEnvParamsBool;
@@ -94,6 +95,7 @@ export const ALLARGS = {
     libDir: { arg: 'libDir', conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
     binDir: { arg: 'binDir', conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
     keepsources: { arg: 'keepsources', conf: 'keepsources', isBool: true, doc: 'Keepsources OpenCV source after build' } as ArgInfo,
+    'dry-run': { arg: 'dry-run', conf: 'dry-run', isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
 }
 /**
  * generate help message
@@ -152,6 +154,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     public isWithoutContrib: boolean = false;
     public isAutoBuildDisabled: boolean = false;
     public keepsources: boolean = false;
+    public dryRun: boolean = false;
     // root path to look for package.json opencv4nodejs section
     // deprecated directly infer your parameters to the constructor
     public autoBuildFlags: string;
@@ -272,6 +275,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         this.isWithoutContrib = !!this.resolveValue(opts, packageEnv, ALLARGS.nocontrib);
         this.isAutoBuildDisabled = !!this.resolveValue(opts, packageEnv, ALLARGS.nobuild);
         this.keepsources = !!this.resolveValue(opts, packageEnv, ALLARGS.keepsources);
+        this.dryRun = !!this.resolveValue(opts, packageEnv, ALLARGS['dry-run']);
 
         const OPENCV_INCLUDE_DIR = this.resolveValue(opts, packageEnv, ALLARGS.incDir);
         if (OPENCV_INCLUDE_DIR && process.env.OPENCV_INCLUDE_DIR !== OPENCV_INCLUDE_DIR) {

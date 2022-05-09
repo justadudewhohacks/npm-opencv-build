@@ -31,18 +31,38 @@ export class SetupOpencv {
       }
 
       const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
-      log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildSLN));
-      await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
+      let exePath = protect(env.opencvBuild);
+      let args = toExecCmd(msbuildExe, buildSLN);
+      this.execLog.push(`cd ${protect(env.opencvBuild)}`);
+      this.execLog.push(`${exePath} ${args}`);
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: %s', exePath, args);
+        await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
+      }
 
       const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
-      log.info('install', 'spawning in %s: %s', protect(env.opencvBuild), toExecCmd(msbuildExe, buildVcxproj));
-      await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
+      exePath = protect(env.opencvBuild);
+      args = toExecCmd(msbuildExe, buildVcxproj);
+      this.execLog.push(`${exePath} ${args}`); 
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: %s', exePath, args);
+        await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
+      }
     } else {
-      log.info('install', 'spawning in %s: make', env.opencvBuild);
-      await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      this.execLog.push(`cd ${protect(env.opencvBuild)}`); 
+      this.execLog.push(`make install -j${env.numberOfCoresAvailable()}`); 
+
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: make', env.opencvBuild);
+        await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      }
+
+      this.execLog.push(`make all -j${env.numberOfCoresAvailable()}`); 
       // revert the strange archiving of libopencv.so going on with make install
-      log.info('install', 'spawning in %s: make all', env.opencvBuild);
-      await spawn('make', ['all', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: make all', env.opencvBuild);
+        await spawn('make', ['all', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      }
     }
   }
 
@@ -124,6 +144,7 @@ export class SetupOpencv {
     fs.writeFileSync(env.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
     return autoBuildFile;
   }
+  private execLog: string[] = [];
 
   /**
    * clone OpenCV repo
@@ -131,7 +152,7 @@ export class SetupOpencv {
    * delete source files
    */
   public async start(): Promise<void> {
-    const execLog: string[] = [];
+    this.execLog = [];
     const env = this.builder.env;
     const msbuild = await this.getMsbuildIfWin()
     let cMakeFlags: string[] = [];
@@ -153,52 +174,65 @@ export class SetupOpencv {
       for (const k of ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR']) {
         const v = process.env[k];
         if (v)
-          execLog.push(`export ${k}=${protect(v)}`);
+        this.execLog.push(`export ${k}=${protect(v)}`);
       }
       // clean up
       const dirs = [env.opencvBuild, env.opencvSrc, env.opencvContribSrc];
-      execLog.push(toExecCmd('rimraf', dirs))
+      this.execLog.push(toExecCmd('rimraf', dirs))
       for (const dir of dirs)
         await primraf(dir);
       // ensure build dir exists
-      execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
+      this.execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
       fs.mkdirSync(env.opencvBuild, { recursive: true });
 
       if (env.isWithoutContrib) {
-        execLog.push(toExecCmd('cd', [env.opencvRoot]))
+        this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
       } else {
         log.info('install', `git clone ${this.builder.constant.opencvContribRepoUrl}`)
         const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvContribRepoUrl];
-        execLog.push(toExecCmd('cd', [env.opencvRoot]))
-        execLog.push(toExecCmd('git', args))
+        this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
+        this.execLog.push(toExecCmd('git', args))
+
         await spawn('git', args, { cwd: env.opencvRoot })
         const wechat = path.join(env.opencvRoot, 'opencv_contrib', 'modules', 'wechat_qrcode');
+        this.execLog.push(toExecCmd('rimraf', [wechat]))
         console.log('delete ', wechat);
         rimraf.sync(wechat);
       }
       log.info('install', `git clone ${this.builder.constant.opencvRepoUrl}`)
       const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl];
-      execLog.push(toExecCmd('git', args2))
+      this.execLog.push(toExecCmd('git', args2))
       await spawn('git', args2, { cwd: env.opencvRoot })
+
+
+      this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);
+      this.execLog.push(`export OPENCV_INCLUDE_DIR=${protect(env.opencvIncludeDir)}`);
+      this.execLog.push(`export OPENCV_LIB_DIR=${protect(env.opencvLibDir)}`);
 
       const cmakeArgs = this.getCmakeArgs(cMakeFlags)
       log.info('install', 'running in %s cmake %s', protect(env.opencvBuild), cmakeArgs.map(protect).join(' '))
-      execLog.push(toExecCmd('cd', [env.opencvBuild]))
-      execLog.push(toExecCmd('cmake', cmakeArgs))
-      await spawn('cmake', cmakeArgs, { cwd: env.opencvBuild })
-      log.info('install', 'starting build...')
+      this.execLog.push(toExecCmd('cd', [env.opencvBuild]))
+      this.execLog.push(toExecCmd('cmake', cmakeArgs))
+      if (!env.dryRun) {
+        await spawn('cmake', cmakeArgs, { cwd: env.opencvBuild })
+        log.info('install', 'starting build...')
+      }
       await this.runBuildCmd(msbuildPath)
     } catch (e) {
-      log.error(`Compilation failed, previous calls:${EOL}%s`, execLog.join(EOL));
+      log.error(`Compilation failed, previous calls:${EOL}%s`, this.execLog.join(EOL));
       throw e;
     }
 
-    this.writeAutoBuildFile()
+    if (!env.dryRun) {
+      this.writeAutoBuildFile()
+    } else {
+      this.execLog.push('echo lock file can not be generated in dry-mode');
+    }
     // cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
     // -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
     // -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
-    if (!env.keepsources) {
+    if (!env.keepsources && !env.dryRun) {
       /**
        * DELETE TMP build dirs
        */
@@ -215,6 +249,11 @@ export class SetupOpencv {
         log.error('install', 'failed to clean opencv_contrib source folder:', err)
         log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvContribSrc)
       }
+    }
+    if (env.dryRun) {
+      console.log();
+      console.log();
+      console.log(this.execLog.join(EOL));
     }
   }
 }

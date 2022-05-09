@@ -42,6 +42,7 @@ npm-opencv-build usage:
    --libDir <value>     OpenCV library directory                 (OPENCV_LIB_DIR env variable)
    --binDir <value>     OpenCV bin directory                     (OPENCV_BIN_DIR env variable)
    --keepsources        Keepsources OpenCV source after build
+   --dry-run            Display command line use to build library
 ```
 
 ## Requirements
