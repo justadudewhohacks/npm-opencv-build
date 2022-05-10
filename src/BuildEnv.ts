@@ -81,6 +81,11 @@ interface ArgInfo {
 }
 
 /**
+ * list of variables needed to link and use openCV
+ */
+export const OPENCV_PATHS_ENV = ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR'];
+
+/**
  * arguments data
  */
 export const ALLARGS = {

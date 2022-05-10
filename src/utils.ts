@@ -49,17 +49,25 @@ export function execFile(cmd: string, args: string[], options?: child_process.Ex
   })
 }
 
-export function spawn(cmd: string, args: string[], options: child_process.ExecOptions, filters?: {filterStderr?: (data: Buffer) => void, filterStdout?: (data: Buffer) => void }): Promise<string> {
+export function spawn(cmd: string, args: string[], options: child_process.ExecOptions, filters?: {err?: (data: Buffer) => Buffer | null, out?: (data: Buffer) => Buffer | null }): Promise<string> {
   filters = filters || {};
+  const filterStdout = (data: Buffer) => {
+    if (filters && filters.out) {
+      data = filters.out(data) as Buffer;
+      if (!data)
+        return;
+    }
+    process.stdout.write(data);
+  }
 
-  let filterStdout = filters.filterStdout;
-  if (!filterStdout)
-    filterStdout = (data: Buffer) => console.log(data.toString().trim());
-
-  // const filterStdout = filters.filterStdout || (data) => console.log(data);
-  let filterStderr = filters.filterStderr;
-  if (!filterStderr)
-  filterStderr = (data: Buffer) => console.error(data.toString().trim());
+  const filterStderr = (data: Buffer) => {
+    if (filters && filters.err) {
+      data = filters.err(data) as Buffer;
+      if (!data)
+        return;
+    }
+    process.stderr.write(data);
+  }
 
   log.silly('install', 'spawning:', protect(cmd), args.map(protect).join(' '))
   return new Promise(function (resolve, reject) {

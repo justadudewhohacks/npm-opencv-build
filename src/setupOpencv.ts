@@ -7,7 +7,7 @@ import { formatNumber, highlight, isCudaAvailable, protect, spawn, toExecCmd } f
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import path from 'path';
+import { OPENCV_PATHS_ENV } from './BuildEnv.js';
 
 const primraf = promisify(rimraf);
 
@@ -29,23 +29,19 @@ export class SetupOpencv {
         log.error('install', 'invalid msbuildExe path" %s', msbuildExe);
         throw Error('invalid msbuildExe path ' + msbuildExe);
       }
-
       const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
-      let exePath = protect(env.opencvBuild);
       let args = toExecCmd(msbuildExe, buildSLN);
       this.execLog.push(`cd ${protect(env.opencvBuild)}`);
-      this.execLog.push(`${exePath} ${args}`);
+      this.execLog.push(args);
       if (!env.dryRun) {
-        log.info('install', 'spawning in %s: %s', exePath, args);
+        log.info('install', 'spawning in %s: %s', env.opencvBuild, args);
         await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
       }
-
       const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
-      exePath = protect(env.opencvBuild);
       args = toExecCmd(msbuildExe, buildVcxproj);
-      this.execLog.push(`${exePath} ${args}`); 
+      this.execLog.push(`${args}`); 
       if (!env.dryRun) {
-        log.info('install', 'spawning in %s: %s', exePath, args);
+        log.info('install', 'spawning in %s: %s', env.opencvBuild, args);
         await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
       }
     } else {
@@ -128,7 +124,6 @@ export class SetupOpencv {
   }
   /**
    * Write Build Context to disk, to avoid further rebuild
-   * @param ctxt 
    * @returns AutoBuildFile
    */
   private writeAutoBuildFile(): AutoBuildFile {
@@ -169,12 +164,14 @@ export class SetupOpencv {
 
     const tag = env.opencvVersion
     log.info('install', `installing opencv version ${formatNumber("%s")} into directory: ${highlight("%s")}`, tag, env.opencvRoot)
-    log.info('install', `Cleaning old build, src, contrib-src directories`)
+    log.info('install', `Cleaning old build: src, build and contrib-src directories`)
     try {
-      for (const k of ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR']) {
+      for (const k of OPENCV_PATHS_ENV) {
         const v = process.env[k];
-        if (v)
-        this.execLog.push(`export ${k}=${protect(v)}`);
+        if (v) {
+          const setEnv = (process.platform === 'win32') ? '$Env:' : 'export ';
+          this.execLog.push(`${setEnv}${k}=${protect(v)}`);
+        }
       }
       // clean up
       const dirs = [env.opencvBuild, env.opencvSrc, env.opencvContribSrc];
@@ -185,6 +182,14 @@ export class SetupOpencv {
       this.execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
       fs.mkdirSync(env.opencvBuild, { recursive: true });
 
+      // hide detached HEAD message.
+      const gitFilter = (data: Buffer): Buffer | null => {
+        const asTxt = data.toString();
+        if (asTxt.includes('detached HEAD')) return null;
+        if (asTxt.includes('--depth is ignored in local clones')) return null;
+        return data;
+      }
+
       if (env.isWithoutContrib) {
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
@@ -193,17 +198,12 @@ export class SetupOpencv {
         const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvContribRepoUrl];
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         this.execLog.push(toExecCmd('git', args))
-
-        await spawn('git', args, { cwd: env.opencvRoot })
-        const wechat = path.join(env.opencvRoot, 'opencv_contrib', 'modules', 'wechat_qrcode');
-        this.execLog.push(toExecCmd('rimraf', [wechat]))
-        console.log('delete ', wechat);
-        rimraf.sync(wechat);
+        await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
       }
       log.info('install', `git clone ${this.builder.constant.opencvRepoUrl}`)
       const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl];
       this.execLog.push(toExecCmd('git', args2))
-      await spawn('git', args2, { cwd: env.opencvRoot })
+      await spawn('git', args2, { cwd: env.opencvRoot }, {err: gitFilter})
 
 
       this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);

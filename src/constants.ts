@@ -28,8 +28,10 @@ export class Constant {
   }
 
   opencvRepoUrl = 'https://github.com/opencv/opencv.git'
+  // opencvRepoUrl = 'c:/cache/opencv'
   opencvContribRepoUrl = 'https://github.com/opencv/opencv_contrib.git'
-
+  // opencvContribRepoUrl = 'c:/cache/opencv_contrib'
+  
   opencvModules = opencvModules;
 
   cmakeVsCompilers: { [version: string]: string } = {
@@ -88,6 +90,7 @@ export class Constant {
       '-DBUILD_opencv_ts=OFF',
       '-DBUILD_opencv_xobjdetect=OFF',
       '-DBUILD_opencv_xphoto=OFF',
+      '-DBUILD_opencv_wechat_qrcode=OFF', // since 10/05/2022
       '-DWITH_VTK=OFF'
     ];
   }

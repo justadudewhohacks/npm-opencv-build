@@ -5,7 +5,7 @@ import log from 'npmlog';
 import { getLibsFactory } from './getLibsFactory.js';
 import { SetupOpencv } from './setupOpencv.js';
 import { Constant } from './constants.js';
-import { args2Option, genHelp, OpenCVBuildEnv, OpenCVBuildEnvParams } from './BuildEnv.js';
+import { args2Option, genHelp, OpenCVBuildEnv, OpenCVBuildEnvParams, OPENCV_PATHS_ENV } from './BuildEnv.js';
 
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
@@ -55,7 +55,6 @@ export class OpenCVBuilder {
       hasLibs = hasLibs && !!foundLib
       log.info('install', `lib ${utils.formatNumber("%s")}: ${utils.light("%s")}`, opencvModule, foundLib ? foundLib.libPath : 'not found')
     })
-
     return hasLibs
   }
 
@@ -68,24 +67,23 @@ export class OpenCVBuilder {
       log.info('install', `${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} is set skipping auto build...`)
       return
     }
-    log.info('install', `if you want to use an own OpenCV installation set ${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')}`)
-
+    log.info('install', `if you want to use an own OpenCV build set ${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} to 1, and fill ${OPENCV_PATHS_ENV.map(utils.highlight).join(', ')} environement variables`);
     // prevent rebuild on every install
     const autoBuildFile = this.env.readAutoBuildFile()
     if (autoBuildFile) {
-      log.info('install', `found auto-build.json: ${utils.highlight(this.env.autoBuildFile)}`)
+      log.info('install', `found previous build summery auto-build.json: ${utils.highlight(this.env.autoBuildFile)}`)
 
       if (autoBuildFile.opencvVersion !== this.env.opencvVersion) {
         // can no longer occure with this version of opencv4nodejs-builder
-        log.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but AUTOBUILD_OPENCV_VERSION=${this.env.opencvVersion}`)
+        log.info('install', `auto build opencv version is ${autoBuildFile.opencvVersion}, but AUTOBUILD_OPENCV_VERSION=${this.env.opencvVersion}, Will rebuild`)
       } else if (autoBuildFile.autoBuildFlags !== this.env.autoBuildFlags) {
         // should no longer occure since -MD5(autoBuildFlags) is append to build path
-        log.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but AUTOBUILD_FLAGS is ${this.env.autoBuildFlags}`)
+        log.info('install', `auto build flags are ${autoBuildFile.autoBuildFlags}, but AUTOBUILD_FLAGS is ${this.env.autoBuildFlags}, Will rebuild`)
       } else {
         const hasLibs = this.checkInstalledLibs(autoBuildFile)
         if (hasLibs) {
-          log.info('install', `all libraries are installed in ${utils.highlight(this.env.opencvLibDir)} => ${utils.highlight('Skip')} building`)
-          return
+          log.info('install', `all libraries are installed in ${utils.highlight(this.env.opencvLibDir)} => ${utils.highlight('Skip building')}`)
+          return;
         } else {
           log.info('install', 'missing some libraries')
         }

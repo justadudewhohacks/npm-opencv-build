@@ -1,5 +1,10 @@
 # Changelog
 
+* V 0.4.7
+ - add --dry-run parameter to debug openCV build failure.
+ - do not build module wechat_qrcode
+ - improve output text readability
+
 * V 0.4.6
  - add static methods in OpenCVBuildEnv.
 
