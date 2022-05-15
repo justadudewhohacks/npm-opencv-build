@@ -51,7 +51,7 @@ export class getLibsFactory {
    * @returns 
    */
   getLibNameRegex(opencvModuleName: string): RegExp {
-    const regexp = `^${this.getLibPrefix}${opencvModuleName}[0-9.]*\.${this.getLibSuffix}$`;
+    const regexp = `^${this.getLibPrefix}${opencvModuleName}[0-9.]*\\.${this.getLibSuffix}$`;
     return new RegExp(regexp)
   }
 
@@ -92,14 +92,14 @@ export class getLibsFactory {
     if (worldLibPath) {
       return [{
         opencvModule: worldModule,
-        libPath: worldLibPath
+        libPath: worldLibPath,
       }]
     }
 
     return [...this.builder.env.enabledModules].map(
       (opencvModule: OpencvModulesType) => ({
         opencvModule,
-        libPath: this.resolveLib(opencvModule)
+        libPath: this.resolveLib(opencvModule),
       })
     )
   }

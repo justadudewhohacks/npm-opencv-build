@@ -41,7 +41,7 @@ async function findMSBuild(): Promise<pathVersion> {
     return Promise.reject('fail to get MSBuild.exe version number');
   const build = {
     path: selected,
-    version: Number(m[1])
+    version: Number(m[1]),
   }
   log.silly('find-msbuild', 'using following msbuild:')
   log.silly('find-msbuild', 'version:', build.version)

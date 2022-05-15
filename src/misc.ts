@@ -114,7 +114,7 @@ export const genHelp = (): string => {
  * @returns and openCVBuildEnvParams object containing an extra object with all unknown args
  */
 export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
-    let out: OpenCVBuildEnvParams = { extra: {} };
+    const out: OpenCVBuildEnvParams = { extra: {} };
     for (let i = 0; i < args.length; i++) {
         let arg = args[i];
         if (arg.startsWith('--')) {
@@ -158,7 +158,7 @@ export const ALL_OPENCV_MODULES = ['apps', 'aruco', 'bgsegm', 'bioinspired', 'ca
     'superres', 'surface_matching', 'ts', 'video', 'videoio', 'wechat_qrcode', 'world',
     'xobjdetect', 'xphoto',
     // olds:
-    'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc'
+    'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
 ] as const;
 
 /**
@@ -169,5 +169,5 @@ export type OpencvModulesType = typeof ALL_OPENCV_MODULES[number];
 export const defaultEnabledModules: OpencvModulesType[] = ['calib3d', 'core', 'dnn', 'features2d', 'flann', 'gapi', 'highgui', 'imgcodecs', 'imgproc',
 'ml', 'objdetect', 'photo', 'python_tests', 'video', 'videoio',
 // olds:
-'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc'
+'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
 ]

@@ -7,7 +7,7 @@ import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { OPENCV_PATHS_ENV } from './misc.js';
+import { OPENCV_PATHS_ENV } from './misc';
 
 const primraf = promisify(rimraf);
 
@@ -18,7 +18,7 @@ export class SetupOpencv {
     return [
       sln,
       '/p:Configuration=Release',
-      `/p:Platform=${process.arch === 'x64' ? 'x64' : 'x86'}`
+      `/p:Platform=${process.arch === 'x64' ? 'x64' : 'x86'}`,
     ]
   }
 
@@ -173,7 +173,7 @@ export class SetupOpencv {
           } else {
             await spawn('git', [ 'pull' ], { cwd: env.opencvContribGitCache }, {err: gitFilter});
           }
-          opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');;
+          opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');
         }
         log.info('install', `git clone ${opencvContribRepoUrl}`)
         const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl, env.opencvContribSrc];

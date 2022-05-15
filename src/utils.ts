@@ -78,13 +78,13 @@ export function spawn(cmd: string, args: string[], options: child_process.ExecOp
   return new Promise(function (resolve, reject) {
     try {
       const child = child_process.spawn(cmd, args, { stdio: ['inherit', 'pipe', 'pipe'], ...options })
-      child.stderr.on('data', filterStderr as any);
-      child.stdout.on('data', filterStdout as any);
+      child.stderr.on('data', filterStderr);
+      child.stdout.on('data', filterStdout);
       child.on('exit', function (code) {
         if (typeof code !== 'number') {
           code = null
         }
-        const msg = `running: ${protect(cmd)} ${args.map(protect).join(' ')}${EOL}in ${options.cwd as string} exited with code ${code} (for more info, set \'--loglevel silly\')'`
+        const msg = `running: ${protect(cmd)} ${args.map(protect).join(' ')}${EOL}in ${options.cwd as string} exited with code ${code} (for more info, set '--loglevel silly')'`
         if (code !== 0) {
           return reject(msg)
         }

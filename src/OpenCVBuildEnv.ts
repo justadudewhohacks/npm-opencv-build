@@ -11,12 +11,12 @@ import { ALL_OPENCV_MODULES } from '.';
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
     public opencvVersion: string;
-    public buildWithCuda: boolean = false;
-    public isWithoutContrib: boolean = false;
-    public isAutoBuildDisabled: boolean = false;
-    public keepsources: boolean = false;
-    public dryRun: boolean = false;
-    public gitCache: boolean = false;
+    public buildWithCuda = false;
+    public isWithoutContrib = false;
+    public isAutoBuildDisabled = false;
+    public keepsources = false;
+    public dryRun = false;
+    public gitCache = false;
     // root path to look for package.json opencv4nodejs section
     // deprecated directly infer your parameters to the constructor
     public autoBuildFlags: string;
@@ -93,12 +93,13 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             const autoBuildFile = this.readAutoBuildFile2(builds[0].autobuild);
             if (!autoBuildFile)
                 throw Error(`failed to read build info from ${builds[0].autobuild}`);
-            let flagStr = autoBuildFile.env.autoBuildFlags;
+            const flagStr = autoBuildFile.env.autoBuildFlags;
             // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
             if (flagStr) {
-                let flags = flagStr.split(' ')
+                const flags = flagStr.split(' ')
                 flags.filter(flag => {
                     if (flag.startsWith('-DBUILD_opencv_')) {
+                        // eslint-disable-next-line prefer-const
                         let [mod, activated] = flag.substring(15).split('=');
                         activated = activated.toUpperCase();
                         if (activated === 'ON' || activated === '1') {
@@ -237,7 +238,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     // brew link ffmpeg@4
 
     public getSharedCmakeFlags(): string[] {
-        let cMakeflags = [
+        const cMakeflags = [
             `-DCMAKE_INSTALL_PREFIX=${this.opencvBuild}`,
             '-DCMAKE_BUILD_TYPE=Release',
             '-DBUILD_EXAMPLES=OFF', // do not build opencv_contrib samples
@@ -247,7 +248,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             '-DBUILD_JAVA=OFF',
             '-DBUILD_ZLIB=OFF', // https://github.com/opencv/opencv/issues/21389
             '-DCUDA_NVCC_FLAGS=--expt-relaxed-constexpr',
-            '-DWITH_VTK=OFF'
+            '-DWITH_VTK=OFF',
         ]
         if (!this.isWithoutContrib)
             cMakeflags.push('-DOPENCV_ENABLE_NONFREE=ON', `-DOPENCV_EXTRA_MODULES_PATH=${this.opencvContribModules}`);
@@ -257,7 +258,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     }
 
     public getCongiguredCmakeFlags(): string[] {
-        let cMakeflags = [];
+        const cMakeflags = [];
         if (this.buildWithCuda && isCudaAvailable()) {
             // log.info('install', 'Adding CUDA flags...');
             // this.enabledModules.delete('cudacodec');// video codec (NVCUVID) is deprecated in cuda 10, so don't add it
@@ -293,7 +294,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     /**
      * extract opencv4nodejs section from package.json if available
      */
-    private static parsePackageJson(): { file: string, data: any } | null {
+    private static parsePackageJson(): { file: string, data: {opencv4nodejs?: {[key: string]: string | boolean | number}}} | null {
         const absPath = OpenCVBuildEnv.getPackageJson();
         if (!fs.existsSync(absPath)) {
             return null
