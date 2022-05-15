@@ -3,11 +3,11 @@ import { EOL } from 'os';
 import { OpenCVBuilder } from './OpenCVBuilder.js';
 import { findMsBuild, pathVersion } from './findMsBuild.js';
 import type { AutoBuildFile } from './types.js';
-import { formatNumber, highlight, isCudaAvailable, protect, spawn, toExecCmd } from './utils.js';
+import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { OPENCV_PATHS_ENV } from './BuildEnv.js';
+import { OPENCV_PATHS_ENV } from './misc.js';
 
 const primraf = promisify(rimraf);
 
@@ -62,35 +62,6 @@ export class SetupOpencv {
     }
   }
 
-  private getCudaCmakeFlags(): string[] {
-    return [
-      '-DWITH_CUDA=ON',
-      '-DBUILD_opencv_cudacodec=OFF', // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
-      '-DCUDA_FAST_MATH=ON', // optional
-      '-DWITH_CUBLAS=ON', // optional
-    ];
-  }
-
-  private getSharedCmakeFlags(): string[] {
-    const env = this.builder.env;
-    let conditionalFlags = env.isWithoutContrib
-      ? []
-      : [
-        '-DOPENCV_ENABLE_NONFREE=ON',
-        `-DOPENCV_EXTRA_MODULES_PATH=${env.opencvContribModules}`
-      ]
-
-    if (this.builder.env.buildWithCuda && isCudaAvailable()) {
-      log.info('install', 'Adding CUDA flags...');
-      conditionalFlags = conditionalFlags.concat(this.getCudaCmakeFlags());
-    }
-
-    return this.builder.constant.defaultCmakeFlags()
-      .concat(conditionalFlags)
-      .concat(env.parseAutoBuildFlags())
-    // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
-  }
-
   private getWinCmakeFlags(msversion: string): string[] {
     const cmakeVsCompiler = this.builder.constant.cmakeVsCompilers[msversion]
     const cmakeArch = this.builder.constant.cmakeArchs[process.arch]
@@ -107,7 +78,7 @@ export class SetupOpencv {
       GFlag = ['-G', `${cmakeVsCompiler}${cmakeArch}`];
     else
       GFlag = ['-G', `${cmakeVsCompiler}`];
-    return GFlag.concat(this.getSharedCmakeFlags())
+    return GFlag.concat(this.builder.env.getSharedCmakeFlags())
   }
 
   private getCmakeArgs(cmakeFlags: string[]): string[] {
@@ -159,7 +130,7 @@ export class SetupOpencv {
       cMakeFlags = this.getWinCmakeFlags("" + msbuild.version);
       msbuildPath = msbuild.path;
     } else {
-      cMakeFlags = this.getSharedCmakeFlags();
+      cMakeFlags = this.builder.env.getSharedCmakeFlags();
     }
 
     const tag = env.opencvVersion
@@ -194,17 +165,38 @@ export class SetupOpencv {
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
       } else {
-        log.info('install', `git clone ${this.builder.constant.opencvContribRepoUrl}`)
-        const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvContribRepoUrl];
+        let opencvContribRepoUrl = this.builder.constant.opencvContribRepoUrl;
+        if (this.builder.env.gitCache) {
+          if (!fs.existsSync(this.builder.env.opencvContribGitCache)) {
+            const args = ['clone', '--quiet', '--progress', opencvContribRepoUrl, this.builder.env.opencvContribGitCache];
+            await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+          } else {
+            await spawn('git', [ 'pull' ], { cwd: env.opencvContribGitCache }, {err: gitFilter});
+          }
+          opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');;
+        }
+        log.info('install', `git clone ${opencvContribRepoUrl}`)
+        const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl, env.opencvContribSrc];
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         this.execLog.push(toExecCmd('git', args))
         await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
       }
-      log.info('install', `git clone ${this.builder.constant.opencvRepoUrl}`)
-      const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl];
+      let opencvRepoUrl = this.builder.constant.opencvRepoUrl;
+
+      if (this.builder.env.gitCache) {
+        if (!fs.existsSync(this.builder.env.opencvGitCache)) {
+          const args = ['clone', '--quiet', '--progress', opencvRepoUrl, this.builder.env.opencvGitCache];
+          await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+        } else {
+          await spawn('git', [ 'pull' ], { cwd: env.opencvGitCache }, {err: gitFilter});
+        }
+        opencvRepoUrl = env.opencvGitCache.replace(/\\/g, '/');
+      }
+
+      log.info('install', `git clone ${opencvRepoUrl}`)
+      const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl, env.opencvSrc];
       this.execLog.push(toExecCmd('git', args2))
       await spawn('git', args2, { cwd: env.opencvRoot }, {err: gitFilter})
-
 
       this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);
       this.execLog.push(`export OPENCV_INCLUDE_DIR=${protect(env.opencvIncludeDir)}`);

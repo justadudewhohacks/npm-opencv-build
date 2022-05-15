@@ -2,9 +2,7 @@ import OpenCVBuilder from './OpenCVBuilder.js';
 import type { OpencvModule } from './types.js';
 import fs from 'fs';
 import path from 'path';
-import { opencvModulesType } from './constants.js';
-
-const worldModule = 'world';
+import { OpencvModulesType } from './misc.js';
 
 export class getLibsFactory {
   libFiles: string[] = [];
@@ -60,7 +58,7 @@ export class getLibsFactory {
   /**
    * find a lib
    */
-  public resolveLib(opencvModuleName: opencvModulesType): string {
+  public resolveLib(opencvModuleName: OpencvModulesType): string {
     const libDir = this.builder.env.opencvLibDir;
     const libFiles: string[] = this.listFiles();
     return this.matchLib(opencvModuleName, libDir, libFiles);
@@ -89,6 +87,7 @@ export class getLibsFactory {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }
 
+    const worldModule = 'world';
     const worldLibPath = this.resolveLib(worldModule)
     if (worldLibPath) {
       return [{
@@ -97,8 +96,8 @@ export class getLibsFactory {
       }]
     }
 
-    return this.builder.constant.opencvModules.map(
-      (opencvModule: opencvModulesType) => ({
+    return [...this.builder.env.enabledModules].map(
+      (opencvModule: OpencvModulesType) => ({
         opencvModule,
         libPath: this.resolveLib(opencvModule)
       })

@@ -1,5 +1,15 @@
 # Changelog
 
+* V 0.5.0
+ - fix -h alias from --help
+ - remove build log at runtime.
+ - re-write cmake parameter handle
+ - disable buy default some opencv modules
+ - add -DBUILD_ZLIB=OFF by default, fix MacOs X build error
+ - default openCV version build is now 4.5.5
+ - OpenCVBuilder.env can be modifyed immediately after his instanciation to enable/disable openCV modules.
+ - add --git-cache or OPENCV_GIT_CACHE env variabe cache git data on local disk
+
 * V 0.4.7
  - add --dry-run parameter to debug openCV build failure.
  - do not build module wechat_qrcode
