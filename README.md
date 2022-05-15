@@ -62,13 +62,13 @@ npm install --global windows-build-tools
 It's possible to specify build environment variables by passing argument to the builder script
 
 ```bash
-node lib/main.js --version 4.5.4 --buildRoot ~/openCV
+node lib/main.js --version 4.5.5 --buildRoot ~/openCV
 ```
 
 with flags, do not forget the quotes `"`
 
 ```bash
-node lib/main.js --version 4.5.4 --buildRoot ~/openCV --flags "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
+node lib/main.js --version 4.5.5 --buildRoot ~/openCV --flags "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
 ```
 
 Using the bin alias
@@ -83,7 +83,7 @@ Or by inserting them into the `package.json` where the dependency is declared an
 {
   "opencv4nodejs": {
     "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc",
-    "autoBuildOpencvVersion": "4.5.4"
+    "autoBuildOpencvVersion": "4.5.5"
   }
 }
 ```
@@ -92,7 +92,7 @@ By using environement varaibles.
 
 ```bash
 export OPENCV4NODEJS_AUTOBUILD_FLAGS="-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
-export OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION="4.5.4"
+export OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION="4.5.5"
 export OPENCV_BUILD_ROOT="~/openCV"
 
 node build/main.js
@@ -114,7 +114,7 @@ the `prebuild` option intend to be use at runtime, so you do not have to keep tr
 
 ### autoBuildOpencvVersion
 
-Choose the openCV version you want to build, default is 4.5.4,
+Choose the openCV version you want to build, default is 4.5.5,
 
 This option value can be provide using:
 
@@ -204,5 +204,5 @@ opencv-build-npm --flags="-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,vi
 ```
 
 ```bash
-opencv-build-npm --version=4.5.4 --nocontrib
+opencv-build-npm --version=4.5.5 --nocontrib
 ```

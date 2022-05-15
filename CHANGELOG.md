@@ -1,5 +1,13 @@
 # Changelog
 
+* V 0.4.8
+ - fix -h alias from --help
+ - remove build log at runtime.
+ - re-write cmake parameter handle
+ - disable buy default some opencv modules
+ - add -DBUILD_ZLIB=OFF by default
+ - default openCV version build is now 4.5.5
+
 * V 0.4.7
  - add --dry-run parameter to debug openCV build failure.
  - do not build module wechat_qrcode

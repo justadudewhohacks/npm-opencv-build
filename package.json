@@ -1,6 +1,6 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2022 Edition",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -11,7 +11,7 @@
     "clean": "rimraf build",
     "build": "tsc",
     "build3x": "tsc && node lib/main.js --keepsource",
-    "install_macm1": "node bin/main.js --version 4.5.4 --flag=\"-DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_OSX_ARCHITECTURES=arm64\"",
+    "install_macm1": "node bin/main.js --version 4.5.5 --flag=\"-DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_OSX_ARCHITECTURES=arm64\"",
     "install_4_5_5": "node bin/main.js --version 4.5.5",
     "do-install": "node lib/main.js",
     "cleanbuild": "rimraf lib && tsc",

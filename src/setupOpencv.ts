@@ -205,7 +205,6 @@ export class SetupOpencv {
       this.execLog.push(toExecCmd('git', args2))
       await spawn('git', args2, { cwd: env.opencvRoot }, {err: gitFilter})
 
-
       this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);
       this.execLog.push(`export OPENCV_INCLUDE_DIR=${protect(env.opencvIncludeDir)}`);
       this.execLog.push(`export OPENCV_LIB_DIR=${protect(env.opencvLibDir)}`);

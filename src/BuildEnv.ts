@@ -5,6 +5,7 @@ import log from 'npmlog';
 import { highlight, formatNumber } from './utils';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
+import { enabledModules, OpencvModulesType } from './constants';
 
 /**
  * options passed to OpenCVBuildEnv constructor
@@ -125,8 +126,8 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
         let arg = args[i];
         if (arg.startsWith('--')) {
             arg = arg.substring(2);
-        } else if (arg.startsWith('--')) {
-            arg = arg.substring(2);
+        } else if (arg.startsWith('-')) {
+            arg = arg.substring(1);
         } else {
             continue;
         }
@@ -188,7 +189,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
 
     constructor(opts?: OpenCVBuildEnvParams) {
         opts = opts || {};
-        const DEFAULT_OPENCV_VERSION = '4.5.4'
+        const DEFAULT_OPENCV_VERSION = '4.5.5';
         this.prebuild = opts.prebuild;
         this._platform = process.platform;
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
@@ -200,7 +201,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         // get project Root path to looks for package.json for opencv4nodejs section
         let packageEnv: OpenCVPackageBuildOptions = {};
         try {
-            packageEnv = OpenCVBuildEnv.readEnvsFromPackageJson()
+            packageEnv = this.readEnvsFromPackageJson()
         } catch (err) {
             log.error('applyEnvsFromPackageJson', 'failed to parse package.json:')
             log.error('applyEnvsFromPackageJson', err)
@@ -232,15 +233,33 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
             // load envthe prevuious build
             const autoBuildFile = this.readAutoBuildFile2(builds[0].autobuild);
             if (!autoBuildFile)
-                throw Error('failed to read build info from ' + builds[0].autobuild);
-            this.autoBuildFlags = autoBuildFile.env.autoBuildFlags;
+                throw Error(`failed to read build info from ${builds[0].autobuild}`);
+            let flagStr = autoBuildFile.env.autoBuildFlags;
+            // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
+            if (flagStr) {
+                let flags = flagStr.split(' ')
+                flags.filter(flag => {
+                    if (flag.startsWith('-DBUILD_opencv_')) {
+                        let [mod, activated] = flag.substring(15).split('=');
+                        activated = activated.toUpperCase();
+                        if (activated === 'ON' || activated === '1') {
+                            enabledModules.add(mod as OpencvModulesType);
+                        } else if (activated === 'OFF' || activated === '0') {
+                            enabledModules.delete(mod as OpencvModulesType);
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            this.autoBuildFlags = flagStr;
             this.buildWithCuda = autoBuildFile.env.buildWithCuda;
             this.isAutoBuildDisabled = autoBuildFile.env.isAutoBuildDisabled;
             this.isWithoutContrib = autoBuildFile.env.isWithoutContrib;
             this.opencvVersion = autoBuildFile.env.opencvVersion;
             this.buildRoot = autoBuildFile.env.buildRoot;
             if (!this.opencvVersion) {
-                throw Error('autobuild file is corrupted, opencvVersion is missing in ' + builds[0].autobuild);
+                throw Error(`autobuild file is corrupted, opencvVersion is missing in ${builds[0].autobuild}`);
             }
             process.env.OPENCV_BIN_DIR = autoBuildFile.env.OPENCV_BIN_DIR;
             process.env.OPENCV_INCLUDE_DIR = autoBuildFile.env.OPENCV_INCLUDE_DIR;
@@ -313,7 +332,6 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
                 }
             }
         }
-
     }
 
     public dumpEnv(): EnvSummery {
@@ -346,11 +364,12 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     /**
      * extract opencv4nodejs section from package.json if available
      */
-    private static parsePackageJson(): { file: string, data: any } | null {
+    private parsePackageJson(): { file: string, data: any } | null {
         // const absPath = path.resolve(this.rootcwd, 'package.json')
         const absPath = path.resolve(process.cwd(), 'package.json')
         if (!fs.existsSync(absPath)) {
-            log.info('config', `No file ${highlight("%s")} found for opencv4nodejs import`, absPath);
+            if (!this.prebuild)
+                log.info('config', `No file ${highlight("%s")} found for opencv4nodejs import`, absPath);
             return null
         }
         const data = JSON.parse(fs.readFileSync(absPath).toString())
@@ -363,7 +382,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
      * get opencv4nodejs section from package.json if available
      * @returns opencv4nodejs customs
      */
-    public static readEnvsFromPackageJson(): { [key: string]: string | boolean | number } {
+    public readEnvsFromPackageJson(): { [key: string]: string | boolean | number } {
         const rootPackageJSON = this.parsePackageJson()
         if (!rootPackageJSON) {
             return {}
@@ -385,6 +404,8 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
      */
     get optHash(): string {
         let optArgs = this.autoBuildFlags;
+        // let optArgs = t .defaultCmakeBuildFlags();
+        
         // if (!optArgs) {
         //     log.info('init', `${utils.highlight("OPENCV4NODEJS_AUTOBUILD_FLAGS")} is not defined, No extra flags will be append to the build command`)
         // } else {
