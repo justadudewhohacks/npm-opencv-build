@@ -43,6 +43,7 @@ npm-opencv-build usage:
    --binDir <value>     OpenCV bin directory                     (OPENCV_BIN_DIR env variable)
    --keepsources        Keepsources OpenCV source after build
    --dry-run            Display command line use to build library
+   --git-cache          Reduce Bandwide usage, by keeping a local git souce un the buildRoot (OPENCV_GIT_CACHE env variable)
 ```
 
 ## Requirements
@@ -133,6 +134,16 @@ This option value can be provide using:
 - The `--buildRoot` in build script
 - The `buildRoot` options field provided to `OpenCVBuildEnv` constructor options.
 - The `OPENCV_BUILD_ROOT` environement variable.
+
+### git-cache
+
+The `git-cache` reduce git clone data transfert, git data will be cache in you `buildRoot`, so you will onlyt downdload all git file once.
+
+This option value can be provide using:
+
+- The `--git-cache` in build script
+- The `git-cache` options field provided to `OpenCVBuildEnv` constructor options.
+- The `OPENCV_GIT_CACHE` environement variable.
 
 ### autoBuildBuildCuda
 
