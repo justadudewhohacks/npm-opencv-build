@@ -1,12 +1,13 @@
 # Changelog
 
-* V 0.4.8
+* V 0.5.0
  - fix -h alias from --help
  - remove build log at runtime.
  - re-write cmake parameter handle
  - disable buy default some opencv modules
  - add -DBUILD_ZLIB=OFF by default
  - default openCV version build is now 4.5.5
+ - OpenCVBuilder.env can be modifyed immediately after his instanciation to enable/disable openCV modules.
 
 * V 0.4.7
  - add --dry-run parameter to debug openCV build failure.

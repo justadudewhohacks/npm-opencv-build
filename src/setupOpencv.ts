@@ -62,35 +62,6 @@ export class SetupOpencv {
     }
   }
 
-  private getCudaCmakeFlags(): string[] {
-    return [
-      '-DWITH_CUDA=ON',
-      '-DBUILD_opencv_cudacodec=OFF', // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
-      '-DCUDA_FAST_MATH=ON', // optional
-      '-DWITH_CUBLAS=ON', // optional
-    ];
-  }
-
-  private getSharedCmakeFlags(): string[] {
-    const env = this.builder.env;
-    let conditionalFlags = env.isWithoutContrib
-      ? []
-      : [
-        '-DOPENCV_ENABLE_NONFREE=ON',
-        `-DOPENCV_EXTRA_MODULES_PATH=${env.opencvContribModules}`
-      ]
-
-    if (this.builder.env.buildWithCuda && isCudaAvailable()) {
-      log.info('install', 'Adding CUDA flags...');
-      conditionalFlags = conditionalFlags.concat(this.getCudaCmakeFlags());
-    }
-
-    return this.builder.constant.defaultCmakeFlags()
-      .concat(conditionalFlags)
-      .concat(env.parseAutoBuildFlags())
-    // .concat(['-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64']);
-  }
-
   private getWinCmakeFlags(msversion: string): string[] {
     const cmakeVsCompiler = this.builder.constant.cmakeVsCompilers[msversion]
     const cmakeArch = this.builder.constant.cmakeArchs[process.arch]
@@ -107,7 +78,7 @@ export class SetupOpencv {
       GFlag = ['-G', `${cmakeVsCompiler}${cmakeArch}`];
     else
       GFlag = ['-G', `${cmakeVsCompiler}`];
-    return GFlag.concat(this.getSharedCmakeFlags())
+    return GFlag.concat(this.builder.env.getSharedCmakeFlags())
   }
 
   private getCmakeArgs(cmakeFlags: string[]): string[] {
@@ -159,7 +130,7 @@ export class SetupOpencv {
       cMakeFlags = this.getWinCmakeFlags("" + msbuild.version);
       msbuildPath = msbuild.path;
     } else {
-      cMakeFlags = this.getSharedCmakeFlags();
+      cMakeFlags = this.builder.env.getSharedCmakeFlags();
     }
 
     const tag = env.opencvVersion

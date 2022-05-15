@@ -7,10 +7,7 @@ import { SetupOpencv } from './setupOpencv.js';
 import { Constant } from './constants.js';
 import { args2Option, genHelp, OpenCVBuildEnv, OpenCVBuildEnvParams, OPENCV_PATHS_ENV } from './BuildEnv.js';
 
-// import { fileURLToPath } from 'url';
-// import { dirname } from 'path';
 export class OpenCVBuilder {
-  // public readonly opencvVersion: string;
   public readonly constant: Constant;
   public readonly getLibs: getLibsFactory;
   public readonly env: OpenCVBuildEnv;

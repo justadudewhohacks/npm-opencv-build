@@ -5,6 +5,11 @@ import path from 'path';
 import log from 'npmlog';
 import pc from 'picocolors'
 
+/**
+ * excape spaces for shell execution
+ * @param txt text to escape
+ * @returns a shell no spaced parameter
+ */
 export const protect = (txt: string): string => { if (txt.includes(' ')) { return `"${txt}"` } else { return txt } }
 
 export function toExecCmd(bin: string, args: string[]) {
