@@ -14,6 +14,7 @@
             "env": {
                 "OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION": "3.4.16",
                 "OPENCV4NODEJS_AUTOBUILD_FLAGS": "-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi",
+                "OPENCV_GIT_CACHE": "1"
             },
             "console": "integratedTerminal"
         },
@@ -27,6 +28,7 @@
             "env": {
                 "OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION": "4.5.3",
                 // "OPENCV4NODEJS_AUTOBUILD_FLAGS": "-DBUILD_LIST=core,imgproc,imgcodecs,videoio,highgui,video,calib3d,features2d,objdetect,dnn,ml,flann,photo,stitching,gapi,face,text",
+                "OPENCV_GIT_CACHE": "1"
             },
             "console": "integratedTerminal"
         },
@@ -38,6 +40,7 @@
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "args": ["--dry-run", "--version", "4.5.5"],
+            "env": {"OPENCV_GIT_CACHE": "1"},
             "console": "integratedTerminal"
         },
         {
@@ -48,6 +51,7 @@
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "args": ["--version", "4.5.5"],
+            "env": {"OPENCV_GIT_CACHE": "1"},
             "console": "integratedTerminal"
         }
 

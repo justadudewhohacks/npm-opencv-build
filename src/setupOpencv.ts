@@ -165,14 +165,36 @@ export class SetupOpencv {
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
       } else {
-        log.info('install', `git clone ${this.builder.constant.opencvContribRepoUrl}`)
-        const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvContribRepoUrl];
+        let opencvContribRepoUrl = this.builder.constant.opencvContribRepoUrl;
+        if (this.builder.env.gitCache) {
+          if (!fs.existsSync(this.builder.env.opencvContribGitCache)) {
+            const args = ['clone', '--quiet', '--progress', opencvContribRepoUrl, this.builder.env.opencvContribGitCache];
+            await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+          } else {
+            await spawn('git', [ 'pull' ], { cwd: env.opencvContribGitCache }, {err: gitFilter});
+          }
+          opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');;
+        }
+        log.info('install', `git clone ${opencvContribRepoUrl}`)
+        const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl, env.opencvContribSrc];
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         this.execLog.push(toExecCmd('git', args))
         await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
       }
-      log.info('install', `git clone ${this.builder.constant.opencvRepoUrl}`)
-      const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', this.builder.constant.opencvRepoUrl];
+      let opencvRepoUrl = this.builder.constant.opencvRepoUrl;
+
+      if (this.builder.env.gitCache) {
+        if (!fs.existsSync(this.builder.env.opencvGitCache)) {
+          const args = ['clone', '--quiet', '--progress', opencvRepoUrl, this.builder.env.opencvGitCache];
+          await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+        } else {
+          await spawn('git', [ 'pull' ], { cwd: env.opencvGitCache }, {err: gitFilter});
+        }
+        opencvRepoUrl = env.opencvGitCache.replace(/\\/g, '/');
+      }
+
+      log.info('install', `git clone ${opencvRepoUrl}`)
+      const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl, env.opencvSrc];
       this.execLog.push(toExecCmd('git', args2))
       await spawn('git', args2, { cwd: env.opencvRoot }, {err: gitFilter})
 

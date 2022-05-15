@@ -16,6 +16,7 @@ export interface OpenCVBuildEnvParamsBool {
     disableAutoBuild?: boolean;
     keepsources?: boolean;
     'dry-run'?: boolean;
+    'git-cache'?: boolean;
 }
 
 type boolKey = keyof OpenCVBuildEnvParamsBool;
@@ -89,18 +90,19 @@ export const OPENCV_PATHS_ENV = ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV
  * arguments data
  */
 export const ALLARGS = {
-    version: { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
-    flags: { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
-    root: { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
+    version:   { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
+    flags:     { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
+    root:      { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
     buildRoot: { arg: 'buildRoot', conf: 'buildRoot', env: 'OPENCV_BUILD_ROOT', isBool: false, doc: 'OpenCV build directory' } as ArgInfo,
-    cuda: { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
+    cuda:      { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
     nocontrib: { arg: 'nocontrib', conf: 'autoBuildWithoutContrib', env: 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB', isBool: true, doc: 'Do not compile Contrib modules' } as ArgInfo,
-    nobuild: { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
+    nobuild:   { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
     OPENCV_INCLUDE_DIR: { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
-    OPENCV_LIB_DIR: { arg: 'libDir', conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
-    OPENCV_BIN_DIR: { arg: 'binDir', conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
+    OPENCV_LIB_DIR: { arg: 'libDir',   conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
+    OPENCV_BIN_DIR: { arg: 'binDir',   conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
     keepsources: { arg: 'keepsources', conf: 'keepsources', isBool: true, doc: 'Keepsources OpenCV source after build' } as ArgInfo,
-    'dry-run': { arg: 'dry-run', conf: 'dry-run', isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
+    dryRun:      { arg: 'dry-run',     conf: 'dry-run',     isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
+    gitCache:    { arg: 'git-cache',   conf: 'git-cache',   env: 'OPENCV_GIT_CACHE', isBool: true, doc: 'Reduce Bandwide usage, by keeping a local git souce un the buildRoot' } as ArgInfo,
 }
 /**
  * generate help message
@@ -176,6 +178,7 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     public isAutoBuildDisabled: boolean = false;
     public keepsources: boolean = false;
     public dryRun: boolean = false;
+    public gitCache: boolean = false;
     // root path to look for package.json opencv4nodejs section
     // deprecated directly infer your parameters to the constructor
     public autoBuildFlags: string;
@@ -315,7 +318,8 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
         this.isWithoutContrib = !!this.resolveValue(ALLARGS.nocontrib);
         this.isAutoBuildDisabled = !!this.resolveValue(ALLARGS.nobuild);
         this.keepsources = !!this.resolveValue(ALLARGS.keepsources);
-        this.dryRun = !!this.resolveValue(ALLARGS['dry-run']);
+        this.dryRun = !!this.resolveValue(ALLARGS.dryRun);
+        this.gitCache = !!this.resolveValue(ALLARGS.gitCache);
     }
 
     #ready = false;
@@ -523,6 +527,15 @@ export class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvP
     public get opencvRoot(): string {
         return path.join(this.rootDir, `opencv-${this.opencvVersion}${this.optHash}`)
     }
+
+    public get opencvGitCache(): string {
+        return path.join(this.rootDir, 'opencvGit')
+    }
+
+    public get opencvContribGitCache(): string {
+        return path.join(this.rootDir, 'opencv_contribGit')
+    }
+
     public get opencvSrc(): string {
         return path.join(this.opencvRoot, 'opencv')
     }
