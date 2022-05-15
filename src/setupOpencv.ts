@@ -3,11 +3,11 @@ import { EOL } from 'os';
 import { OpenCVBuilder } from './OpenCVBuilder.js';
 import { findMsBuild, pathVersion } from './findMsBuild.js';
 import type { AutoBuildFile } from './types.js';
-import { formatNumber, highlight, isCudaAvailable, protect, spawn, toExecCmd } from './utils.js';
+import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { OPENCV_PATHS_ENV } from './BuildEnv.js';
+import { OPENCV_PATHS_ENV } from './misc.js';
 
 const primraf = promisify(rimraf);
 

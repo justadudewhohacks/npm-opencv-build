@@ -5,7 +5,8 @@ import log from 'npmlog';
 import { getLibsFactory } from './getLibsFactory.js';
 import { SetupOpencv } from './setupOpencv.js';
 import { Constant } from './constants.js';
-import { args2Option, genHelp, OpenCVBuildEnv, OpenCVBuildEnvParams, OPENCV_PATHS_ENV } from './BuildEnv.js';
+import OpenCVBuildEnv from './OpenCVBuildEnv.js';
+import { args2Option, genHelp, OpenCVBuildEnvParams, OPENCV_PATHS_ENV } from './misc.js';
 
 export class OpenCVBuilder {
   public readonly constant: Constant;

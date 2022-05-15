@@ -2,7 +2,7 @@ import OpenCVBuilder from './OpenCVBuilder.js';
 import type { OpencvModule } from './types.js';
 import fs from 'fs';
 import path from 'path';
-import { OpencvModulesType } from './BuildEnv.js';
+import { OpencvModulesType } from './misc.js';
 
 export class getLibsFactory {
   libFiles: string[] = [];
