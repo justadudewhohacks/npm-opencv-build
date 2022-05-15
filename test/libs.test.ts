@@ -18,7 +18,7 @@ describe('libs', () => {
   const env = new FakeOpenCVBuildEnv({prebuild: 'latestBuild'});
   const builder = new OpenCVBuilder(env);
   builder.getLibs.syncPath = false;
-  const opencvModules = builder.constant.opencvModules;
+  const opencvModules = builder.env.enabledModules;
 
   it('should find world .lib (win) Fullpath test', () => {
     const libFiles = [ 'opencv_world340.lib' ]
