@@ -5,7 +5,7 @@
  - remove build log at runtime.
  - re-write cmake parameter handle
  - disable buy default some opencv modules
- - add -DBUILD_ZLIB=OFF by default
+ - add -DBUILD_ZLIB=OFF by default, fix MacOs X build error
  - default openCV version build is now 4.5.5
  - OpenCVBuilder.env can be modifyed immediately after his instanciation to enable/disable openCV modules.
  - add --git-cache or OPENCV_GIT_CACHE env variabe cache git data on local disk
