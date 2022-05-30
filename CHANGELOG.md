@@ -1,5 +1,9 @@
 # Changelog
 
+* V 0.5.1
+- fix regression in agument parsing
+- fix cuda detection code
+
 * V 0.5.0
  - fix -h alias from --help
  - remove build log at runtime.

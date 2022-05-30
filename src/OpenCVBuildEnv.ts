@@ -5,16 +5,34 @@ import log from 'npmlog';
 import { highlight, formatNumber, isCudaAvailable } from './utils';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
-import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc';
+import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV, OPENCV_PATHS_ENV_args } from './misc';
 import { ALL_OPENCV_MODULES } from '.';
 
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
-    public opencvVersion: string;
+    /**
+     * set using env OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION , or --version or autoBuildOpencvVersion option in package.json
+     */
+     public opencvVersion: string;
+    /**
+     * set using env OPENCV4NODEJS_BUILD_CUDA , or --cuda or autoBuildBuildCuda option in package.json
+     */
     public buildWithCuda = false;
+    /**
+     * set using env OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB, or --nocontrib arg, or autoBuildWithoutContrib option in package.json
+     */
     public isWithoutContrib = false;
+    /**
+     * set using env OPENCV4NODEJS_DISABLE_AUTOBUILD, or --nobuild arg or disableAutoBuild option in package.json
+     */
     public isAutoBuildDisabled = false;
+    /**
+     * set using --keepsources arg or keepsources option in package.json
+     */
     public keepsources = false;
+    /**
+     * set using --dry-run arg or dry-run option in package.json
+     */
     public dryRun = false;
     public gitCache = false;
     // root path to look for package.json opencv4nodejs section
@@ -162,8 +180,8 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         this.isWithoutContrib = !!this.resolveValue(ALLARGS.nocontrib);
         this.isAutoBuildDisabled = !!this.resolveValue(ALLARGS.nobuild);
         this.keepsources = !!this.resolveValue(ALLARGS.keepsources);
-        this.dryRun = !!this.resolveValue(ALLARGS.dryRun);
-        this.gitCache = !!this.resolveValue(ALLARGS.gitCache);
+        this.dryRun = !!this.resolveValue(ALLARGS['dry-run']);
+        this.gitCache = !!this.resolveValue(ALLARGS['git-cache']);
     }
 
     #ready = false;
@@ -174,7 +192,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (this.#ready)
             return;
         this.#ready = true;
-        for (const varname of OPENCV_PATHS_ENV) {
+        for (const varname of OPENCV_PATHS_ENV_args) {
             const value = this.resolveValue(ALLARGS[varname]);
             if (value && process.env[varname] !== value) {
                 process.env[varname] = value;

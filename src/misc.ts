@@ -79,7 +79,13 @@ export interface ArgInfo {
 export const OPENCV_PATHS_ENV = ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR'] as const;
 
 /**
+ * list of variables needed to link and use openCV
+ */
+ export const OPENCV_PATHS_ENV_args = ['binDir', 'incDir', 'libDir'] as const;
+
+/**
  * arguments data
+ * key must be === arg
  */
 export const ALLARGS = {
     version:   { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
@@ -89,12 +95,12 @@ export const ALLARGS = {
     cuda:      { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
     nocontrib: { arg: 'nocontrib', conf: 'autoBuildWithoutContrib', env: 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB', isBool: true, doc: 'Do not compile Contrib modules' } as ArgInfo,
     nobuild:   { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
-    OPENCV_INCLUDE_DIR: { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
-    OPENCV_LIB_DIR: { arg: 'libDir',   conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
-    OPENCV_BIN_DIR: { arg: 'binDir',   conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
+    incDir:    { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
+    libDir:    { arg: 'libDir',   conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
+    binDir:    { arg: 'binDir',   conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
     keepsources: { arg: 'keepsources', conf: 'keepsources', isBool: true, doc: 'Keepsources OpenCV source after build' } as ArgInfo,
-    dryRun:      { arg: 'dry-run',     conf: 'dry-run',     isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
-    gitCache:    { arg: 'git-cache',   conf: 'git-cache',   env: 'OPENCV_GIT_CACHE', isBool: true, doc: 'Reduce Bandwide usage, by keeping a local git souce un the buildRoot' } as ArgInfo,
+    'dry-run':   { arg: 'dry-run',     conf: 'dry-run',     isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
+    'git-cache': { arg: 'git-cache',   conf: 'git-cache',   env: 'OPENCV_GIT_CACHE', isBool: true, doc: 'Reduce Bandwide usage, by keeping a local git souce un the buildRoot' } as ArgInfo,
 }
 /**
  * generate help message
