@@ -39,6 +39,12 @@ export function exec(cmd: string, options?: child_process.ExecOptions): Promise<
   })
 }
 
+export function execSync(cmd: string, options?: child_process.ExecOptions): string {
+  log.silly('install', 'executing: %s', protect(cmd))
+  const stdout = child_process.execSync(cmd, options);
+  return stdout.toString();
+}
+
 /**
  * only used by findVs2017
  */
@@ -108,6 +114,18 @@ async function requireCmd(cmd: string, hint: string): Promise<string> {
   }
 }
 
+function requireCmdSync(cmd: string, hint: string): string {
+  log.info('install', `executing: ${pc.cyan('%s')}`, cmd)
+  try {
+    const stdout = execSync(cmd)
+    log.verbose('install', `${cmd}: ${stdout.trim()}`)
+    return stdout;
+  } catch (err) {
+    const errMessage = `failed to execute ${cmd}, ${hint}, error is: ${err.toString()}`
+    throw new Error(errMessage)
+  }
+}
+
 export async function requireGit() {
   const out = await requireCmd('git --version', 'git is required')
   const version = out.match(/version ([\d.\w]+)/)
@@ -128,12 +146,12 @@ export async function requireCmake() {
  * looks for cuda lib
  * @returns 
  */
-export async function isCudaAvailable() {
+export function isCudaAvailable() {
   log.info('install', 'Check if CUDA is available & what version...');
 
   if (process.platform == 'win32') {
     try {
-      await requireCmd('nvcc --version', 'CUDA availability check');
+      requireCmdSync('nvcc --version', 'CUDA availability check');
       return true;
     } catch (err) {
       log.info('install', 'Seems like CUDA is not installed.');
