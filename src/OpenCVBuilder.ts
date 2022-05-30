@@ -63,6 +63,7 @@ export class OpenCVBuilder {
 
     if (this.env.isAutoBuildDisabled) {
       log.info('install', `${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} is set skipping auto build...`)
+      new SetupOpencv(this).writeAutoBuildFile(true);
       return
     }
     log.info('install', `if you want to use an own OpenCV build set ${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} to 1, and fill ${OPENCV_PATHS_ENV.map(utils.highlight).join(', ')} environement variables`);

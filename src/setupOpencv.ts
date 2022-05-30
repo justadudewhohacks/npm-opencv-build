@@ -97,7 +97,7 @@ export class SetupOpencv {
    * Write Build Context to disk, to avoid further rebuild
    * @returns AutoBuildFile
    */
-  private writeAutoBuildFile(): AutoBuildFile {
+  public writeAutoBuildFile(overwrite: boolean): AutoBuildFile {
     const env = this.builder.env;
     const autoBuildFile: AutoBuildFile = {
       opencvVersion: env.opencvVersion,
@@ -107,6 +107,12 @@ export class SetupOpencv {
     }
     log.info('install', `writing auto-build file into directory: ${highlight("%s")}`, env.autoBuildFile)
     // log.info('install', JSON.stringify(autoBuildFile))
+    fs.mkdirSync(env.opencvRoot, {recursive: true});
+    if (!overwrite) {
+      const old = env.readAutoBuildFile()
+      if (old)
+        return old;
+    }
     fs.writeFileSync(env.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
     return autoBuildFile;
   }
@@ -217,7 +223,7 @@ export class SetupOpencv {
     }
 
     if (!env.dryRun) {
-      this.writeAutoBuildFile()
+      this.writeAutoBuildFile(true)
     } else {
       this.execLog.push('echo lock file can not be generated in dry-mode');
     }

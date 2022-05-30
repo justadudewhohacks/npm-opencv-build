@@ -2,3 +2,4 @@ opencv
 node_modules
 opencv-*/
 lib/
+.pnpm-debug.log
