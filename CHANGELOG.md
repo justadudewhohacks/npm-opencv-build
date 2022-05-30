@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.3
+- fix prebuild openCV usage.
+
 * V 0.5.2
 - fix regression in agument parsing bis
 
