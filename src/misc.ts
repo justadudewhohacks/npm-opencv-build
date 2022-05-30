@@ -2,7 +2,7 @@
  * options passed to OpenCVBuildEnv constructor
  * highest priority values
  */
- export interface OpenCVBuildEnvParamsBool {
+export interface OpenCVBuildEnvParamsBool {
     autoBuildBuildCuda?: boolean;
     autoBuildWithoutContrib?: boolean;
     disableAutoBuild?: boolean;
@@ -79,28 +79,23 @@ export interface ArgInfo {
 export const OPENCV_PATHS_ENV = ['OPENCV_BIN_DIR', 'OPENCV_INCLUDE_DIR', 'OPENCV_LIB_DIR'] as const;
 
 /**
- * list of variables needed to link and use openCV
- */
- export const OPENCV_PATHS_ENV_args = ['binDir', 'incDir', 'libDir'] as const;
-
-/**
  * arguments data
  * key must be === arg
  */
 export const ALLARGS = {
-    version:   { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
-    flags:     { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
-    root:      { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
+    version: { arg: 'version', conf: 'autoBuildOpencvVersion', env: 'OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION', isBool: false, doc: 'OpenCV version' } as ArgInfo,
+    flags: { arg: 'flags', conf: 'autoBuildFlags', env: 'OPENCV4NODEJS_AUTOBUILD_FLAGS', isBool: false, doc: 'OpenCV cMake Build flags' } as ArgInfo,
+    root: { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
     buildRoot: { arg: 'buildRoot', conf: 'buildRoot', env: 'OPENCV_BUILD_ROOT', isBool: false, doc: 'OpenCV build directory' } as ArgInfo,
-    cuda:      { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
+    cuda: { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
     nocontrib: { arg: 'nocontrib', conf: 'autoBuildWithoutContrib', env: 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB', isBool: true, doc: 'Do not compile Contrib modules' } as ArgInfo,
-    nobuild:   { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
-    incDir:    { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
-    libDir:    { arg: 'libDir',   conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
-    binDir:    { arg: 'binDir',   conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
+    nobuild: { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
+    incDir: { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,
+    libDir: { arg: 'libDir', conf: 'opencvLibDir', env: 'OPENCV_LIB_DIR', isBool: false, doc: 'OpenCV library directory' } as ArgInfo,
+    binDir: { arg: 'binDir', conf: 'opencvBinDir', env: 'OPENCV_BIN_DIR', isBool: false, doc: 'OpenCV bin directory' } as ArgInfo,
     keepsources: { arg: 'keepsources', conf: 'keepsources', isBool: true, doc: 'Keepsources OpenCV source after build' } as ArgInfo,
-    'dry-run':   { arg: 'dry-run',     conf: 'dry-run',     isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
-    'git-cache': { arg: 'git-cache',   conf: 'git-cache',   env: 'OPENCV_GIT_CACHE', isBool: true, doc: 'Reduce Bandwide usage, by keeping a local git souce un the buildRoot' } as ArgInfo,
+    'dry-run': { arg: 'dry-run', conf: 'dry-run', isBool: true, doc: 'Display command line use to build library' } as ArgInfo,
+    'git-cache': { arg: 'git-cache', conf: 'git-cache', env: 'OPENCV_GIT_CACHE', isBool: true, doc: 'Reduce Bandwide usage, by keeping a local git souce un the buildRoot' } as ArgInfo,
 }
 /**
  * generate help message
@@ -173,7 +168,7 @@ export const ALL_OPENCV_MODULES = ['apps', 'aruco', 'bgsegm', 'bioinspired', 'ca
 export type OpencvModulesType = typeof ALL_OPENCV_MODULES[number];
 
 export const defaultEnabledModules: OpencvModulesType[] = ['calib3d', 'core', 'dnn', 'features2d', 'flann', 'gapi', 'highgui', 'imgcodecs', 'imgproc',
-'ml', 'objdetect', 'photo', 'python_tests', 'video', 'videoio',
-// olds:
-'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
+    'ml', 'objdetect', 'photo', 'python_tests', 'video', 'videoio',
+    // olds:
+    'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
 ]

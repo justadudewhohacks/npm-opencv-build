@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.2
+- fix regression in agument parsing bis
+
 * V 0.5.1
 - fix regression in agument parsing
 - fix cuda detection code

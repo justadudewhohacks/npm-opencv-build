@@ -5,7 +5,7 @@ import log from 'npmlog';
 import { highlight, formatNumber, isCudaAvailable } from './utils';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
-import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV, OPENCV_PATHS_ENV_args } from './misc';
+import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc';
 import { ALL_OPENCV_MODULES } from '.';
 
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
@@ -192,10 +192,11 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (this.#ready)
             return;
         this.#ready = true;
-        for (const varname of OPENCV_PATHS_ENV_args) {
-            const value = this.resolveValue(ALLARGS[varname]);
+        for (const varname of ['binDir', 'incDir', 'libDir'] ) {
+            const varname2 = varname as 'binDir' | 'incDir' | 'libDir';
+            const value = this.resolveValue(ALLARGS[varname2]);
             if (value && process.env[varname] !== value) {
-                process.env[varname] = value;
+                process.env[ALLARGS[varname2].env] = value;
             }
         }
         if (this.no_autobuild) {
