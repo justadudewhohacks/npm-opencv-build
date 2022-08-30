@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.5
+- fix tiny-glob usage.
+
 * V 0.5.4
 - add autodetection mode for chocolatey on windows, brew on macos, and debian-base distrib
 - remove glob in favor of tiny-glob 10 times smaller

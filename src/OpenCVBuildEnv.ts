@@ -184,13 +184,13 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                     }
                 }
                 if (!process.env.OPENCV_INCLUDE_DIR) {
-                    const candidates = blob("/usr/lib/*-linux-gnu/");
+                    const candidates = blob("/usr/lib/*-linux-gnu");
                     if (candidates.length)
                         process.env.OPENCV_INCLUDE_DIR = candidates[0];
                 }
             } else if (os === 'darwin') {
                 // Brew detection
-                const candidates = blob("/opt/homebrew/Cellar/opencv/*/");
+                const candidates = blob("/opt/homebrew/Cellar/opencv/*");
                 if (candidates.length) {
                     const dir = candidates[0];
                     if (!process.env.OPENCV_BIN_DIR) {
