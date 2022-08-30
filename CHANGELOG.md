@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.6
+- fix path interversion lib <-> include for Linux and MacOs
+
 * V 0.5.5
 - fix tiny-glob usage.
 

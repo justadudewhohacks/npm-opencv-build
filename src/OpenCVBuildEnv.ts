@@ -178,15 +178,15 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                     }
                 }
                 if (!process.env.OPENCV_LIB_DIR) {
-                    const candidate = "/usr/include/opencv4/"
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_LIB_DIR = candidate;
-                    }
-                }
-                if (!process.env.OPENCV_INCLUDE_DIR) {
                     const candidates = blob("/usr/lib/*-linux-gnu");
                     if (candidates.length)
-                        process.env.OPENCV_INCLUDE_DIR = candidates[0];
+                        process.env.OPENCV_LIB_DIR = candidates[0];
+                }
+                if (!process.env.OPENCV_INCLUDE_DIR) {
+                    const candidate = "/usr/include/opencv4/"
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_INCLUDE_DIR = candidate;
+                    }
                 }
             } else if (os === 'darwin') {
                 // Brew detection
@@ -200,15 +200,15 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                         }
                     }
                     if (!process.env.OPENCV_LIB_DIR) {
-                        const candidate = path.join(dir, "include");
-                        if (fs.existsSync(candidate)) {
-                            process.env.OPENCV_LIB_DIR = candidate;
-                        }
-                    }
-                    if (!process.env.OPENCV_INCLUDE_DIR) {
                         const candidate = path.join(dir, "lib");
                         if (fs.existsSync(candidate))
-                            process.env.OPENCV_INCLUDE_DIR = candidates[0];
+                            process.env.OPENCV_LIB_DIR = candidates[0];
+                    }
+                    if (!process.env.OPENCV_INCLUDE_DIR) {
+                        const candidate = path.join(dir, "include");
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_INCLUDE_DIR = candidate;
+                        }
                     }
                 }
             }
