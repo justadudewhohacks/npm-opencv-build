@@ -3,8 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "type": "node",
             "request": "launch",
             "name": "install 3.4.16",
@@ -40,7 +39,9 @@
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "args": ["--dry-run", "--version", "4.5.5"],
-            "env": {"OPENCV_GIT_CACHE": "1"},
+            "env": {
+                "OPENCV_GIT_CACHE": "1"
+            },
             "console": "integratedTerminal"
         },
         {
@@ -51,9 +52,23 @@
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
             "args": ["--version", "4.5.5"],
-            "env": {"OPENCV_GIT_CACHE": "1"},
+            "env": {
+                "OPENCV_GIT_CACHE": "1"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "install no-build auto",
+            "program": "${workspaceFolder}/bin/main.js",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+            "args": ["--nobuild"],
+            "env": {
+                "OPENCV_GIT_CACHE": "1"
+            },
             "console": "integratedTerminal"
         }
-
     ]
 }

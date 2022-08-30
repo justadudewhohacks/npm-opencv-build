@@ -1,7 +1,6 @@
 import log from 'npmlog';
 import { execFile, formatNumber, light } from './utils.js';
-import blob from 'glob';
-import { promisify } from 'util';
+import blob from 'tiny-glob';
 
 export interface pathVersion {
   version: number;
@@ -12,7 +11,6 @@ export interface pathVersion {
  * @returns take the last MSBuild.exe version in PROGRAMFILES
  */
 async function findMSBuild(): Promise<pathVersion> {
-  const pblob = promisify(blob)
 
   const progFiles = new Set([process.env.programfiles, process.env.ProgramW6432, process.env['programfiles(x86)']]);
   const matches: string[] = [];
@@ -20,7 +18,7 @@ async function findMSBuild(): Promise<pathVersion> {
   for (const progFile of progFiles) {
     if (progFile) {
       const reg = `${progFile.replace(/\\/g, '/')}/Microsoft Visual Studio/*/*/MSBuild/*/Bin/MSBuild.exe`;
-      for (const m of await pblob(reg, {}))
+      for (const m of await blob(reg, {}))
         matches.push(m);
     }
   }

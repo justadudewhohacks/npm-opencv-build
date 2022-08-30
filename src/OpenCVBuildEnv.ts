@@ -7,13 +7,14 @@ import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
 import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc';
 import { ALL_OPENCV_MODULES } from '.';
+import blob from 'tiny-glob/sync';
 
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
     /**
      * set using env OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION , or --version or autoBuildOpencvVersion option in package.json
      */
-     public opencvVersion: string;
+    public opencvVersion: string;
     /**
      * set using env OPENCV4NODEJS_BUILD_CUDA , or --cuda or autoBuildBuildCuda option in package.json
      */
@@ -147,6 +148,70 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         // try to build a new openCV or use a prebuilt one
         if (this.no_autobuild) {
             this.opencvVersion = '0.0.0';
+            const os = process.platform;
+            if (os === "win32") {
+                // chocolatey
+                if (!process.env.OPENCV_BIN_DIR) {
+                    const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\bin";
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_BIN_DIR = candidate;
+                    }
+                }
+                if (!process.env.OPENCV_LIB_DIR) {
+                    const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\lib"
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_LIB_DIR = candidate;
+                    }
+                }
+                if (!process.env.OPENCV_INCLUDE_DIR) {
+                    const candidate = "c:\\tools\\opencv\\build\\include"
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_INCLUDE_DIR = candidate;
+                    }
+                }
+            } else if (os === 'linux') {
+                // apt detection
+                if (!process.env.OPENCV_BIN_DIR) {
+                    const candidate = "/usr/bin/";
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_BIN_DIR = candidate;
+                    }
+                }
+                if (!process.env.OPENCV_LIB_DIR) {
+                    const candidate = "/usr/include/opencv4/"
+                    if (fs.existsSync(candidate)) {
+                        process.env.OPENCV_LIB_DIR = candidate;
+                    }
+                }
+                if (!process.env.OPENCV_INCLUDE_DIR) {
+                    const candidates = blob("/usr/lib/*-linux-gnu/");
+                    if (candidates.length)
+                        process.env.OPENCV_INCLUDE_DIR = candidates[0];
+                }
+            } else if (os === 'darwin') {
+                // Brew detection
+                const candidates = blob("/opt/homebrew/Cellar/opencv/*/");
+                if (candidates.length) {
+                    const dir = candidates[0];
+                    if (!process.env.OPENCV_BIN_DIR) {
+                        const candidate = path.join(dir, "bin");
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_BIN_DIR = candidate;
+                        }
+                    }
+                    if (!process.env.OPENCV_LIB_DIR) {
+                        const candidate = path.join(dir, "include");
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_LIB_DIR = candidate;
+                        }
+                    }
+                    if (!process.env.OPENCV_INCLUDE_DIR) {
+                        const candidate = path.join(dir, "lib");
+                        if (fs.existsSync(candidate))
+                            process.env.OPENCV_INCLUDE_DIR = candidates[0];
+                    }
+                }
+            }
         } else {
             this.opencvVersion = this.resolveValue(ALLARGS.version);
             if (!this.opencvVersion) {
@@ -192,7 +257,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (this.#ready)
             return;
         this.#ready = true;
-        for (const varname of ['binDir', 'incDir', 'libDir'] ) {
+        for (const varname of ['binDir', 'incDir', 'libDir']) {
             const varname2 = varname as 'binDir' | 'incDir' | 'libDir';
             const value = this.resolveValue(ALLARGS[varname2]);
             if (value && process.env[varname] !== value) {
@@ -220,7 +285,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     /** default module build list */
     #enabledModules = new Set<OpencvModulesType>(defaultEnabledModules);
-    
+
     public get enabledModules(): OpencvModulesType[] {
         return [...this.#enabledModules];
     }
@@ -313,7 +378,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     /**
      * extract opencv4nodejs section from package.json if available
      */
-    private static parsePackageJson(): { file: string, data: {opencv4nodejs?: {[key: string]: string | boolean | number}}} | null {
+    private static parsePackageJson(): { file: string, data: { opencv4nodejs?: { [key: string]: string | boolean | number } } } | null {
         const absPath = OpenCVBuildEnv.getPackageJson();
         if (!fs.existsSync(absPath)) {
             return null
