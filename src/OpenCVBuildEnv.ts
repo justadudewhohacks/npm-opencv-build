@@ -190,24 +190,26 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 }
             } else if (os === 'darwin') {
                 // Brew detection
-                const candidates = blob("/opt/homebrew/Cellar/opencv/*");
-                if (candidates.length) {
-                    const dir = candidates[0];
-                    if (!process.env.OPENCV_BIN_DIR) {
-                        const candidate = path.join(dir, "bin");
-                        if (fs.existsSync(candidate)) {
-                            process.env.OPENCV_BIN_DIR = candidate;
+                if (fs.existSync("/opt/homebrew/Cellar/opencv") {
+                    const candidates = blob("/opt/homebrew/Cellar/opencv/*");
+                    if (candidates.length) {
+                        const dir = candidates[0];
+                        if (!process.env.OPENCV_BIN_DIR) {
+                            const candidate = path.join(dir, "bin");
+                            if (fs.existsSync(candidate)) {
+                                process.env.OPENCV_BIN_DIR = candidate;
+                            }
                         }
-                    }
-                    if (!process.env.OPENCV_LIB_DIR) {
-                        const candidate = path.join(dir, "lib");
-                        if (fs.existsSync(candidate))
-                            process.env.OPENCV_LIB_DIR = candidates[0];
-                    }
-                    if (!process.env.OPENCV_INCLUDE_DIR) {
-                        const candidate = path.join(dir, "include");
-                        if (fs.existsSync(candidate)) {
-                            process.env.OPENCV_INCLUDE_DIR = candidate;
+                        if (!process.env.OPENCV_LIB_DIR) {
+                            const candidate = path.join(dir, "lib");
+                            if (fs.existsSync(candidate))
+                                process.env.OPENCV_LIB_DIR = candidates[0];
+                        }
+                        if (!process.env.OPENCV_INCLUDE_DIR) {
+                            const candidate = path.join(dir, "include");
+                            if (fs.existsSync(candidate)) {
+                                process.env.OPENCV_INCLUDE_DIR = candidate;
+                            }
                         }
                     }
                 }
