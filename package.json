@@ -14,7 +14,7 @@
     "install_macm1": "node bin/main.js --version 4.5.5 --flag=\"-DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_OSX_ARCHITECTURES=arm64\"",
     "install_4_5_5": "node bin/main.js --version 4.5.5",
     "install_4_6_0": "node bin/main.js --version 4.6.0",
-    "do-install": "node lib/main.js",
+    "do-install": "node bin/main.js",
     "cleanbuild": "rimraf lib && tsc",
     "postinstallDISABLED": "npm run do-install",
     "prepare": "npm run build",
