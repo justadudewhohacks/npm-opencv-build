@@ -1,5 +1,10 @@
 # Changelog
 
+* V 0.5.7
+- fork tiny-glob to fix windows build support. [issue47](https://github.com/UrielCh/opencv4nodejs/issues/47)
+- accept PR3 (fix for when /opt/homebrew/Cellar/opencv does not exist)
+- accept PR4 (Update script do-install bin\main.js in package.json)
+
 * V 0.5.6
 - fix path interversion lib <-> include for Linux and MacOs
 

@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
 import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc';
 import { ALL_OPENCV_MODULES } from '.';
-import blob from 'tiny-glob/sync';
+import { sync as blob } from '@u4/tiny-glob';
 
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
@@ -190,7 +190,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 }
             } else if (os === 'darwin') {
                 // Brew detection
-                if (fs.existSync("/opt/homebrew/Cellar/opencv") {
+                if (fs.existsSync("/opt/homebrew/Cellar/opencv")) {
                     const candidates = blob("/opt/homebrew/Cellar/opencv/*");
                     if (candidates.length) {
                         const dir = candidates[0];

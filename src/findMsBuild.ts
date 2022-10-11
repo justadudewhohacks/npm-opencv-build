@@ -1,6 +1,6 @@
 import log from 'npmlog';
 import { execFile, formatNumber, light } from './utils.js';
-import blob from 'tiny-glob';
+import blob from '@u4/tiny-glob';
 
 export interface pathVersion {
   version: number;
