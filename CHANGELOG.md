@@ -1,4 +1,10 @@
 # Changelog
+
+* V 0.5.9
+- findMSBuild now return all MsBuild version
+- force resolve absolute path for msbuild binary
+- improve logs
+
 * V 0.5.8
 - bump @u4/tiny-glob to ignore walking on non existing directories.
 

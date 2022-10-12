@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { EOL } from 'os';
 import { OpenCVBuilder } from './OpenCVBuilder.js';
-import { findMsBuild, pathVersion } from './findMsBuild.js';
+import { findMSBuild, PathVersion } from './findMsBuild.js';
 import type { AutoBuildFile } from './types.js';
 import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
@@ -39,21 +39,21 @@ export class SetupOpencv {
       }
       const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
       args = toExecCmd(msbuildExe, buildVcxproj);
-      this.execLog.push(`${args}`); 
+      this.execLog.push(`${args}`);
       if (!env.dryRun) {
         log.info('install', 'spawning in %s: %s', env.opencvBuild, args);
         await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
       }
     } else {
-      this.execLog.push(`cd ${protect(env.opencvBuild)}`); 
-      this.execLog.push(`make install -j${env.numberOfCoresAvailable()}`); 
+      this.execLog.push(`cd ${protect(env.opencvBuild)}`);
+      this.execLog.push(`make install -j${env.numberOfCoresAvailable()}`);
 
       if (!env.dryRun) {
         log.info('install', 'spawning in %s: make', env.opencvBuild);
         await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
       }
 
-      this.execLog.push(`make all -j${env.numberOfCoresAvailable()}`); 
+      this.execLog.push(`make all -j${env.numberOfCoresAvailable()}`);
       // revert the strange archiving of libopencv.so going on with make install
       if (!env.dryRun) {
         log.info('install', 'spawning in %s: make all', env.opencvBuild);
@@ -85,11 +85,13 @@ export class SetupOpencv {
     return [this.builder.env.opencvSrc].concat(cmakeFlags)
   }
 
-  private async getMsbuildIfWin(): Promise<pathVersion | undefined> {
+  private async getMsbuildIfWin(): Promise<PathVersion | undefined> {
     if (this.builder.env.isWin) {
-      const msbuild = await findMsBuild()
-      log.info('install', `using msbuild: ${formatNumber("%s")} path: ${highlight("%s")}`, msbuild.version, msbuild.path)
-      return msbuild
+      const msbuilds = await findMSBuild()
+      if (msbuilds.length > 1)
+        log.warn('install', `${msbuilds.length} msbuild version detected using the most recent one.`);
+      log.info('install', `using msbuild V${formatNumber("%s")} path: ${highlight("%s")}`, msbuilds[0].version, msbuilds[0].path)
+      return msbuilds[0]
     }
     return undefined;
   }
@@ -107,7 +109,7 @@ export class SetupOpencv {
     }
     log.info('install', `writing auto-build file into directory: ${highlight("%s")}`, env.autoBuildFile)
     // log.info('install', JSON.stringify(autoBuildFile))
-    fs.mkdirSync(env.opencvRoot, {recursive: true});
+    fs.mkdirSync(env.opencvRoot, { recursive: true });
     if (!overwrite) {
       const old = env.readAutoBuildFile()
       if (old)
@@ -175,9 +177,9 @@ export class SetupOpencv {
         if (this.builder.env.gitCache) {
           if (!fs.existsSync(this.builder.env.opencvContribGitCache)) {
             const args = ['clone', '--quiet', '--progress', opencvContribRepoUrl, this.builder.env.opencvContribGitCache];
-            await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+            await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
           } else {
-            await spawn('git', [ 'pull' ], { cwd: env.opencvContribGitCache }, {err: gitFilter});
+            await spawn('git', ['pull'], { cwd: env.opencvContribGitCache }, { err: gitFilter });
           }
           opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');
         }
@@ -185,16 +187,16 @@ export class SetupOpencv {
         const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl, env.opencvContribSrc];
         this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
         this.execLog.push(toExecCmd('git', args))
-        await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+        await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
       }
       let opencvRepoUrl = this.builder.constant.opencvRepoUrl;
 
       if (this.builder.env.gitCache) {
         if (!fs.existsSync(this.builder.env.opencvGitCache)) {
           const args = ['clone', '--quiet', '--progress', opencvRepoUrl, this.builder.env.opencvGitCache];
-          await spawn('git', args, { cwd: env.opencvRoot }, {err: gitFilter});
+          await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
         } else {
-          await spawn('git', [ 'pull' ], { cwd: env.opencvGitCache }, {err: gitFilter});
+          await spawn('git', ['pull'], { cwd: env.opencvGitCache }, { err: gitFilter });
         }
         opencvRepoUrl = env.opencvGitCache.replace(/\\/g, '/');
       }
@@ -202,7 +204,7 @@ export class SetupOpencv {
       log.info('install', `git clone ${opencvRepoUrl}`)
       const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl, env.opencvSrc];
       this.execLog.push(toExecCmd('git', args2))
-      await spawn('git', args2, { cwd: env.opencvRoot }, {err: gitFilter})
+      await spawn('git', args2, { cwd: env.opencvRoot }, { err: gitFilter })
 
       this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);
       this.execLog.push(`export OPENCV_INCLUDE_DIR=${protect(env.opencvIncludeDir)}`);
