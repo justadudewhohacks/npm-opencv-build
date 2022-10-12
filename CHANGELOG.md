@@ -1,4 +1,6 @@
 # Changelog
+* V 0.5.8
+- bump @u4/tiny-glob to ignore walking on non existing directories.
 
 * V 0.5.7
 - fork tiny-glob to fix windows build support. [issue47](https://github.com/UrielCh/opencv4nodejs/issues/47)

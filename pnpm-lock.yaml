@@ -9,7 +9,7 @@ specifiers:
   '@types/rimraf': ^3.0.2
   '@typescript-eslint/eslint-plugin': ^5.40.0
   '@typescript-eslint/parser': ^5.40.0
-  '@u4/tiny-glob': ^0.2.9
+  '@u4/tiny-glob': ^0.2.10
   chai: ^4.3.6
   chai-string: ^1.5.0
   eslint: ^8.25.0
@@ -21,7 +21,7 @@ specifiers:
   typescript: ^4.8.4
 
 dependencies:
-  '@u4/tiny-glob': 0.2.9
+  '@u4/tiny-glob': 0.2.10
   npmlog: 6.0.2
   picocolors: 1.0.0
   rimraf: 3.0.2
@@ -312,8 +312,8 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@u4/tiny-glob/0.2.9:
-    resolution: {integrity: sha512-enH21jFigulUDtnOjsonbdU2q9G5FvZB6wQ0/Y0fqkMR4iOPPGK2VKhEhprKhgwF7fvlBjFOovqVfYH31wNYZA==}
+  /@u4/tiny-glob/0.2.10:
+    resolution: {integrity: sha512-KKHFK0yzVEGoupYXaDCJEc16DsxWox9/Hbze2sr8T0R8FtOyyiN4pd9dSKKWyxqGuDIPwW9hvd3Eg3/IXu9TKA==}
     dev: false
 
   /@ungap/promise-all-settled/1.1.2:
