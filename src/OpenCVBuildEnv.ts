@@ -50,8 +50,11 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     /**
      * autodetect path using common values.
+     * @return number of updated env variable from 0 to 3
      */
-    public static autoLocatePrebuild() {
+    public static autoLocatePrebuild(): { changes: number, summery: string[] } {
+        let changes = 0;
+        const summery = [] as string[];
         const os = process.platform;
         if (os === "win32") {
             // chocolatey
@@ -59,18 +62,31 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\bin";
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_BIN_DIR = candidate;
+                    summery.push('OPENCV_BIN_DIR resolve');
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_BIN_DIR from ${candidate}`);
                 }
+
             }
             if (!process.env.OPENCV_LIB_DIR) {
                 const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\lib"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_LIB_DIR = candidate;
+                    summery.push('OPENCV_LIB_DIR resolve');
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_LIB_DIR from ${candidate}`);
                 }
             }
             if (!process.env.OPENCV_INCLUDE_DIR) {
                 const candidate = "c:\\tools\\opencv\\build\\include"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_INCLUDE_DIR = candidate;
+                    summery.push('OPENCV_INCLUDE_DIR resolve');
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_INCLUDE_DIR from ${candidate}`);
                 }
             }
         } else if (os === 'linux') {
@@ -79,45 +95,77 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "/usr/bin/";
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_BIN_DIR = candidate;
+                    summery.push('OPENCV_BIN_DIR resolve');
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_BIN_DIR from ${candidate}`);
                 }
             }
             if (!process.env.OPENCV_LIB_DIR) {
-                const candidates = blob("/usr/lib/*-linux-gnu");
-                if (candidates.length)
+                const lookup = "/usr/lib/*-linux-gnu";
+                const candidates = blob(lookup);
+                if (candidates.length) {
                     process.env.OPENCV_LIB_DIR = candidates[0];
+                    summery.push(`OPENCV_LIB_DIR resolve ${candidates.length} candidates`);
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_LIB_DIR from ${lookup}`);
+                }
             }
             if (!process.env.OPENCV_INCLUDE_DIR) {
                 const candidate = "/usr/include/opencv4/"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_INCLUDE_DIR = candidate;
+                    summery.push('OPENCV_INCLUDE_DIR resolve');
+                    changes++;
+                } else {
+                    summery.push(`failed to resolve OPENCV_INCLUDE_DIR from ${candidate}`);
                 }
             }
         } else if (os === 'darwin') {
             // Brew detection
             if (fs.existsSync("/opt/homebrew/Cellar/opencv")) {
-                const candidates = blob("/opt/homebrew/Cellar/opencv/*");
+                const lookup = "/opt/homebrew/Cellar/opencv/*";
+                const candidates = blob(lookup);
+                if (candidates.length > 1) {
+                    summery.push(`homebrew detection found more than one openCV setup: ${candidates.join(',')} using only the first one`);
+                }
                 if (candidates.length) {
                     const dir = candidates[0];
                     if (!process.env.OPENCV_BIN_DIR) {
                         const candidate = path.join(dir, "bin");
                         if (fs.existsSync(candidate)) {
                             process.env.OPENCV_BIN_DIR = candidate;
+                            summery.push("OPENCV_BIN_DIR resolved");
+                            changes++;
+                        } else {
+                            summery.push(`failed to resolve OPENCV_BIN_DIR from ${lookup}/bin`);
                         }
                     }
                     if (!process.env.OPENCV_LIB_DIR) {
                         const candidate = path.join(dir, "lib");
-                        if (fs.existsSync(candidate))
-                            process.env.OPENCV_LIB_DIR = candidates[0];
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_LIB_DIR = candidate;
+                            summery.push(`OPENCV_LIB_DIR resolved`);
+                            changes++;
+                        } else {
+                            summery.push(`failed to resolve OPENCV_BIN_DIR from ${lookup}/lib`);
+                        }
                     }
                     if (!process.env.OPENCV_INCLUDE_DIR) {
                         const candidate = path.join(dir, "include");
                         if (fs.existsSync(candidate)) {
                             process.env.OPENCV_INCLUDE_DIR = candidate;
+                            summery.push('OPENCV_INCLUDE_DIR resolve');
+                            changes++;
+                        } else {
+                            summery.push(`failed to resolve OPENCV_INCLUDE_DIR from ${lookup}/include`);
                         }
                     }
                 }
             }
         }
+        return { changes, summery };
     }
 
     private resolveValue(info: ArgInfo): string {

@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.11
+- improve OpenCVBuildEnv.autoLocatePrebuild() add verbose output
+
 * V 0.5.10
 - add public static OpenCVBuildEnv.autoLocatePrebuild()
 
