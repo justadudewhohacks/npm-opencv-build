@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.12
+- less tiny-glob usage
+
 * V 0.5.11
 - improve OpenCVBuildEnv.autoLocatePrebuild() add verbose output
 

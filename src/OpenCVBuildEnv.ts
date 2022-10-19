@@ -62,7 +62,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\bin";
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_BIN_DIR = candidate;
-                    summery.push('OPENCV_BIN_DIR resolve');
+                    summery.push('OPENCV_BIN_DIR resolved');
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_BIN_DIR from ${candidate}`);
@@ -73,7 +73,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\lib"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_LIB_DIR = candidate;
-                    summery.push('OPENCV_LIB_DIR resolve');
+                    summery.push('OPENCV_LIB_DIR resolved');
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_LIB_DIR from ${candidate}`);
@@ -83,7 +83,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "c:\\tools\\opencv\\build\\include"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_INCLUDE_DIR = candidate;
-                    summery.push('OPENCV_INCLUDE_DIR resolve');
+                    summery.push('OPENCV_INCLUDE_DIR resolved');
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_INCLUDE_DIR from ${candidate}`);
@@ -95,7 +95,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "/usr/bin/";
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_BIN_DIR = candidate;
-                    summery.push('OPENCV_BIN_DIR resolve');
+                    summery.push('OPENCV_BIN_DIR resolved');
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_BIN_DIR from ${candidate}`);
@@ -103,10 +103,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             }
             if (!process.env.OPENCV_LIB_DIR) {
                 const lookup = "/usr/lib/*-linux-gnu";
-                const candidates = blob(lookup);
-                if (candidates.length) {
-                    process.env.OPENCV_LIB_DIR = candidates[0];
-                    summery.push(`OPENCV_LIB_DIR resolve ${candidates.length} candidates`);
+                // tiny-blob need to be fix bypassing th issue
+                const [candidate] = fs.readdirSync('/usr/lib/').filter((a: string) => a.endsWith('-linux-gnu')).map(a => `/usr/lib/${a}`);
+                // const candidates = blob(lookup);
+                if (candidate) {
+                    process.env.OPENCV_LIB_DIR = candidate;
+                    summery.push(`OPENCV_LIB_DIR resolved`);
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_LIB_DIR from ${lookup}`);
@@ -116,7 +118,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const candidate = "/usr/include/opencv4/"
                 if (fs.existsSync(candidate)) {
                     process.env.OPENCV_INCLUDE_DIR = candidate;
-                    summery.push('OPENCV_INCLUDE_DIR resolve');
+                    summery.push('OPENCV_INCLUDE_DIR resolved');
                     changes++;
                 } else {
                     summery.push(`failed to resolve OPENCV_INCLUDE_DIR from ${candidate}`);
