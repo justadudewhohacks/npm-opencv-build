@@ -48,6 +48,78 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     protected _platform: NodeJS.Platform;
     private no_autobuild: string;
 
+    /**
+     * autodetect path using common values.
+     */
+    public static autoLocatePrebuild() {
+        const os = process.platform;
+        if (os === "win32") {
+            // chocolatey
+            if (!process.env.OPENCV_BIN_DIR) {
+                const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\bin";
+                if (fs.existsSync(candidate)) {
+                    process.env.OPENCV_BIN_DIR = candidate;
+                }
+            }
+            if (!process.env.OPENCV_LIB_DIR) {
+                const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\lib"
+                if (fs.existsSync(candidate)) {
+                    process.env.OPENCV_LIB_DIR = candidate;
+                }
+            }
+            if (!process.env.OPENCV_INCLUDE_DIR) {
+                const candidate = "c:\\tools\\opencv\\build\\include"
+                if (fs.existsSync(candidate)) {
+                    process.env.OPENCV_INCLUDE_DIR = candidate;
+                }
+            }
+        } else if (os === 'linux') {
+            // apt detection
+            if (!process.env.OPENCV_BIN_DIR) {
+                const candidate = "/usr/bin/";
+                if (fs.existsSync(candidate)) {
+                    process.env.OPENCV_BIN_DIR = candidate;
+                }
+            }
+            if (!process.env.OPENCV_LIB_DIR) {
+                const candidates = blob("/usr/lib/*-linux-gnu");
+                if (candidates.length)
+                    process.env.OPENCV_LIB_DIR = candidates[0];
+            }
+            if (!process.env.OPENCV_INCLUDE_DIR) {
+                const candidate = "/usr/include/opencv4/"
+                if (fs.existsSync(candidate)) {
+                    process.env.OPENCV_INCLUDE_DIR = candidate;
+                }
+            }
+        } else if (os === 'darwin') {
+            // Brew detection
+            if (fs.existsSync("/opt/homebrew/Cellar/opencv")) {
+                const candidates = blob("/opt/homebrew/Cellar/opencv/*");
+                if (candidates.length) {
+                    const dir = candidates[0];
+                    if (!process.env.OPENCV_BIN_DIR) {
+                        const candidate = path.join(dir, "bin");
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_BIN_DIR = candidate;
+                        }
+                    }
+                    if (!process.env.OPENCV_LIB_DIR) {
+                        const candidate = path.join(dir, "lib");
+                        if (fs.existsSync(candidate))
+                            process.env.OPENCV_LIB_DIR = candidates[0];
+                    }
+                    if (!process.env.OPENCV_INCLUDE_DIR) {
+                        const candidate = path.join(dir, "include");
+                        if (fs.existsSync(candidate)) {
+                            process.env.OPENCV_INCLUDE_DIR = candidate;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private resolveValue(info: ArgInfo): string {
         if (info.conf in this.opts) {
             if (info.isBool) {
@@ -148,72 +220,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         // try to build a new openCV or use a prebuilt one
         if (this.no_autobuild) {
             this.opencvVersion = '0.0.0';
-            const os = process.platform;
-            if (os === "win32") {
-                // chocolatey
-                if (!process.env.OPENCV_BIN_DIR) {
-                    const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\bin";
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_BIN_DIR = candidate;
-                    }
-                }
-                if (!process.env.OPENCV_LIB_DIR) {
-                    const candidate = "c:\\tools\\opencv\\build\\x64\\vc14\\lib"
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_LIB_DIR = candidate;
-                    }
-                }
-                if (!process.env.OPENCV_INCLUDE_DIR) {
-                    const candidate = "c:\\tools\\opencv\\build\\include"
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_INCLUDE_DIR = candidate;
-                    }
-                }
-            } else if (os === 'linux') {
-                // apt detection
-                if (!process.env.OPENCV_BIN_DIR) {
-                    const candidate = "/usr/bin/";
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_BIN_DIR = candidate;
-                    }
-                }
-                if (!process.env.OPENCV_LIB_DIR) {
-                    const candidates = blob("/usr/lib/*-linux-gnu");
-                    if (candidates.length)
-                        process.env.OPENCV_LIB_DIR = candidates[0];
-                }
-                if (!process.env.OPENCV_INCLUDE_DIR) {
-                    const candidate = "/usr/include/opencv4/"
-                    if (fs.existsSync(candidate)) {
-                        process.env.OPENCV_INCLUDE_DIR = candidate;
-                    }
-                }
-            } else if (os === 'darwin') {
-                // Brew detection
-                if (fs.existsSync("/opt/homebrew/Cellar/opencv")) {
-                    const candidates = blob("/opt/homebrew/Cellar/opencv/*");
-                    if (candidates.length) {
-                        const dir = candidates[0];
-                        if (!process.env.OPENCV_BIN_DIR) {
-                            const candidate = path.join(dir, "bin");
-                            if (fs.existsSync(candidate)) {
-                                process.env.OPENCV_BIN_DIR = candidate;
-                            }
-                        }
-                        if (!process.env.OPENCV_LIB_DIR) {
-                            const candidate = path.join(dir, "lib");
-                            if (fs.existsSync(candidate))
-                                process.env.OPENCV_LIB_DIR = candidates[0];
-                        }
-                        if (!process.env.OPENCV_INCLUDE_DIR) {
-                            const candidate = path.join(dir, "include");
-                            if (fs.existsSync(candidate)) {
-                                process.env.OPENCV_INCLUDE_DIR = candidate;
-                            }
-                        }
-                    }
-                }
-            }
+            OpenCVBuildEnv.autoLocatePrebuild();
         } else {
             this.opencvVersion = this.resolveValue(ALLARGS.version);
             if (!this.opencvVersion) {
@@ -267,10 +274,13 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             }
         }
         if (this.no_autobuild) {
+            /**
+             * no autobuild, all OPENCV_PATHS_ENV should be defined
+             */
             for (const varname of OPENCV_PATHS_ENV) {
                 const value = process.env[varname];
                 if (!value) {
-                    throw new Error(`${varname} must be define if can not be create nobuild / disableAutoBuild / OPENCV4NODEJS_DISABLE_AUTOBUILD is set`);
+                    throw new Error(`${varname} must be define if auto-build is disabled, and autodetection failed`);
                 }
                 let stats: Stats;
                 try {
