@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.10
+- add public static OpenCVBuildEnv.autoLocatePrebuild()
+
 * V 0.5.9
 - findMSBuild now return all MsBuild version
 - force resolve absolute path for msbuild binary
