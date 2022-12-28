@@ -174,8 +174,15 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (info.conf in this.opts) {
             if (info.isBool) {
                 return this.opts[info.conf] ? '1' : '';
-            } else
-                return this.opts[info.conf] as string || '';
+            } else {
+                let str = '' + this.opts[info.conf];
+                if (!str)
+                    return '';
+                str = str.toLowerCase()
+                if (str === 'false' || str === '0' || str.startsWith('disabl') || str === 'off')
+                    return '';
+                return str;
+            }
         } else {
             if (this.#packageEnv && this.#packageEnv[info.conf]) {
                 return this.#packageEnv[info.conf] || '';

@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.5.13
+- improve configuration boolean flag parsing, "0", "false", "off", "disable" and "disabled" are mean false
+
 * V 0.5.12
 - less tiny-glob usage
 
