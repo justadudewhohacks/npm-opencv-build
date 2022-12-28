@@ -45,6 +45,11 @@ export interface OpenCVBuildEnvParamsString {
      * looks like: opencv/build/.../bin
      */
     opencvBinDir?: string;// never used based on opencvBuild path + OS postfix
+    /**
+     * Restrict cuda targeded version to a limited set of version
+     * add on 28/12/2022
+     */
+    cudaArch?: string;
 }
 type stringKey = keyof OpenCVBuildEnvParamsString;
 
@@ -88,6 +93,8 @@ export const ALLARGS = {
     root: { arg: 'root', conf: 'rootcwd', env: 'INIT_CWD', isBool: false, doc: 'OpenCV-build root directory (deprecated)' } as ArgInfo,
     buildRoot: { arg: 'buildRoot', conf: 'buildRoot', env: 'OPENCV_BUILD_ROOT', isBool: false, doc: 'OpenCV build directory' } as ArgInfo,
     cuda: { arg: 'cuda', conf: 'autoBuildBuildCuda', env: 'OPENCV4NODEJS_BUILD_CUDA', isBool: true, doc: 'Enable cuda in OpenCV build' } as ArgInfo,
+    // add on 28/12/2022
+    cudaArch: { arg: 'cudaArch', conf: 'cudaArch', env: 'OPENCV4NODEJS_BUILD_CUDA_ARCH', isBool: false, doc: 'Specify the cuda arch will drasticly reduce build time, see https://en.wikipedia.org/wiki/CUDA, ex if you have a RTX 3080 use --cudaArch=8.6, if you have also a RTX 2080 --cudaArch=7.5,8.6' } as ArgInfo,
     nocontrib: { arg: 'nocontrib', conf: 'autoBuildWithoutContrib', env: 'OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB', isBool: true, doc: 'Do not compile Contrib modules' } as ArgInfo,
     nobuild: { arg: 'nobuild', conf: 'disableAutoBuild', env: 'OPENCV4NODEJS_DISABLE_AUTOBUILD', isBool: true, doc: 'Do build OpenCV' } as ArgInfo,
     incDir: { arg: 'incDir', conf: 'opencvIncludeDir', env: 'OPENCV_INCLUDE_DIR', isBool: false, doc: 'OpenCV include directory' } as ArgInfo,

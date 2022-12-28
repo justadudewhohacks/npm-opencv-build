@@ -1,5 +1,12 @@
 # Changelog
 
+* V 0.6.0
+- Improve cuda builds
+- add --cudaArch
+- generate build-cmd.bat/sh in build directory
+- more log
+- fix error logs
+
 * V 0.5.13
 - improve configuration boolean flag parsing, "0", "false", "off", "disable" and "disabled" are mean false
 

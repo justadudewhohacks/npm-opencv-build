@@ -91,6 +91,8 @@ export function spawn(cmd: string, args: string[], options: child_process.ExecOp
           code = null
         }
         const msg = `running: ${protect(cmd)} ${args.map(protect).join(' ')}${EOL}in ${options.cwd as string} exited with code ${code} (for more info, set '--loglevel silly')'`
+        // if (code !== 0)
+        //   console.log(`End of spawn ${cmd} ${args.join(' ')} RET:`, code);
         if (code !== 0) {
           return reject(msg)
         }
@@ -142,42 +144,43 @@ export async function requireCmake() {
   }
 }
 
+let cached_cuda: null | boolean = null;
 /**
  * looks for cuda lib
  * @returns 
  */
-export function isCudaAvailable() {
+export function isCudaAvailable(): boolean {
+  if (cached_cuda != null)
+    return cached_cuda;
   log.info('install', 'Check if CUDA is available & what version...');
-
   if (process.platform == 'win32') {
     try {
       requireCmdSync('nvcc --version', 'CUDA availability check');
-      return true;
+      // return true;
     } catch (err) {
-      log.info('install', 'Seems like CUDA is not installed.');
+      log.info('install', 'Seems like CUDA is not installed; nvcc --version call failed');
       return false;
     }
   }
-
   // Because NVCC is not installed by default & requires an extra install step,
   // this is work around that always works
-  const cudeFileTxt = '/usr/local/cuda/version.txt';
-  const cudeFileJson = '/usr/local/cuda/version.json';
-  const cudaVersionFilePathTxt = path.resolve(cudeFileTxt);
-  const cudaVersionFilePathJson = path.resolve(cudeFileJson);
-
-  if (fs.existsSync(cudaVersionFilePathTxt)) {
-    const content = fs.readFileSync(cudaVersionFilePathTxt, 'utf8');
-    log.info('install', content);
-    return true;
+  const {CUDA_PATH} = process.env;
+  for (const cudaPath of [CUDA_PATH, '/usr/local/cuda/']) {
+    if (!cudaPath)
+      continue;
+    if (!fs.existsSync(cudaPath))
+      continue;
+      for (const file of ['version.txt', 'version.json']) {
+        const realpath = path.resolve(cudaPath, file);
+        if (fs.existsSync(realpath)) {
+          const content = fs.readFileSync(realpath, 'utf8');
+          log.info('install', content);
+          cached_cuda = true;
+          return true;
+          }
+      }
   }
-
-  if (fs.existsSync(cudaVersionFilePathJson)) {
-    const content = fs.readFileSync(cudaVersionFilePathJson, 'utf8');
-    log.info('install', content);
-    return true;
-  }
-
-  log.info('install', `CUDA version file could not be found in /usr/local/cuda/version.{txt,json}.`);
+  log.info('install', `CUDA version file could not be found in {/usr/local/cuda/,CUDA_PATH}version.{txt,json}`);
+  cached_cuda = false;
   return false;
 }

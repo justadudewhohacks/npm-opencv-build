@@ -36,6 +36,9 @@ npm-opencv-build usage:
    --root <value>       OpenCV-build root directory (deprecated) (INIT_CWD env variable)
    --buildRoot <value>  OpenCV build directory                   (OPENCV_BUILD_ROOT env variable)
    --cuda               Enable cuda in OpenCV build              (OPENCV4NODEJS_BUILD_CUDA env variable)
+   --cudaArch <value>   Specify the cuda arch will drasticly reduce build time, see https://en.wikipedia.org/wiki/CUDA,
+                        ex if you have a RTX 3080 use --cudaArch=8.6, if you have also a RTX 2080 --cudaArch=7.5,8.6
+                                                                 (OPENCV4NODEJS_BUILD_CUDA_ARCH env variable)
    --nocontrib          Do not compile Contrib modules           (OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB env variable)
    --nobuild            Do build OpenCV                          (OPENCV4NODEJS_DISABLE_AUTOBUILD env variable)
    --incDir <value>     OpenCV include directory                 (OPENCV_INCLUDE_DIR env variable)

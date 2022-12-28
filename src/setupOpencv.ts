@@ -82,6 +82,7 @@ export class SetupOpencv {
   }
 
   private getCmakeArgs(cmakeFlags: string[]): string[] {
+    log.info('install', `getCmakeArgs prefixing Cmake args with ${highlight("%s")}`, this.builder.env.opencvSrc)
     return [this.builder.env.opencvSrc].concat(cmakeFlags)
   }
 
@@ -99,9 +100,9 @@ export class SetupOpencv {
    * Write Build Context to disk, to avoid further rebuild
    * @returns AutoBuildFile
    */
-  public writeAutoBuildFile(overwrite: boolean): AutoBuildFile {
+  public writeAutoBuildFile(overwrite: boolean, buildLog?: string): AutoBuildFile {
     const env = this.builder.env;
-    const autoBuildFile: AutoBuildFile = {
+    const autoBuildInfo: AutoBuildFile = {
       opencvVersion: env.opencvVersion,
       autoBuildFlags: env.autoBuildFlags,
       modules: this.builder.getLibs.getLibs(),
@@ -115,8 +116,10 @@ export class SetupOpencv {
       if (old)
         return old;
     }
-    fs.writeFileSync(env.autoBuildFile, JSON.stringify(autoBuildFile, null, 4))
-    return autoBuildFile;
+    fs.writeFileSync(env.autoBuildFile, JSON.stringify(autoBuildInfo, null, 4))
+    if (buildLog)
+      fs.writeFileSync(env.autoBuildLog, buildLog)
+    return autoBuildInfo;
   }
   private execLog: string[] = [];
 
@@ -130,7 +133,7 @@ export class SetupOpencv {
     const env = this.builder.env;
     const msbuild = await this.getMsbuildIfWin()
     let cMakeFlags: string[] = [];
-    let msbuildPath: string | undefined = undefined;
+    let msbuildPath = '';
     // Get cmake flags here to check for CUDA early on instead of the start of the building process
     if (env.isWin) {
       if (!msbuild)
@@ -140,6 +143,7 @@ export class SetupOpencv {
     } else {
       cMakeFlags = this.builder.env.getSharedCmakeFlags();
     }
+    log.info('install', `cMakeFlags will be: ${formatNumber("%s")}`, cMakeFlags.join(' '));
 
     const tag = env.opencvVersion
     log.info('install', `installing opencv version ${formatNumber("%s")} into directory: ${highlight("%s")}`, tag, env.opencvRoot)
@@ -211,6 +215,7 @@ export class SetupOpencv {
       this.execLog.push(`export OPENCV_LIB_DIR=${protect(env.opencvLibDir)}`);
 
       const cmakeArgs = this.getCmakeArgs(cMakeFlags)
+
       log.info('install', 'running in %s cmake %s', protect(env.opencvBuild), cmakeArgs.map(protect).join(' '))
       this.execLog.push(toExecCmd('cd', [env.opencvBuild]))
       this.execLog.push(toExecCmd('cmake', cmakeArgs))
@@ -220,12 +225,14 @@ export class SetupOpencv {
       }
       await this.runBuildCmd(msbuildPath)
     } catch (e) {
-      log.error(`Compilation failed, previous calls:${EOL}%s`, this.execLog.join(EOL));
+      const allCmds = this.execLog.join(EOL);
+      log.error('build', `Compilation failed, previous calls:${EOL}%s`, allCmds);
+      // log.error(`Compilation failed, previous calls:${EOL}%s`, allCmds);
       throw e;
     }
 
     if (!env.dryRun) {
-      this.writeAutoBuildFile(true)
+      this.writeAutoBuildFile(true, this.execLog.join(EOL))
     } else {
       this.execLog.push('echo lock file can not be generated in dry-mode');
     }
@@ -237,6 +244,7 @@ export class SetupOpencv {
        * DELETE TMP build dirs
        */
       try {
+        log.info('install', `cleaning openCV build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvSrc)
         await primraf(env.opencvSrc)
       } catch (err) {
         log.error('install', 'failed to clean opencv source folder:', err)
@@ -244,11 +252,15 @@ export class SetupOpencv {
       }
 
       try {
+        log.info('install', `cleaning openCVContrib build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvContribSrc)
         await primraf(env.opencvContribSrc)
       } catch (err) {
         log.error('install', 'failed to clean opencv_contrib source folder:', err)
         log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvContribSrc)
       }
+    } else {
+      log.info('install', `Keeping openCV build file in ${highlight("%s")}`, env.opencvSrc)
+      log.info('install', `Keeping openCVContrib build file in ${highlight("%s")}`, env.opencvContribSrc)
     }
     if (env.dryRun) {
       console.log();

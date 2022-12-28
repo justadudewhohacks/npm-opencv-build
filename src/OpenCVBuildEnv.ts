@@ -19,6 +19,16 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
      * set using env OPENCV4NODEJS_BUILD_CUDA , or --cuda or autoBuildBuildCuda option in package.json
      */
     public buildWithCuda = false;
+    #cudaArch = '';
+
+    get cudaArch(): string {
+        const arch = this.#cudaArch;
+        if (!arch)
+            return '';
+        if (!arch.match(/^(\d+\.\d+)(,\d+\.\d+)*$/))
+            throw Error(`invalid value for cudaArch "${arch}" should be a list of valid cuda arch separated by comma like: "7.5,8.6"`)
+        return arch;
+    }
     /**
      * set using env OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB, or --nocontrib arg, or autoBuildWithoutContrib option in package.json
      */
@@ -308,6 +318,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
         this.autoBuildFlags = this.resolveValue(ALLARGS.flags);
         this.buildWithCuda = !!this.resolveValue(ALLARGS.cuda);
+        this.#cudaArch = this.resolveValue(ALLARGS.cudaArch);
         this.isWithoutContrib = !!this.resolveValue(ALLARGS.nocontrib);
         this.isAutoBuildDisabled = !!this.resolveValue(ALLARGS.nobuild);
         this.keepsources = !!this.resolveValue(ALLARGS.keepsources);
@@ -394,9 +405,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         const cMakeflags = [
             `-DCMAKE_INSTALL_PREFIX=${this.opencvBuild}`,
             '-DCMAKE_BUILD_TYPE=Release',
+            '-DCMAKE_BUILD_TYPES=Release',
             '-DBUILD_EXAMPLES=OFF', // do not build opencv_contrib samples
             '-DBUILD_DOCS=OFF',
             '-DBUILD_TESTS=OFF',
+            '-DBUILD_opencv_dnn=ON', // added 28/12/2022
+            '-DENABLE_FAST_MATH=ON',
             '-DBUILD_PERF_TESTS=OFF',
             '-DBUILD_JAVA=OFF',
             '-DBUILD_ZLIB=OFF', // https://github.com/opencv/opencv/issues/21389
@@ -412,10 +426,18 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     public getCongiguredCmakeFlags(): string[] {
         const cMakeflags = [];
-        if (this.buildWithCuda && isCudaAvailable()) {
-            // log.info('install', 'Adding CUDA flags...');
-            // this.enabledModules.delete('cudacodec');// video codec (NVCUVID) is deprecated in cuda 10, so don't add it
-            cMakeflags.push('-DWITH_CUDA=ON', '-DCUDA_FAST_MATH=ON'/* optional */, '-DWITH_CUBLAS=ON' /* optional */)
+        if (this.buildWithCuda) {
+            if (isCudaAvailable()) {
+                // log.info('install', 'Adding CUDA flags...');
+                // this.enabledModules.delete('cudacodec');// video codec (NVCUVID) is deprecated in cuda 10, so don't add it
+                cMakeflags.push('-DWITH_CUDA=ON', '-DCUDA_FAST_MATH=ON'/* optional */, '-DWITH_CUBLAS=ON' /* optional */, "-DOPENCV_DNN_CUDA=ON")
+                const cudaArch = this.cudaArch;
+                if (cudaArch) {
+                    cMakeflags.push(`-DCUDA_ARCH_BIN=${cudaArch}`)
+                }
+            } else {
+                log.error('install', 'failed to locate CUDA setup');
+            }
         }
         cMakeflags.push(...this.getCmakeBuildFlags());
         // add user added flags
@@ -433,6 +455,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             isWithoutContrib: this.isWithoutContrib,
             isAutoBuildDisabled: this.isAutoBuildDisabled,
             autoBuildFlags: this.autoBuildFlags,
+            cudaArch: this.cudaArch,
             buildRoot: this.buildRoot,
             OPENCV_INCLUDE_DIR: process.env.OPENCV_INCLUDE_DIR || '',
             OPENCV_LIB_DIR: process.env.OPENCV_LIB_DIR || '',
@@ -485,8 +508,6 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
      */
     get optHash(): string {
         let optArgs = this.getCongiguredCmakeFlags().join(' ');
-        // if (this.autoBuildFlags) 
-        //     optArgs += ' ' + this.autoBuildFlags;
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'
         if (optArgs) {
@@ -502,7 +523,6 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             .map((n) => ({ autobuild: path.join(rootDir, n, 'auto-build.json'), dir: n }))
             .filter((n) => fs.existsSync(n.autobuild))
             .map(({ autobuild, dir }) => ({ autobuild, dir, date: fs.statSync(autobuild).mtime }))
-        //fs.existsSync(path.join(rootDir, n, 'auto-build.json')));
         return versions;
     }
 
@@ -568,6 +588,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     }
     public get autoBuildFile(): string {
         return path.join(this.opencvRoot, 'auto-build.json')
+    }
+    public get autoBuildLog(): string {
+        if (this.isWin)
+            return path.join(this.opencvRoot, 'build-cmd.bat')
+        else
+            return path.join(this.opencvRoot, 'build-cmd.sh')
     }
     public readAutoBuildFile(): AutoBuildFile | undefined {
         return this.readAutoBuildFile2(this.autoBuildFile);

@@ -12,6 +12,7 @@ specifiers:
   '@u4/tiny-glob': ^0.2.10
   chai: ^4.3.6
   chai-string: ^1.5.0
+  cross-env: ^7.0.3
   eslint: ^8.25.0
   mocha: ^10.0.0
   npmlog: ^6.0.2
@@ -37,6 +38,7 @@ devDependencies:
   '@typescript-eslint/parser': 5.40.0_z4bbprzjrhnsfa24uvmcbu7f5q
   chai: 4.3.6
   chai-string: 1.5.0_chai@4.3.6
+  cross-env: 7.0.3
   eslint: 8.25.0
   mocha: 10.0.0
   ts-node: 10.9.1_xkk4lltwku4cysulzbqoieownu
@@ -523,6 +525,14 @@ packages:
 
   /create-require/1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+    dev: true
+
+  /cross-env/7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
     dev: true
 
   /cross-spawn/7.0.3:

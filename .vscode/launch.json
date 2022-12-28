@@ -69,6 +69,20 @@
                 "OPENCV_GIT_CACHE": "1"
             },
             "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "build with cuda",
+            "program": "${workspaceFolder}/bin/main.js",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+            "args": ["--keepsource", "--version", "4.6.0", "--cuda", "--cudaArch=8.6"],
+            "env": {
+                "OPENCV4NODEJS_DISABLE_AUTOBUILD": ""
+            },
+            "console": "integratedTerminal"
         }
+
     ]
 }

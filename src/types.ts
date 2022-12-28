@@ -9,6 +9,7 @@ export interface EnvSummery {
   isWithoutContrib: boolean,
   isAutoBuildDisabled: boolean,
   buildRoot: string,
+  cudaArch: string,
   autoBuildFlags: string,
   OPENCV_INCLUDE_DIR: string,
   OPENCV_LIB_DIR: string,

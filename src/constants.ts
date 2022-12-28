@@ -1,6 +1,5 @@
 import { OpenCVBuilder } from "./OpenCVBuilder.js"
 
-
 export class Constant {
   constructor(private readonly builder: OpenCVBuilder) {
   }

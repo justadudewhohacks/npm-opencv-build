@@ -57,6 +57,7 @@ export class OpenCVBuilder {
   }
 
   async install(): Promise<void> {
+    let time = Date.now();
     // if project directory has a package.json containing opencv4nodejs variables
     // apply these variables to the process environment
     // this.env.applyEnvsFromPackageJson()
@@ -103,6 +104,10 @@ export class OpenCVBuilder {
       await utils.requireGit()
       await utils.requireCmake()
       await new SetupOpencv(this).start()
+      time = (Date.now() - time);
+      const date = new Date(time);
+      const timeString = date.toISOString().substring(11, 19);
+      log.info('install', `Total Build Time: ${utils.formatNumber(timeString)}`)
     } catch (err) {
       if (err.toString)
         log.error('install', err.toString())
