@@ -9,6 +9,17 @@ import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBu
 import { ALL_OPENCV_MODULES } from '.';
 import { sync as blob } from '@u4/tiny-glob';
 
+function toBool(value?: string | null) {
+    if (!value)
+        return false;
+    if (typeof value === 'boolean')
+        return value;
+    value = value.toLowerCase();
+    if (value === '0' ||value === 'false' || value === 'off' || value.startsWith('disa'))
+        return false;
+    return true;
+}
+
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
     /**
@@ -181,30 +192,26 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     }
 
     private resolveValue(info: ArgInfo): string {
+        let value = '';
         if (info.conf in this.opts) {
-            if (info.isBool) {
-                return this.opts[info.conf] ? '1' : '';
-            } else {
-                let str = '' + this.opts[info.conf];
-                if (!str)
-                    return '';
-                str = str.toLowerCase()
-                if (str === 'false' || str === '0' || str.startsWith('disabl') || str === 'off')
-                    return '';
-                return str;
-            }
+            value = this.opts[info.conf] as string || '';
         } else {
             if (this.#packageEnv && this.#packageEnv[info.conf]) {
-                return this.#packageEnv[info.conf] || '';
+                value = this.#packageEnv[info.conf] || '';
             } else {
-                return process.env[info.env] || '';
+                value = process.env[info.env] || '';
             }
+        }
+        if (info.isBool) {
+            return toBool(value)? '1': '';
+        } else {
+            return value;
         }
     }
     #packageEnv: OpenCVPackageBuildOptions = {};
 
     constructor(private opts = {} as OpenCVBuildEnvParams) {
-        const DEFAULT_OPENCV_VERSION = '4.5.5';
+        const DEFAULT_OPENCV_VERSION = '4.6.0';
         this.prebuild = opts.prebuild;
         this._platform = process.platform;
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
@@ -225,7 +232,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             log.error('applyEnvsFromPackageJson', err)
         }
         // try to use previouse build
-        this.no_autobuild = this.resolveValue(ALLARGS.nobuild);
+        this.no_autobuild = toBool(this.resolveValue(ALLARGS.nobuild))? '1': '';
         if (!this.no_autobuild && opts.prebuild) {
             const builds = this.listBuild();
             if (!builds.length) {

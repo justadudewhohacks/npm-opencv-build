@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "outDir": "lib",
     "module": "commonjs",
-    "target": "ES2017",
+    "target": "ES2019",
     "moduleResolution": "node",
     "sourceMap": true,
     "typeRoots": [
