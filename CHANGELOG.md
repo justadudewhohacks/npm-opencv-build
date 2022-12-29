@@ -6,6 +6,8 @@
 - generate build-cmd.bat/sh in build directory
 - more log
 - fix error logs
+- force keep previous hash build once loaded.
+- fix V 0.5.13 regression on boolean flags.
 
 * V 0.5.13
 - improve configuration boolean flag parsing, "0", "false", "off", "disable" and "disabled" are mean false

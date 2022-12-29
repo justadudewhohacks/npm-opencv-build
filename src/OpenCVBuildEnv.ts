@@ -259,6 +259,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             if (!autoBuildFile)
                 throw Error(`failed to read build info from ${builds[0].autobuild}`);
             const flagStr = autoBuildFile.env.autoBuildFlags;
+            this.hash = builds[0].dir.replace(/^opencv-.+-/, '-');
             // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
             if (flagStr) {
                 const flags = flagStr.split(' ')
@@ -509,11 +510,13 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         log.info('config', `found opencv4nodejs section in ${highlight('%s')}`, rootPackageJSON.file);
         return rootPackageJSON.data.opencv4nodejs
     }
-
+    private hash = '';
     /**
      * openCV uniq version prostfix, used to avoid build path colision.
      */
     get optHash(): string {
+        if (this.hash)
+            return this.hash;
         let optArgs = this.getCongiguredCmakeFlags().join(' ');
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'
