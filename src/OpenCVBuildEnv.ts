@@ -15,7 +15,7 @@ function toBool(value?: string | null) {
     if (typeof value === 'boolean')
         return value;
     value = value.toLowerCase();
-    if (value === '0' ||value === 'false' || value === 'off' || value.startsWith('disa'))
+    if (value === '0' || value === 'false' || value === 'off' || value.startsWith('disa'))
         return false;
     return true;
 }
@@ -68,6 +68,62 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     public packageRoot: string;
     protected _platform: NodeJS.Platform;
     private no_autobuild: string;
+
+    /**
+     * Find the proper root dir, this directory will contains all openCV source code and a subfolder per build
+     * @param opts 
+     * @returns 
+     */
+    public static getBuildDir(opts = {} as OpenCVBuildEnvParams) {
+        let buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
+        if (buildRoot[0] === '~') {
+            buildRoot = path.join(os.homedir(), buildRoot.slice(1));
+        }
+        return buildRoot;
+    }
+
+    /**
+     * list existing build in the diven directory
+     * @param rootDir build directory
+     * @returns builds list
+     */
+    public static listBuild(rootDir: string): Array<{ autobuild: string, buildInfo: AutoBuildFile, dir: string, hash: string, date: Date }> {
+        const versions = fs.readdirSync(rootDir)
+            .filter(n => n.startsWith('opencv-'))
+            .map((dir) => {
+                const autobuild = path.join(rootDir, dir, 'auto-build.json');
+                const hash = dir.replace(/^opencv-.+-/, '-');
+                const buildInfo = OpenCVBuildEnv.readAutoBuildFile(autobuild, true) as AutoBuildFile;
+                return { autobuild, dir, hash, buildInfo, date: fs.statSync(autobuild).mtime }
+            })
+            .filter((n) => n.buildInfo)
+        return versions;
+    }
+
+    /**
+     * Read a parse an existing autoBuildFile
+     * @param autoBuildFile file path
+     * @returns 
+     */
+    public static readAutoBuildFile(autoBuildFile: string, quiet?: boolean): AutoBuildFile | undefined {
+        try {
+            const fileExists = fs.existsSync(autoBuildFile)
+            if (fileExists) {
+                const autoBuildFileData = JSON.parse(fs.readFileSync(autoBuildFile).toString()) as AutoBuildFile
+                if (!autoBuildFileData.opencvVersion || !('autoBuildFlags' in autoBuildFileData) || !Array.isArray(autoBuildFileData.modules)) {
+                    // if (quiet) return undefined;
+                    throw new Error(`auto-build.json has invalid contents, please delete the file: ${autoBuildFile}`);
+                }
+                return autoBuildFileData
+            }
+            if (!quiet) log.info('readAutoBuildFile', 'file does not exists: %s', autoBuildFile)
+        } catch (err) {
+            //if (!quiet) 
+            log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', autoBuildFile, err.toString())
+        }
+        return undefined
+    }
+
 
     /**
      * autodetect path using common values.
@@ -203,7 +259,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             }
         }
         if (info.isBool) {
-            return toBool(value)? '1': '';
+            return toBool(value) ? '1' : '';
         } else {
             return value;
         }
@@ -215,10 +271,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         this.prebuild = opts.prebuild;
         this._platform = process.platform;
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
-        this.buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
-        if (this.buildRoot[0] === '~') {
-            this.buildRoot = path.join(os.homedir(), this.buildRoot.slice(1));
-        }
+        this.buildRoot = OpenCVBuildEnv.getBuildDir(opts);
         // get project Root path to looks for package.json for opencv4nodejs section
         try {
             const data = OpenCVBuildEnv.readEnvsFromPackageJson();
@@ -232,9 +285,9 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             log.error('applyEnvsFromPackageJson', err)
         }
         // try to use previouse build
-        this.no_autobuild = toBool(this.resolveValue(ALLARGS.nobuild))? '1': '';
+        this.no_autobuild = toBool(this.resolveValue(ALLARGS.nobuild)) ? '1' : '';
         if (!this.no_autobuild && opts.prebuild) {
-            const builds = this.listBuild();
+            const builds = OpenCVBuildEnv.listBuild(this.rootDir);
             if (!builds.length) {
                 throw Error(`No build found in ${this.rootDir} you should launch opencv-build-npm once`);
             }
@@ -255,11 +308,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 }
             }
             // load envthe prevuious build
-            const autoBuildFile = this.readAutoBuildFile2(builds[0].autobuild);
-            if (!autoBuildFile)
-                throw Error(`failed to read build info from ${builds[0].autobuild}`);
+            const autoBuildFile = builds[0].buildInfo;
+            //const autoBuildFile = OpenCVBuildEnv.readAutoBuildFile(builds[0].autobuild);
+            //if (!autoBuildFile)
+            //    throw Error(`failed to read build info from ${builds[0].autobuild}`);
             const flagStr = autoBuildFile.env.autoBuildFlags;
-            this.hash = builds[0].dir.replace(/^opencv-.+-/, '-');
+            this.hash = builds[0].hash;
             // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
             if (flagStr) {
                 const flags = flagStr.split(' ')
@@ -526,16 +580,6 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         return optArgs;
     }
 
-    public listBuild(): Array<{ autobuild: string, dir: string, date: Date }> {
-        const rootDir = this.rootDir;
-        const versions = fs.readdirSync(rootDir)
-            .filter(n => n.startsWith('opencv-'))
-            .map((n) => ({ autobuild: path.join(rootDir, n, 'auto-build.json'), dir: n }))
-            .filter((n) => fs.existsSync(n.autobuild))
-            .map(({ autobuild, dir }) => ({ autobuild, dir, date: fs.statSync(autobuild).mtime }))
-        return versions;
-    }
-
     public get platform(): NodeJS.Platform {
         return this._platform;
     }
@@ -606,23 +650,6 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             return path.join(this.opencvRoot, 'build-cmd.sh')
     }
     public readAutoBuildFile(): AutoBuildFile | undefined {
-        return this.readAutoBuildFile2(this.autoBuildFile);
-    }
-
-    private readAutoBuildFile2(autoBuildFile: string): AutoBuildFile | undefined {
-        try {
-            const fileExists = fs.existsSync(autoBuildFile)
-            if (fileExists) {
-                const autoBuildFileData = JSON.parse(fs.readFileSync(autoBuildFile).toString()) as AutoBuildFile
-                if (!autoBuildFileData.opencvVersion || !('autoBuildFlags' in autoBuildFileData) || !Array.isArray(autoBuildFileData.modules)) {
-                    throw new Error('auto-build.json has invalid contents')
-                }
-                return autoBuildFileData
-            }
-            log.info('readAutoBuildFile', 'file does not exists: %s', autoBuildFile)
-        } catch (err) {
-            log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', autoBuildFile, err.toString())
-        }
-        return undefined
+        return OpenCVBuildEnv.readAutoBuildFile(this.autoBuildFile);
     }
 }
