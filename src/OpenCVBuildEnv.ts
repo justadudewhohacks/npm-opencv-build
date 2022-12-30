@@ -2,11 +2,11 @@ import fs, { Stats } from 'fs';
 import os from 'os';
 import path from 'path';
 import log from 'npmlog';
-import { highlight, formatNumber, isCudaAvailable } from './utils';
+import { highlight, formatNumber, isCudaAvailable } from './utils.js';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
-import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc';
-import { ALL_OPENCV_MODULES } from '.';
+import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc.js';
+import { ALL_OPENCV_MODULES } from './misc.js';
 import { sync as blob } from '@u4/tiny-glob';
 
 function toBool(value?: string | null) {

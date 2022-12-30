@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.6.2
+- CJS + ESM build
+
 * V 0.6.1
 - improve OpenCVBuildEnv, exposing new static methods
 

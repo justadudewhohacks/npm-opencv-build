@@ -7,7 +7,7 @@ import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { OPENCV_PATHS_ENV } from './misc';
+import { OPENCV_PATHS_ENV } from './misc.js';
 
 const primraf = promisify(rimraf);
 

@@ -87,7 +87,7 @@ Or by inserting them into the `package.json` where the dependency is declared an
 {
   "opencv4nodejs": {
     "autoBuildFlags": "-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc",
-    "autoBuildOpencvVersion": "4.5.5"
+    "autoBuildOpencvVersion": "4.6.0"
   }
 }
 ```
@@ -96,7 +96,7 @@ By using environement varaibles.
 
 ```bash
 export OPENCV4NODEJS_AUTOBUILD_FLAGS="-DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_PC_FILE_NAME=opencv.pc"
-export OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION="4.5.5"
+export OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION="4.6.0"
 export OPENCV_BUILD_ROOT="~/openCV"
 
 node build/main.js
