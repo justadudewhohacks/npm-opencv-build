@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.6.1
+- improve OpenCVBuildEnv, exposing new static methods
+
 * V 0.6.0
 - Improve cuda builds
 - add --cudaArch
