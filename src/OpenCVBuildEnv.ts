@@ -20,6 +20,8 @@ function toBool(value?: string | null) {
     return true;
 }
 
+const DEFAULT_OPENCV_VERSION = '4.6.0';
+
 export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString {
     public prebuild?: 'latestBuild' | 'latestVersion' | 'oldestBuild' | 'oldestVersion';
     /**
@@ -247,6 +249,28 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         return { changes, summery };
     }
 
+
+    private getExpectedVersion(): string {
+        if (this.no_autobuild) {
+            return '0.0.0';
+        } 
+        const opencvVersion = this.resolveValue(ALLARGS.version);
+        if (opencvVersion) 
+            return opencvVersion;
+        return DEFAULT_OPENCV_VERSION;
+    }
+
+    // private getExpectedBuildWithCuda(): boolean {
+    //     return !!this.resolveValue(ALLARGS.cuda);
+    // }
+    // this.autoBuildFlags = this.resolveValue(ALLARGS.flags);
+    // this.#cudaArch = this.resolveValue(ALLARGS.cudaArch);
+    // this.isWithoutContrib = !!this.resolveValue(ALLARGS.nocontrib);
+    // this.isAutoBuildDisabled = !!this.resolveValue(ALLARGS.nobuild);
+    // this.keepsources = !!this.resolveValue(ALLARGS.keepsources);
+    // this.dryRun = !!this.resolveValue(ALLARGS['dry-run']);
+    // this.gitCache = !!this.resolveValue(ALLARGS['git-cache']);
+
     private resolveValue(info: ArgInfo): string {
         let value = '';
         if (info.conf in this.opts) {
@@ -267,7 +291,6 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     #packageEnv: OpenCVPackageBuildOptions = {};
 
     constructor(private opts = {} as OpenCVBuildEnvParams) {
-        const DEFAULT_OPENCV_VERSION = '4.6.0';
         this.prebuild = opts.prebuild;
         this._platform = process.platform;
         this.packageRoot = opts.rootcwd || process.env.INIT_CWD || process.cwd();
@@ -287,9 +310,14 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         // try to use previouse build
         this.no_autobuild = toBool(this.resolveValue(ALLARGS.nobuild)) ? '1' : '';
         if (!this.no_autobuild && opts.prebuild) {
-            const builds = OpenCVBuildEnv.listBuild(this.rootDir);
+            let builds = OpenCVBuildEnv.listBuild(this.rootDir);
             if (!builds.length) {
                 throw Error(`No build found in ${this.rootDir} you should launch opencv-build-npm once`);
+            }
+            const expVer = this.getExpectedVersion();
+            builds = builds.filter(b => b.buildInfo.opencvVersion === expVer)
+            if (!builds.length) {
+                throw Error(`No build of version ${expVer} found in ${this.rootDir} you should launch opencv-build-npm`);
             }
             if (builds.length > 1) {
                 switch (opts.prebuild) {
@@ -351,13 +379,9 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             this.opencvVersion = '0.0.0';
             OpenCVBuildEnv.autoLocatePrebuild();
         } else {
-            this.opencvVersion = this.resolveValue(ALLARGS.version);
-            if (!this.opencvVersion) {
-                this.opencvVersion = DEFAULT_OPENCV_VERSION;
-                log.info('init', `no openCV version given using default verison ${formatNumber(DEFAULT_OPENCV_VERSION)}`)
-            } else {
-                log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
-            }
+            this.opencvVersion = this.getExpectedVersion();
+            log.info('init', `using openCV verison ${formatNumber(this.opencvVersion)}`)
+
             if (process.env.INIT_CWD) {
                 log.info('init', `${highlight("INIT_CWD")} is defined overwriting root path to ${highlight(process.env.INIT_CWD)}`)
             }

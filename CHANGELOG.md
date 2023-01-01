@@ -1,5 +1,9 @@
 # Changelog
 
+* V 0.6.3
+- CJS First
+- enforce opencv version check durring version detection
+
 * V 0.6.2
 - CJS + ESM build
 
