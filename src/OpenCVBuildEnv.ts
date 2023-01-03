@@ -14,6 +14,9 @@ function toBool(value?: string | null) {
         return false;
     if (typeof value === 'boolean')
         return value;
+    if (typeof value === 'number') {
+        return value === 1;
+    }
     value = value.toLowerCase();
     if (value === '0' || value === 'false' || value === 'off' || value.startsWith('disa'))
         return false;
@@ -73,8 +76,8 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     /**
      * Find the proper root dir, this directory will contains all openCV source code and a subfolder per build
-     * @param opts 
-     * @returns 
+     * @param opts
+     * @returns
      */
     public static getBuildDir(opts = {} as OpenCVBuildEnvParams) {
         let buildRoot = opts.buildRoot || process.env.OPENCV_BUILD_ROOT || path.join(__dirname, '..')
@@ -105,7 +108,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     /**
      * Read a parse an existing autoBuildFile
      * @param autoBuildFile file path
-     * @returns 
+     * @returns
      */
     public static readAutoBuildFile(autoBuildFile: string, quiet?: boolean): AutoBuildFile | undefined {
         try {
@@ -120,7 +123,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             }
             if (!quiet) log.info('readAutoBuildFile', 'file does not exists: %s', autoBuildFile)
         } catch (err) {
-            //if (!quiet) 
+            //if (!quiet)
             log.error('readAutoBuildFile', 'failed to read auto-build.json from: %s, with error: %s', autoBuildFile, err.toString())
         }
         return undefined
@@ -253,9 +256,9 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     private getExpectedVersion(): string {
         if (this.no_autobuild) {
             return '0.0.0';
-        } 
+        }
         const opencvVersion = this.resolveValue(ALLARGS.version);
-        if (opencvVersion) 
+        if (opencvVersion)
             return opencvVersion;
         return DEFAULT_OPENCV_VERSION;
     }
