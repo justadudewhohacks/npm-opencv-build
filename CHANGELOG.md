@@ -1,5 +1,13 @@
 # Changelog
 
+* V 0.7.0
+- Rollback ESM to CJS first (ESM build is still available)
+- modules in cMakeflags are now sort in alphabetic order to keep build hash consistante.
+- build module list is now an up to date set
+- img_hash is now enabled by default
+- all cuda module (except cudalegacy) are now enabled once cuda is enabled 
+- auto-build.json now contains list of enabled modules.
+
 * V 0.6.3
 - CJS First
 - enforce opencv version check durring version detection

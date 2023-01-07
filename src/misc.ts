@@ -154,28 +154,405 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
     return out
 }
 
+
 /**
- * All available module fron openCV 4.5.5
+ * from https://docs.opencv.org/4.x/
  */
-export const ALL_OPENCV_MODULES = ['apps', 'aruco', 'bgsegm', 'bioinspired', 'calib3d', 'ccalib',
-    'core', 'datasets', 'dnn', 'dnn_objdetect', 'dpm', 'features2d', 'flann', 'fuzzy',
-    'gapi', 'hfs', 'highgui', 'img_hash', 'imgcodecs', 'imgproc', 'java_bindings_generator',
-    'js', 'js_bindings_generator', 'line_descriptor', 'ml', 'objc_bindings_generator',
-    'objdetect', 'optflow', 'phase_unwrapping', 'photo', 'python3', 'python_bindings_generator',
-    'python_tests', 'reg', 'rgbd', 'saliency', 'shape', 'stereo', 'stitching', 'structured_light',
-    'superres', 'surface_matching', 'ts', 'video', 'videoio', 'wechat_qrcode', 'world',
-    'xobjdetect', 'xphoto',
+export const MODEULES_MAP = {
+    world: true,
+    /**
+     * Core functionality
+     * https://docs.opencv.org/4.x/d0/de1/group__core.html
+     */
+    core: true,
+    /**
+     * Image Processing
+     * https://docs.opencv.org/4.x/d7/dbd/group__imgproc.html
+     */
+    imgproc: true,
+    /**
+     * Image file reading and writing
+     * https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html
+     */
+    imgcodecs: true,
+    /**
+     * Video I/O
+     * https://docs.opencv.org/4.x/dd/de7/group__videoio.html
+     */
+    videoio: true,
+    /**
+     * High-level GUI
+     * https://docs.opencv.org/4.x/d7/dfc/group__highgui.html
+     */
+    highgui: true,
+    /**
+     * Video Analysis
+     * https://docs.opencv.org/4.x/d7/de9/group__video.html
+     */
+    video: true,
+    /**
+     * Camera Calibration and 3D Reconstruction
+     * https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html
+     */
+    calib3d: true,
+    /**
+     * 2D Features Framework
+     * https://docs.opencv.org/4.x/da/d9b/group__features2d.html
+     */
+    features2d: true,
+    /**
+     * Object Detection
+     * https://docs.opencv.org/4.x/d5/d54/group__objdetect.html
+     */
+    objdetect: true,
+    /**
+     * Deep Neural Network module
+     * https://docs.opencv.org/4.x/d6/d0f/group__dnn.html
+     */
+    dnn: true,
+    /**
+     * Machine Learning
+     * https://docs.opencv.org/4.x/dd/ded/group__ml.html
+     */ 
+    ml: true,
+    /**
+     * Clustering and Search in Multi-Dimensional Spaces
+     * https://docs.opencv.org/4.x/dc/de5/group__flann.html
+     */ 
+    flann: true,
+    /**
+     * Computational Photography
+     * https://docs.opencv.org/4.x/d1/d0d/group__photo.html
+     */
+    photo: true,
+    /**
+     * Images stitching
+     * https://docs.opencv.org/4.x/d1/d46/group__stitching.html
+     */ 
+    stitching: false,
+    /**
+     * Graph API
+     * https://docs.opencv.org/4.x/d0/d1e/gapi.html
+     */
+    gapi: true,
+    
+    /**
+     * Extra modules
+     */
+    /**
+     * Alpha Matting
+     * https://docs.opencv.org/4.x/d4/d40/group__alphamat.html
+     */
+    alphamat: false,
+    /**
+     * Aruco markers, module functionality was moved to objdetect module
+     * https://docs.opencv.org/4.x/d9/d6a/group__aruco.html
+     */
+    aruco: false, 
+    /**
+     * Barcode detecting and decoding methods
+     * https://docs.opencv.org/4.x/d2/dea/group__barcode.html
+     */
+    barcode: false, 
+    /**
+     * Improved Background-Foreground Segmentation Methods
+     * https://docs.opencv.org/4.x/d2/d55/group__bgsegm.html
+     */
+    bgsegm: false, 
+    /**
+     * Biologically inspired vision models and derivated tools
+     * https://docs.opencv.org/4.x/dd/deb/group__bioinspired.html
+     */
+    bioinspired: false, 
+    /**
+     * Custom Calibration Pattern for 3D reconstruction
+     * https://docs.opencv.org/4.x/d3/ddc/group__ccalib.html
+     */
+    ccalib: false, 
+    /**
+     * Operations on Matrices
+     * https://docs.opencv.org/4.x/d5/d8e/group__cudaarithm.html
+     */
+    cudaarithm: false, 
+    /**
+     * Background Segmentation
+     * https://docs.opencv.org/4.x/d6/d17/group__cudabgsegm.html
+     */
+    cudabgsegm: false, 
+    /**
+     * Video Encoding/Decoding
+     * https://docs.opencv.org/4.x/d0/d61/group__cudacodec.html
+     */
+    cudacodec: false, 
+    /**
+     * Feature Detection and Description
+     * https://docs.opencv.org/4.x/d6/d1d/group__cudafeatures2d.html
+     */
+    cudafeatures2d: false, 
+    /**
+     * Image Filtering
+     * https://docs.opencv.org/4.x/dc/d66/group__cudafilters.html
+     */
+    cudafilters: false, 
+    /**
+     * Image Processing
+     * https://docs.opencv.org/4.x/d0/d05/group__cudaimgproc.html
+     */
+    cudaimgproc: false, 
+    /**
+     * Legacy support
+     * https://docs.opencv.org/4.x/d5/dc3/group__cudalegacy.html
+     */
+    cudalegacy: false, 
+    /**
+     * Object Detection
+     * https://docs.opencv.org/4.x/d9/d3f/group__cudaobjdetect.html
+     */
+    cudaobjdetect: false, 
+    /**
+     * Optical Flow
+     * https://docs.opencv.org/4.x/d7/d3f/group__cudaoptflow.html
+     */
+    cudaoptflow: false, 
+    /**
+     * Stereo Correspondence
+     * https://docs.opencv.org/4.x/dd/d47/group__cudastereo.html
+     */
+    cudastereo: false, 
+    /**
+     * Image Warping
+     * https://docs.opencv.org/4.x/db/d29/group__cudawarping.html
+     */
+    cudawarping: false, 
+    /**
+     * Device layer
+     * https://docs.opencv.org/4.x/df/dfc/group__cudev.html
+     */
+    cudev: false, 
+    /**
+     * GUI for Interactive Visual Debugging of Computer Vision Programs
+     * https://docs.opencv.org/4.x/df/dff/group__cvv.html
+     */
+    cvv: false, 
+    /**
+     * Framework for working with different datasets
+     * https://docs.opencv.org/4.x/d8/d00/group__datasets.html
+     */
+    datasets: false, 
+    /**
+     * DNN used for object detection
+     * https://docs.opencv.org/4.x/d5/df6/group__dnn__objdetect.html
+     */
+    dnn_objdetect: false, 
+    /**
+     * DNN used for super resolution
+     * https://docs.opencv.org/4.x/d9/de0/group__dnn__superres.html
+     */
+    dnn_superres: false, 
+    /**
+     * Deformable Part-based Models
+     * https://docs.opencv.org/4.x/d9/d12/group__dpm.html
+     */
+    dpm: false, 
+    /**
+     * Face Analysis
+     * https://docs.opencv.org/4.x/db/d7c/group__face.html
+     */
+    face: true, 
+    /**
+     * Drawing UTF-8 strings with freetype/harfbuzz
+     * https://docs.opencv.org/4.x/d4/dfc/group__freetype.html
+     */
+    freetype: false, 
+    /**
+     * Image processing based on fuzzy mathematics
+     * https://docs.opencv.org/4.x/df/d5b/group__fuzzy.html
+     */
+    fuzzy: false, 
+    /**
+     * Hierarchical Data Format I/O routines
+     * https://docs.opencv.org/4.x/db/d77/group__hdf.html
+     */
+    hdf: false, 
+    /**
+     * Hierarchical Feature Selection for Efficient Image Segmentation
+     * https://docs.opencv.org/4.x/dc/d29/group__hfs.html
+     */
+    hfs: false, 
+    /**
+     * The module brings implementations of different image hashing algorithms.
+     * https://docs.opencv.org/4.x/d4/d93/group__img__hash.html
+     */
+    img_hash: true, 
+    /**
+     * The module brings implementations of intensity transformation algorithms to adjust image contrast.
+     * https://docs.opencv.org/4.x/dc/dfe/group__intensity__transform.html
+     */
+    intensity_transform: false, 
+    /**
+     * Julia bindings for OpenCV
+     * https://docs.opencv.org/4.x/d7/d44/group__julia.html
+     */
+    julia: false, 
+    /**
+     * Binary descriptors for lines extracted from an image
+     * https://docs.opencv.org/4.x/dc/ddd/group__line__descriptor.html
+     */
+    line_descriptor: false, 
+    /**
+     * Macbeth Chart module
+     * https://docs.opencv.org/4.x/dd/d19/group__mcc.html
+     */
+    mcc: false, 
+    /**
+     * Optical Flow Algorithms
+     * https://docs.opencv.org/4.x/d2/d84/group__optflow.html
+     */
+    optflow: false, 
+    /**
+     * OGRE 3D Visualiser
+     * https://docs.opencv.org/4.x/d2/d17/group__ovis.html
+     */
+    ovis: false, 
+    /**
+     * Phase Unwrapping API
+     * https://docs.opencv.org/4.x/df/d3a/group__phase__unwrapping.html
+     */
+    phase_unwrapping: false, 
+    /**
+     * Plot function for Mat data
+     * https://docs.opencv.org/4.x/db/dfe/group__plot.html
+     */
+    plot: false, 
+    /*
+     * Image Quality Analysis (IQA) API
+     * https://docs.opencv.org/4.x/dc/d20/group__quality.html
+     */
+    quality: false, 
+    /**
+     * silhouette based 3D object tracking
+     * https://docs.opencv.org/4.x/d4/dc4/group__rapid.html
+     */
+    rapid: false, 
+    /**
+     * Image Registration
+     * https://docs.opencv.org/4.x/db/d61/group__reg.html
+     */
+    reg: false, 
+    /**
+     * RGB-Depth Processing
+     * https://docs.opencv.org/4.x/d2/d3a/group__rgbd.html
+     */
+    rgbd: false, 
+    /**
+     * Saliency API
+     * https://docs.opencv.org/4.x/d8/d65/group__saliency.html
+     */
+    saliency: false,
+    /**
+     * Structure From Motion
+     * https://docs.opencv.org/4.x/d8/d8c/group__sfm.html
+     */
+    sfm: false, 
+    /**
+     * Shape Distance and Matching
+     * https://docs.opencv.org/4.x/d1/d85/group__shape.html
+     */
+    shape: false, 
+    /**
+     * Stereo Correspondance Algorithms
+     * https://docs.opencv.org/4.x/dd/d86/group__stereo.html
+     */
+    stereo: false, 
+    /**
+     * Structured Light API
+     * https://docs.opencv.org/4.x/d1/d90/group__structured__light.html
+     */
+    structured_light: false, 
+    /**
+     * Super Resolution
+     * https://docs.opencv.org/4.x/d7/d0a/group__superres.html
+     */
+    superres: false, 
+    /**
+     * Surface Matching
+     * https://docs.opencv.org/4.x/d9/d25/group__surface__matching.html
+     */
+    surface_matching: false, 
+    /**
+     * Scene Text Detection and Recognition
+     * https://docs.opencv.org/4.x/d4/d61/group__text.html
+     */
+    text: true,
+    /**
+     * Tracking API
+     * https://docs.opencv.org/4.x/d9/df8/group__tracking.html
+     */
+    tracking: true, 
+    /**
+     * Video Stabilization
+     * https://docs.opencv.org/4.x/d5/d50/group__videostab.html
+     */
+    videostab: true, 
+    /**
+     * 3D Visualizer
+     * https://docs.opencv.org/4.x/d1/d19/group__viz.html
+     */
+    viz: false, 
+    /**
+     * WeChat QR code detector for detecting and parsing QR code.
+     * https://docs.opencv.org/4.x/dd/d63/group__wechat__qrcode.html
+     */
+    wechat_qrcode: false, 
+    /**
+     * Extra 2D Features Framework
+     * https://docs.opencv.org/4.x/d1/db4/group__xfeatures2d.html
+     */
+    xfeatures2d: true, 
+    /**
+     * Extended Image Processing
+     * https://docs.opencv.org/4.x/df/d2d/group__ximgproc.html
+     */
+    ximgproc: false,
+    /**
+     * Extended object detection
+     * https://docs.opencv.org/4.x/d4/d54/group__xobjdetect.html
+     */
+    xobjdetect: false, 
+    /**
+     * Additional photo processing algorithms
+     * https://docs.opencv.org/4.x/de/daa/group__xphoto.html
+     */
+    xphoto: false, 
     // olds:
-    'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
-] as const;
+    // apps: false,
+} as const;
 
 /**
  * type of valid openCV Modules
  */
-export type OpencvModulesType = typeof ALL_OPENCV_MODULES[number];
+export type OpencvModulesType = keyof typeof MODEULES_MAP;
 
-export const defaultEnabledModules: OpencvModulesType[] = ['calib3d', 'core', 'dnn', 'features2d', 'flann', 'gapi', 'highgui', 'imgcodecs', 'imgproc',
-    'ml', 'objdetect', 'photo', 'python_tests', 'video', 'videoio',
-    // olds:
-    'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
-]
+/**
+ * All available module fron openCV 4.5.5
+ */
+export const ALL_OPENCV_MODULES = Object.keys(MODEULES_MAP) as OpencvModulesType[];
+//  ['apps', 'aruco', 'bgsegm', 'bioinspired', 'calib3d', 'ccalib',
+//     'core', 'datasets', 'dnn', 'dnn_objdetect', 'dpm', 'features2d', 'flann', 'fuzzy',
+//     'gapi', 'hfs', 'highgui', 'img_hash', 'imgcodecs', 'imgproc', 'java_bindings_generator',
+//     'js', 'js_bindings_generator', 'line_descriptor', 'ml', 'objc_bindings_generator',
+//     'objdetect', 'optflow', 'phase_unwrapping', 'photo', 'python3', 'python_bindings_generator',
+//     // 'python_tests',
+//      'reg', 'rgbd', 'saliency', 'shape', 'stereo', 'stitching', 'structured_light',
+//     'superres', 'surface_matching', 'ts', 'video', 'videoio', 'wechat_qrcode', 'world',
+//     'xobjdetect', 'xphoto',
+//     // olds:
+//     'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
+// ] as const;
+
+
+// export const defaultEnabledModules: OpencvModulesType[] = ['calib3d', 'core', 'dnn', 'features2d', 'flann', 'gapi', 'highgui', 'imgcodecs', 'imgproc',
+//     'ml', 'objdetect', 'photo', 'video', 'videoio', 'img_hash', //  'python_tests',
+//     // olds:
+//     'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
+// ]

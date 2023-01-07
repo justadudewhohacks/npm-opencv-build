@@ -1,4 +1,4 @@
-import { OpenCVBuildEnv, OpenCVBuildEnvParams, OpenCVBuilder } from '../lib/index'
+import { OpenCVBuildEnv, type OpenCVBuildEnvParams, OpenCVBuilder } from '../dist/cjs/index'
 import chai, { expect } from 'chai'
 // import path from 'path';
 
