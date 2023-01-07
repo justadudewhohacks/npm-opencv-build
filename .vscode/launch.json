@@ -34,11 +34,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "install 4.5.5 dry-run",
+            "name": "install 4.6.0 dry-run keepsource",
             "program": "${workspaceFolder}/bin/main.js",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
-            "args": ["--dry-run", "--version", "4.5.5"],
+            "args": ["--dry-run", "--version", "4.6.0", "--keepsource"],
             "env": {
                 "OPENCV_GIT_CACHE": "1"
             },
@@ -47,11 +47,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "install 4.5.5",
+            "name": "install 4.6.0 keepsource",
             "program": "${workspaceFolder}/bin/main.js",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
-            "args": ["--version", "4.5.5"],
+            "args": ["--version", "4.6.0", "--keepsource"],
             "env": {
                 "OPENCV_GIT_CACHE": "1"
             },

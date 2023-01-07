@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.7.1
+- world module do not exclude other modules in auto-build.json (fix img_hash modules)
+
 * V 0.7.0
 - Rollback ESM to CJS first (ESM build is still available)
 - modules in cMakeflags are now sort in alphabetic order to keep build hash consistante.

@@ -87,20 +87,26 @@ export class getLibsFactory {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }
 
-    const worldModule = 'world';
-    const worldLibPath = this.resolveLib(worldModule)
-    if (worldLibPath) {
-      return [{
-        opencvModule: worldModule,
-        libPath: worldLibPath,
-      }]
-    }
-
-    return [...this.builder.env.enabledModules].map(
+    const modules: OpencvModule[] = [];
+    // const worldModule = 'world';
+    // const worldLibPath = this.resolveLib(worldModule)
+    // if (worldLibPath) {
+    //   modules.push({
+    //     opencvModule: worldModule,
+    //     libPath: worldLibPath,
+    //   });
+    // }
+    
+    const extra = [...this.builder.env.enabledModules].map(
       (opencvModule: OpencvModulesType) => ({
         opencvModule,
         libPath: this.resolveLib(opencvModule),
       })
     )
+    for (const m of extra) {
+      if (m.libPath)
+        modules.push(m);
+    }
+    return modules;
   }
 }
