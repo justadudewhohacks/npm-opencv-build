@@ -154,12 +154,17 @@ export const args2Option = (args: string[]): OpenCVBuildEnvParams => {
     return out
 }
 
-
 /**
  * from https://docs.opencv.org/4.x/
  */
 export const MODEULES_MAP = {
+    // not a real module
+    // apps: true,
+    // not a real module
     world: true,
+    // was enabled in previous version.
+    python_tests: true,
+
     /**
      * Core functionality
      * https://docs.opencv.org/4.x/d0/de1/group__core.html
@@ -235,7 +240,6 @@ export const MODEULES_MAP = {
      * https://docs.opencv.org/4.x/d0/d1e/gapi.html
      */
     gapi: true,
-    
     /**
      * Extra modules
      */
@@ -513,7 +517,7 @@ export const MODEULES_MAP = {
      * Extended Image Processing
      * https://docs.opencv.org/4.x/df/d2d/group__ximgproc.html
      */
-    ximgproc: false,
+    ximgproc: true,
     /**
      * Extended object detection
      * https://docs.opencv.org/4.x/d4/d54/group__xobjdetect.html
@@ -537,22 +541,3 @@ export type OpencvModulesType = keyof typeof MODEULES_MAP;
  * All available module fron openCV 4.5.5
  */
 export const ALL_OPENCV_MODULES = Object.keys(MODEULES_MAP) as OpencvModulesType[];
-//  ['apps', 'aruco', 'bgsegm', 'bioinspired', 'calib3d', 'ccalib',
-//     'core', 'datasets', 'dnn', 'dnn_objdetect', 'dpm', 'features2d', 'flann', 'fuzzy',
-//     'gapi', 'hfs', 'highgui', 'img_hash', 'imgcodecs', 'imgproc', 'java_bindings_generator',
-//     'js', 'js_bindings_generator', 'line_descriptor', 'ml', 'objc_bindings_generator',
-//     'objdetect', 'optflow', 'phase_unwrapping', 'photo', 'python3', 'python_bindings_generator',
-//     // 'python_tests',
-//      'reg', 'rgbd', 'saliency', 'shape', 'stereo', 'stitching', 'structured_light',
-//     'superres', 'surface_matching', 'ts', 'video', 'videoio', 'wechat_qrcode', 'world',
-//     'xobjdetect', 'xphoto',
-//     // olds:
-//     'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
-// ] as const;
-
-
-// export const defaultEnabledModules: OpencvModulesType[] = ['calib3d', 'core', 'dnn', 'features2d', 'flann', 'gapi', 'highgui', 'imgcodecs', 'imgproc',
-//     'ml', 'objdetect', 'photo', 'video', 'videoio', 'img_hash', //  'python_tests',
-//     // olds:
-//     'videostab', 'face', 'text', 'tracking', 'xfeatures2d', 'ximgproc',
-// ]

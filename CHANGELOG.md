@@ -1,5 +1,8 @@
 # Changelog
 
+* V 0.7.2
+- restore previous compiled module list from v 0.6.3
+
 * V 0.7.1
 - world module do not exclude other modules in auto-build.json (fix img_hash modules)
 
