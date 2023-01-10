@@ -64,7 +64,9 @@ export class OpenCVBuilder {
 
     if (this.env.isAutoBuildDisabled) {
       log.info('install', `${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} is set skipping auto build...`)
-      new SetupOpencv(this).writeAutoBuildFile(true);
+      const setup = new SetupOpencv(this);
+      setup.writeAutoBuildFile(true);
+      setup.linkBuild();
       return
     }
     log.info('install', `if you want to use an own OpenCV build set ${utils.highlight('OPENCV4NODEJS_DISABLE_AUTOBUILD')} to 1, and fill ${OPENCV_PATHS_ENV.map(utils.highlight).join(', ')} environement variables`);
@@ -103,7 +105,8 @@ export class OpenCVBuilder {
     try {
       await utils.requireGit()
       await utils.requireCmake()
-      await new SetupOpencv(this).start()
+      const setup = new SetupOpencv(this);
+      await setup.start()
       time = (Date.now() - time);
       const date = new Date(time);
       const timeString = date.toISOString().substring(11, 19);

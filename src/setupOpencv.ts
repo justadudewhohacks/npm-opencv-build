@@ -3,11 +3,12 @@ import { EOL } from 'os';
 import { OpenCVBuilder } from './OpenCVBuilder.js';
 import { findMSBuild, PathVersion } from './findMsBuild.js';
 import type { AutoBuildFile } from './types.js';
-import { formatNumber, highlight, protect, spawn, toExecCmd } from './utils.js';
+import { formatNumber, formatRed, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
 import { OPENCV_PATHS_ENV } from './misc.js';
+import path from 'path';
 
 const primraf = promisify(rimraf);
 
@@ -121,6 +122,26 @@ export class SetupOpencv {
       fs.writeFileSync(env.autoBuildLog, buildLog)
     return autoBuildInfo;
   }
+
+  /**
+   * add a sym link named latest to the current build.
+   */
+  public linkBuild(): void {
+    const env = this.builder.env;
+    const latest = path.join(env.rootDir, 'latest');
+    try {
+      fs.unlinkSync(latest);
+    } catch (_e) {
+      // ignore
+    }
+    try {
+      fs.symlinkSync(env.opencvRoot, latest);
+      log.info('install', `Linking from ${highlight("%s")} to ${highlight("%s")}`, env.opencvRoot, latest);
+    } catch (e) {
+      log.info('install', `Failed to create link from ${highlight("%s")} to ${highlight("%s")} Error: ${formatRed("%s")}`, env.opencvRoot, latest, (e as Error).message);
+    }
+  }
+
   private execLog: string[] = [];
 
   /**
@@ -233,6 +254,7 @@ export class SetupOpencv {
 
     if (!env.dryRun) {
       this.writeAutoBuildFile(true, this.execLog.join(EOL))
+      this.linkBuild();
     } else {
       this.execLog.push('echo lock file can not be generated in dry-mode');
     }

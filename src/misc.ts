@@ -161,7 +161,7 @@ export const MODEULES_MAP = {
     // not a real module
     // apps: true,
     // not a real module
-    world: true,
+    world: false,
     // was enabled in previous version.
     python_tests: true,
 
@@ -247,7 +247,7 @@ export const MODEULES_MAP = {
      * Alpha Matting
      * https://docs.opencv.org/4.x/d4/d40/group__alphamat.html
      */
-    alphamat: false,
+    alphamat: null,
     /**
      * Aruco markers, module functionality was moved to objdetect module
      * https://docs.opencv.org/4.x/d9/d6a/group__aruco.html
@@ -257,7 +257,7 @@ export const MODEULES_MAP = {
      * Barcode detecting and decoding methods
      * https://docs.opencv.org/4.x/d2/dea/group__barcode.html
      */
-    barcode: false, 
+    barcode: null, 
     /**
      * Improved Background-Foreground Segmentation Methods
      * https://docs.opencv.org/4.x/d2/d55/group__bgsegm.html
@@ -277,67 +277,67 @@ export const MODEULES_MAP = {
      * Operations on Matrices
      * https://docs.opencv.org/4.x/d5/d8e/group__cudaarithm.html
      */
-    cudaarithm: false, 
+    cudaarithm: null, 
     /**
      * Background Segmentation
      * https://docs.opencv.org/4.x/d6/d17/group__cudabgsegm.html
      */
-    cudabgsegm: false, 
+    cudabgsegm: null, 
     /**
      * Video Encoding/Decoding
      * https://docs.opencv.org/4.x/d0/d61/group__cudacodec.html
      */
-    cudacodec: false, 
+    cudacodec: null, 
     /**
      * Feature Detection and Description
      * https://docs.opencv.org/4.x/d6/d1d/group__cudafeatures2d.html
      */
-    cudafeatures2d: false, 
+    cudafeatures2d: null, 
     /**
      * Image Filtering
      * https://docs.opencv.org/4.x/dc/d66/group__cudafilters.html
      */
-    cudafilters: false, 
+    cudafilters: null, 
     /**
      * Image Processing
      * https://docs.opencv.org/4.x/d0/d05/group__cudaimgproc.html
      */
-    cudaimgproc: false, 
+    cudaimgproc: null, 
     /**
      * Legacy support
      * https://docs.opencv.org/4.x/d5/dc3/group__cudalegacy.html
      */
-    cudalegacy: false, 
+    cudalegacy: null, 
     /**
      * Object Detection
      * https://docs.opencv.org/4.x/d9/d3f/group__cudaobjdetect.html
      */
-    cudaobjdetect: false, 
+    cudaobjdetect: null, 
     /**
      * Optical Flow
      * https://docs.opencv.org/4.x/d7/d3f/group__cudaoptflow.html
      */
-    cudaoptflow: false, 
+    cudaoptflow: null, 
     /**
      * Stereo Correspondence
      * https://docs.opencv.org/4.x/dd/d47/group__cudastereo.html
      */
-    cudastereo: false, 
+    cudastereo: null, 
     /**
      * Image Warping
      * https://docs.opencv.org/4.x/db/d29/group__cudawarping.html
      */
-    cudawarping: false, 
+    cudawarping: null, 
     /**
      * Device layer
      * https://docs.opencv.org/4.x/df/dfc/group__cudev.html
      */
-    cudev: false, 
+    cudev: null, 
     /**
      * GUI for Interactive Visual Debugging of Computer Vision Programs
      * https://docs.opencv.org/4.x/df/dff/group__cvv.html
      */
-    cvv: false, 
+    cvv: null, 
     /**
      * Framework for working with different datasets
      * https://docs.opencv.org/4.x/d8/d00/group__datasets.html
@@ -352,7 +352,7 @@ export const MODEULES_MAP = {
      * DNN used for super resolution
      * https://docs.opencv.org/4.x/d9/de0/group__dnn__superres.html
      */
-    dnn_superres: false, 
+    dnn_superres: null, 
     /**
      * Deformable Part-based Models
      * https://docs.opencv.org/4.x/d9/d12/group__dpm.html
@@ -367,7 +367,7 @@ export const MODEULES_MAP = {
      * Drawing UTF-8 strings with freetype/harfbuzz
      * https://docs.opencv.org/4.x/d4/dfc/group__freetype.html
      */
-    freetype: false, 
+    freetype: null, // activated by default ?
     /**
      * Image processing based on fuzzy mathematics
      * https://docs.opencv.org/4.x/df/d5b/group__fuzzy.html
@@ -377,7 +377,7 @@ export const MODEULES_MAP = {
      * Hierarchical Data Format I/O routines
      * https://docs.opencv.org/4.x/db/d77/group__hdf.html
      */
-    hdf: false, 
+    hdf: null, 
     /**
      * Hierarchical Feature Selection for Efficient Image Segmentation
      * https://docs.opencv.org/4.x/dc/d29/group__hfs.html
@@ -392,12 +392,12 @@ export const MODEULES_MAP = {
      * The module brings implementations of intensity transformation algorithms to adjust image contrast.
      * https://docs.opencv.org/4.x/dc/dfe/group__intensity__transform.html
      */
-    intensity_transform: false, 
+    intensity_transform: null, 
     /**
      * Julia bindings for OpenCV
      * https://docs.opencv.org/4.x/d7/d44/group__julia.html
      */
-    julia: false, 
+    julia: null, 
     /**
      * Binary descriptors for lines extracted from an image
      * https://docs.opencv.org/4.x/dc/ddd/group__line__descriptor.html
@@ -407,7 +407,7 @@ export const MODEULES_MAP = {
      * Macbeth Chart module
      * https://docs.opencv.org/4.x/dd/d19/group__mcc.html
      */
-    mcc: false, 
+    mcc: null, 
     /**
      * Optical Flow Algorithms
      * https://docs.opencv.org/4.x/d2/d84/group__optflow.html
@@ -417,7 +417,7 @@ export const MODEULES_MAP = {
      * OGRE 3D Visualiser
      * https://docs.opencv.org/4.x/d2/d17/group__ovis.html
      */
-    ovis: false, 
+    ovis: null, 
     /**
      * Phase Unwrapping API
      * https://docs.opencv.org/4.x/df/d3a/group__phase__unwrapping.html
@@ -427,17 +427,17 @@ export const MODEULES_MAP = {
      * Plot function for Mat data
      * https://docs.opencv.org/4.x/db/dfe/group__plot.html
      */
-    plot: false, 
+    plot: null, 
     /*
      * Image Quality Analysis (IQA) API
      * https://docs.opencv.org/4.x/dc/d20/group__quality.html
      */
-    quality: false, 
+    quality: null, 
     /**
      * silhouette based 3D object tracking
      * https://docs.opencv.org/4.x/d4/dc4/group__rapid.html
      */
-    rapid: false, 
+    rapid: null, 
     /**
      * Image Registration
      * https://docs.opencv.org/4.x/db/d61/group__reg.html
@@ -457,7 +457,7 @@ export const MODEULES_MAP = {
      * Structure From Motion
      * https://docs.opencv.org/4.x/d8/d8c/group__sfm.html
      */
-    sfm: false, 
+    sfm: null, 
     /**
      * Shape Distance and Matching
      * https://docs.opencv.org/4.x/d1/d85/group__shape.html
@@ -502,7 +502,7 @@ export const MODEULES_MAP = {
      * 3D Visualizer
      * https://docs.opencv.org/4.x/d1/d19/group__viz.html
      */
-    viz: false, 
+    viz: null, 
     /**
      * WeChat QR code detector for detecting and parsing QR code.
      * https://docs.opencv.org/4.x/dd/d63/group__wechat__qrcode.html
@@ -529,7 +529,14 @@ export const MODEULES_MAP = {
      */
     xphoto: false, 
     // olds:
-    // apps: false,
+    apps: false,
+    java_bindings_generator: false,
+    js: false,
+    bindings_generator: false,
+    objc_bindings_generator: false,
+    python3: false,
+    python_bindings_generator: false,
+    ts: false,
 } as const;
 
 /**

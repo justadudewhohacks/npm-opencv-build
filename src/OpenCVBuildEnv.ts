@@ -502,9 +502,10 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     public getCmakeBuildFlags(): string[] {
         const out: string[] = [];
         for (const mod of ALL_OPENCV_MODULES) {
-            let arg = `-DBUILD_opencv_${mod}=`;
-            arg += this.#enabledModules.has(mod) ? 'ON' : 'OFF';
-            out.push(arg);
+            const value = this.#enabledModules.has(mod) ? 'ON' : 'OFF';
+            if (value === 'OFF' && MODEULES_MAP[mod] === null)
+                continue;
+            out.push(`-DBUILD_opencv_${mod}=${value}`);
         }
         return out.sort();
     }

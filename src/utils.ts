@@ -24,6 +24,10 @@ export function light(text: string): string {
   return pc.yellow(text);
 }
 
+export function formatRed(text: string): string {
+  return pc.red(text);
+}
+
 export function formatNumber(text: string): string {
   return pc.bold(pc.green(text));
 }
