@@ -1,5 +1,8 @@
 # Changelog
 
+## V 0.7.4
+- force world module detection
+
 ## V 0.7.3
 - change default build module list, remove world module
 - add a symlink named latest pointing to the latest build

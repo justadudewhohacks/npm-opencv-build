@@ -88,14 +88,14 @@ export class getLibsFactory {
     }
 
     const modules: OpencvModule[] = [];
-    // const worldModule = 'world';
-    // const worldLibPath = this.resolveLib(worldModule)
-    // if (worldLibPath) {
-    //   modules.push({
-    //     opencvModule: worldModule,
-    //     libPath: worldLibPath,
-    //   });
-    // }
+    const worldModule = 'world';
+    const worldLibPath = this.resolveLib(worldModule)
+    if (worldLibPath) {
+      modules.push({
+        opencvModule: worldModule,
+        libPath: worldLibPath,
+      });
+    }
     
     const extra = [...this.builder.env.enabledModules].map(
       (opencvModule: OpencvModulesType) => ({
@@ -104,6 +104,8 @@ export class getLibsFactory {
       })
     )
     for (const m of extra) {
+      if (m.opencvModule === 'world')
+        continue;
       if (m.libPath)
         modules.push(m);
     }
