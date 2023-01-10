@@ -611,6 +611,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     public numberOfCoresAvailable(): number { return os.cpus().length }
 
+    private static readEnvsFromPackageJsonLog = 0
     /**
      * get opencv4nodejs section from package.json if available
      * @returns opencv4nodejs customs
@@ -622,14 +623,17 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         }
 
         if (!rootPackageJSON.data) {
-            log.info('config', `looking for opencv4nodejs option from ${highlight("%s")}`, rootPackageJSON.file);
+            if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+                log.info('config', `looking for opencv4nodejs option from ${highlight("%s")}`, rootPackageJSON.file);
             return {}
         }
         if (!rootPackageJSON.data.opencv4nodejs) {
-            log.info('config', `no opencv4nodejs section found in ${highlight('%s')}`, rootPackageJSON.file);
+            if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+                log.info('config', `no opencv4nodejs section found in ${highlight('%s')}`, rootPackageJSON.file);
             return {};
         }
-        log.info('config', `found opencv4nodejs section in ${highlight('%s')}`, rootPackageJSON.file);
+        if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+            log.info('config', `found opencv4nodejs section in ${highlight('%s')}`, rootPackageJSON.file);
         return rootPackageJSON.data.opencv4nodejs
     }
     private hash = '';

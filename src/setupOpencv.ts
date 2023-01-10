@@ -136,9 +136,9 @@ export class SetupOpencv {
     }
     try {
       fs.symlinkSync(env.opencvRoot, latest);
-      log.info('install', `Linking from ${highlight("%s")} to ${highlight("%s")}`, env.opencvRoot, latest);
+      log.info('install', `Cretate link ${highlight("%s")} to ${highlight("%s")}`, latest, env.opencvRoot);
     } catch (e) {
-      log.info('install', `Failed to create link from ${highlight("%s")} to ${highlight("%s")} Error: ${formatRed("%s")}`, env.opencvRoot, latest, (e as Error).message);
+      log.info('install', `Failed to create link ${highlight("%s")} to ${highlight("%s")} Error: ${formatRed("%s")}`, latest, env.opencvRoot, (e as Error).message);
     }
   }
 
