@@ -5,7 +5,7 @@ import log from 'npmlog';
 import { highlight, formatNumber, isCudaAvailable } from './utils.js';
 import crypto from 'crypto';
 import { AutoBuildFile, EnvSummery } from './types.js';
-import { ALLARGS, ArgInfo, defaultEnabledModules, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc.js';
+import { ALLARGS, ArgInfo, MODEULES_MAP, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc.js';
 import { ALL_OPENCV_MODULES } from './misc.js';
 import { sync as blob } from '@u4/tiny-glob';
 
@@ -375,6 +375,20 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             process.env.OPENCV_BIN_DIR = autoBuildFile.env.OPENCV_BIN_DIR;
             process.env.OPENCV_INCLUDE_DIR = autoBuildFile.env.OPENCV_INCLUDE_DIR;
             process.env.OPENCV_LIB_DIR = autoBuildFile.env.OPENCV_LIB_DIR;
+
+            if (this.buildWithCuda && isCudaAvailable()) {
+                this.#enabledModules.add('cudaarithm');
+                this.#enabledModules.add('cudabgsegm');
+                this.#enabledModules.add('cudacodec');
+                this.#enabledModules.add('cudafeatures2d');
+                this.#enabledModules.add('cudafilters');
+                this.#enabledModules.add('cudaimgproc');
+                // this.#enabledModules.add('cudalegacy');
+                this.#enabledModules.add('cudaobjdetect');
+                this.#enabledModules.add('cudaoptflow');
+                this.#enabledModules.add('cudastereo');
+                this.#enabledModules.add('cudawarping');
+            }
             return;
         }
         // try to build a new openCV or use a prebuilt one
@@ -413,6 +427,20 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         this.keepsources = !!this.resolveValue(ALLARGS.keepsources);
         this.dryRun = !!this.resolveValue(ALLARGS['dry-run']);
         this.gitCache = !!this.resolveValue(ALLARGS['git-cache']);
+
+        if (this.buildWithCuda && isCudaAvailable()) {
+            this.#enabledModules.add('cudaarithm');
+            this.#enabledModules.add('cudabgsegm');
+            this.#enabledModules.add('cudacodec');
+            this.#enabledModules.add('cudafeatures2d');
+            this.#enabledModules.add('cudafilters');
+            this.#enabledModules.add('cudaimgproc');
+            // this.#enabledModules.add('cudalegacy');
+            this.#enabledModules.add('cudaobjdetect');
+            this.#enabledModules.add('cudaoptflow');
+            this.#enabledModules.add('cudastereo');
+            this.#enabledModules.add('cudawarping');
+        }
     }
 
     #ready = false;
@@ -453,7 +481,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     }
 
     /** default module build list */
-    #enabledModules = new Set<OpencvModulesType>(defaultEnabledModules);
+    #enabledModules = new Set<OpencvModulesType>(Object.entries(MODEULES_MAP).filter(([, v]) => v).map(([k]) => k as OpencvModulesType));
 
     public get enabledModules(): OpencvModulesType[] {
         return [...this.#enabledModules];
@@ -477,11 +505,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     public getCmakeBuildFlags(): string[] {
         const out: string[] = [];
         for (const mod of ALL_OPENCV_MODULES) {
-            let arg = `-DBUILD_opencv_${mod}=`;
-            arg += this.#enabledModules.has(mod) ? 'ON' : 'OFF';
-            out.push(arg);
+            const value = this.#enabledModules.has(mod) ? 'ON' : 'OFF';
+            if (value === 'OFF' && MODEULES_MAP[mod] === null)
+                continue;
+            out.push(`-DBUILD_opencv_${mod}=${value}`);
         }
-        return out;
+        return out.sort();
     }
 
     // if version < 4.5.6 ffmpeg 5 not compatible
@@ -520,6 +549,19 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 // log.info('install', 'Adding CUDA flags...');
                 // this.enabledModules.delete('cudacodec');// video codec (NVCUVID) is deprecated in cuda 10, so don't add it
                 cMakeflags.push('-DWITH_CUDA=ON', '-DCUDA_FAST_MATH=ON'/* optional */, '-DWITH_CUBLAS=ON' /* optional */, "-DOPENCV_DNN_CUDA=ON")
+
+                this.#enabledModules.add('cudaarithm');
+                this.#enabledModules.add('cudabgsegm');
+                this.#enabledModules.add('cudacodec');
+                this.#enabledModules.add('cudafeatures2d');
+                this.#enabledModules.add('cudafilters');
+                this.#enabledModules.add('cudaimgproc');
+                // this.#enabledModules.add('cudalegacy');
+                this.#enabledModules.add('cudaobjdetect');
+                this.#enabledModules.add('cudaoptflow');
+                this.#enabledModules.add('cudastereo');
+                this.#enabledModules.add('cudawarping');
+
                 const cudaArch = this.cudaArch;
                 if (cudaArch) {
                     cMakeflags.push(`-DCUDA_ARCH_BIN=${cudaArch}`)
@@ -534,6 +576,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             // log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', this.autoBuildFlags)
             cMakeflags.push(...this.autoBuildFlags.split(' '));
         }
+        // console.log(cMakeflags)
         return cMakeflags;
     }
 
@@ -549,6 +592,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             OPENCV_INCLUDE_DIR: process.env.OPENCV_INCLUDE_DIR || '',
             OPENCV_LIB_DIR: process.env.OPENCV_LIB_DIR || '',
             OPENCV_BIN_DIR: process.env.OPENCV_BIN_DIR || '',
+            modules: [...this.#enabledModules].sort(),
         }
     }
 
@@ -570,6 +614,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
     public numberOfCoresAvailable(): number { return os.cpus().length }
 
+    private static readEnvsFromPackageJsonLog = 0
     /**
      * get opencv4nodejs section from package.json if available
      * @returns opencv4nodejs customs
@@ -581,14 +626,17 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         }
 
         if (!rootPackageJSON.data) {
-            log.info('config', `looking for opencv4nodejs option from ${highlight("%s")}`, rootPackageJSON.file);
+            if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+                log.info('config', `looking for opencv4nodejs option from ${highlight("%s")}`, rootPackageJSON.file);
             return {}
         }
         if (!rootPackageJSON.data.opencv4nodejs) {
-            log.info('config', `no opencv4nodejs section found in ${highlight('%s')}`, rootPackageJSON.file);
+            if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+                log.info('config', `no opencv4nodejs section found in ${highlight('%s')}`, rootPackageJSON.file);
             return {};
         }
-        log.info('config', `found opencv4nodejs section in ${highlight('%s')}`, rootPackageJSON.file);
+        if (!OpenCVBuildEnv.readEnvsFromPackageJsonLog++)
+            log.info('config', `found opencv4nodejs section in ${highlight('%s')}`, rootPackageJSON.file);
         return rootPackageJSON.data.opencv4nodejs
     }
     private hash = '';
