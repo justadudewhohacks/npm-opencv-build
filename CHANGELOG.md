@@ -1,5 +1,8 @@
 # Changelog
 
+## V 0.7.5
+- improve autoBuildFlags support
+
 ## V 0.7.4
 - force world module detection
 

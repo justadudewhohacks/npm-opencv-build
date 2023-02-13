@@ -567,11 +567,39 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 log.error('install', 'failed to locate CUDA setup');
             }
         }
-        cMakeflags.push(...this.getCmakeBuildFlags());
+
         // add user added flags
         if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string' && this.autoBuildFlags.length) {
+            const addedFlags = this.autoBuildFlags.split(' ');
+            const buidlList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
+            if (buidlList) {
+                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buidlList);
+            } else {
+                cMakeflags.push(...this.getCmakeBuildFlags());
+            }
             // log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', this.autoBuildFlags)
-            cMakeflags.push(...this.autoBuildFlags.split(' '));
+            // cMakeflags.push(...this.autoBuildFlags.split(' '));
+            for (const arg of addedFlags) {
+                const m = arg.match(/^(-D.+=)(.+)$/);
+                if (!m) {
+                    cMakeflags.push(arg);
+                    continue;
+                }
+                const [, key] = m;
+                const pos = cMakeflags.findIndex(a => a.startsWith(key))
+                if (pos >= 0) {
+                    if (cMakeflags[pos] === arg)
+                        log.info('config', `cmake flag "${highlight('%s')}" had no effect.`, arg);
+                    else {
+                        log.info('config', `replacing cmake flag "${highlight('%s')}" by "${highlight('%s')}"`, cMakeflags[pos], m[0]);
+                        cMakeflags[pos] = m[0];
+                    }
+                } else {
+                    log.info('config', `adding cmake flag "${highlight('%s')}"`, m[0]);
+                }
+            }
+        } else {
+            cMakeflags.push(...this.getCmakeBuildFlags());
         }
         // console.log(cMakeflags)
         return cMakeflags;
