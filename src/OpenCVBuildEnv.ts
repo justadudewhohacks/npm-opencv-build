@@ -14,9 +14,8 @@ function toBool(value?: string | null) {
         return false;
     if (typeof value === 'boolean')
         return value;
-    if (typeof value === 'number') {
-        return value === 1;
-    }
+    if (typeof value === 'number')
+        return value > 0;
     value = value.toLowerCase();
     if (value === '0' || value === 'false' || value === 'off' || value.startsWith('disa'))
         return false;
