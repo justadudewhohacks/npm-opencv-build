@@ -346,7 +346,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             this.hash = builds[0].hash;
             // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
             if (flagStr) {
-                const flags = flagStr.split(' ')
+                const flags = flagStr.split(/\s+/)
                 flags.filter(flag => {
                     if (flag.startsWith('-DBUILD_opencv_')) {
                         // eslint-disable-next-line prefer-const
@@ -572,7 +572,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
         // add user added flags
         if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string' && this.autoBuildFlags.length) {
-            const addedFlags = this.autoBuildFlags.split(' ');
+            const addedFlags = this.autoBuildFlags.split(/\s+/);
             const buidlList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
             if (buidlList) {
                 log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buidlList);
@@ -580,7 +580,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 cMakeflags.push(...this.getCmakeBuildFlags());
             }
             // log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', this.autoBuildFlags)
-            // cMakeflags.push(...this.autoBuildFlags.split(' '));
+            // cMakeflags.push(...this.autoBuildFlags.split(/\s+/));
             for (const arg of addedFlags) {
                 const m = arg.match(/^(-D.+=)(.+)$/);
                 if (!m) {
