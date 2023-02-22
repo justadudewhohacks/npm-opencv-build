@@ -679,6 +679,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (optArgs) {
             optArgs = '-' + crypto.createHash('md5').update(optArgs).digest('hex').substring(0, 5);
         }
+        this.hash = optArgs;
         return optArgs;
     }
 
