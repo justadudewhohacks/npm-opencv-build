@@ -536,12 +536,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         ]
         if (!this.isWithoutContrib)
             cMakeflags.push('-DOPENCV_ENABLE_NONFREE=ON', `-DOPENCV_EXTRA_MODULES_PATH=${this.opencvContribModules}`);
-        cMakeflags.push(... this.getCongiguredCmakeFlags());
+        cMakeflags.push(... this.getConfiguredCmakeFlags());
         return cMakeflags;
         // .cMakeflags.push('-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64');
     }
 
-    public getCongiguredCmakeFlags(): string[] {
+    public getConfiguredCmakeFlags(): string[] {
         const cMakeflags = [];
         if (this.buildWithCuda) {
             if (isCudaAvailable()) {
@@ -573,9 +573,9 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         // add user added flags
         if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string' && this.autoBuildFlags.length) {
             const addedFlags = this.autoBuildFlags.split(/\s+/);
-            const buidlList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
-            if (buidlList) {
-                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buidlList);
+            const buildList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
+            if (buildList) {
+                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
             } else {
                 cMakeflags.push(...this.getCmakeBuildFlags());
             }
@@ -673,7 +673,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     get optHash(): string {
         if (this.hash)
             return this.hash;
-        let optArgs = this.getCongiguredCmakeFlags().join(' ');
+        let optArgs = this.getConfiguredCmakeFlags().join(' ');
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'
         if (optArgs) {
