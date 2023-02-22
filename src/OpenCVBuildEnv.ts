@@ -598,6 +598,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                     }
                 } else {
                     log.info('config', `adding cmake flag "${highlight('%s')}"`, m[0]);
+                    cMakeflags.push(m[0]);
                 }
             }
         } else {
