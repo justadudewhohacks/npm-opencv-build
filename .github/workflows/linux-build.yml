@@ -21,9 +21,6 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 7.14.2
     #- name: Install cmake
     #  run: sudo apt-get install -y cmake
     - uses: actions/checkout@v3
@@ -32,6 +29,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
-    - run: pnpm ci
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 7.14.2
+        run_install: |
+         - recursive: true
+           args: [--frozen-lockfile, --strict-peer-dependencies]         
     - run: pnpm run build --if-present
     - run: pnpm test
