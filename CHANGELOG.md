@@ -1,5 +1,8 @@
 # Changelog
 
+## V 0.7.6
+- fix parameter separator detection by piercus
+
 ## V 0.7.5
 - improve autoBuildFlags support
 
