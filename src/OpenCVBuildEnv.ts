@@ -541,6 +541,8 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         // .cMakeflags.push('-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64');
     }
 
+    private getConfiguredCmakeFlagsOnce = false;
+
     public getConfiguredCmakeFlags(): string[] {
         const cMakeflags = [];
         if (this.buildWithCuda) {
@@ -566,7 +568,8 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                     cMakeflags.push(`-DCUDA_ARCH_BIN=${cudaArch}`)
                 }
             } else {
-                log.error('install', 'failed to locate CUDA setup');
+                if (!this.getConfiguredCmakeFlagsOnce)
+                    log.error('install', 'failed to locate CUDA setup');
             }
         }
 
@@ -575,7 +578,8 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             const addedFlags = this.autoBuildFlags.split(/\s+/);
             const buildList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
             if (buildList) {
-                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
+                if (!this.getConfiguredCmakeFlagsOnce)
+                    log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
             } else {
                 cMakeflags.push(...this.getCmakeBuildFlags());
             }
@@ -590,14 +594,17 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 const [, key] = m;
                 const pos = cMakeflags.findIndex(a => a.startsWith(key))
                 if (pos >= 0) {
-                    if (cMakeflags[pos] === arg)
-                        log.info('config', `cmake flag "${highlight('%s')}" had no effect.`, arg);
-                    else {
-                        log.info('config', `replacing cmake flag "${highlight('%s')}" by "${highlight('%s')}"`, cMakeflags[pos], m[0]);
+                    if (cMakeflags[pos] === arg) {
+                        if (!this.getConfiguredCmakeFlagsOnce)
+                            log.info('config', `cmake flag "${highlight('%s')}" had no effect.`, arg);
+                    } else {
+                        if (!this.getConfiguredCmakeFlagsOnce)
+                            log.info('config', `replacing cmake flag "${highlight('%s')}" by "${highlight('%s')}"`, cMakeflags[pos], m[0]);
                         cMakeflags[pos] = m[0];
                     }
                 } else {
-                    log.info('config', `adding cmake flag "${highlight('%s')}"`, m[0]);
+                    if (!this.getConfiguredCmakeFlagsOnce)
+                        log.info('config', `adding cmake flag "${highlight('%s')}"`, m[0]);
                     cMakeflags.push(m[0]);
                 }
             }
@@ -605,6 +612,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             cMakeflags.push(...this.getCmakeBuildFlags());
         }
         // console.log(cMakeflags)
+        this.getConfiguredCmakeFlagsOnce = true;
         return cMakeflags;
     }
 
@@ -641,6 +649,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     }
 
     public numberOfCoresAvailable(): number { return os.cpus().length }
+
 
     private static readEnvsFromPackageJsonLog = 0
     /**
@@ -680,7 +689,9 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         if (optArgs) {
             optArgs = '-' + crypto.createHash('md5').update(optArgs).digest('hex').substring(0, 5);
         }
-        this.hash = optArgs;
+        // do not cache the opt hash, it can change during the configuration process.
+        // it will be fix durring the final serialisation.
+        // this.hash = optArgs;
         return optArgs;
     }
 
