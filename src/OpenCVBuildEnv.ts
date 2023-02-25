@@ -346,7 +346,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
             this.hash = builds[0].hash;
             // merge -DBUILD_opencv_ to internal BUILD_opencv_ manager
             if (flagStr) {
-                const flags = flagStr.split(' ')
+                const flags = flagStr.split(/\s+/)
                 flags.filter(flag => {
                     if (flag.startsWith('-DBUILD_opencv_')) {
                         // eslint-disable-next-line prefer-const
@@ -536,12 +536,12 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         ]
         if (!this.isWithoutContrib)
             cMakeflags.push('-DOPENCV_ENABLE_NONFREE=ON', `-DOPENCV_EXTRA_MODULES_PATH=${this.opencvContribModules}`);
-        cMakeflags.push(... this.getCongiguredCmakeFlags());
+        cMakeflags.push(... this.getConfiguredCmakeFlags());
         return cMakeflags;
         // .cMakeflags.push('-DCMAKE_SYSTEM_PROCESSOR=arm64', '-DCMAKE_OSX_ARCHITECTURES=arm64');
     }
 
-    public getCongiguredCmakeFlags(): string[] {
+    public getConfiguredCmakeFlags(): string[] {
         const cMakeflags = [];
         if (this.buildWithCuda) {
             if (isCudaAvailable()) {
@@ -572,15 +572,15 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
 
         // add user added flags
         if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string' && this.autoBuildFlags.length) {
-            const addedFlags = this.autoBuildFlags.split(' ');
-            const buidlList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
-            if (buidlList) {
-                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buidlList);
+            const addedFlags = this.autoBuildFlags.split(/\s+/);
+            const buildList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
+            if (buildList) {
+                log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
             } else {
                 cMakeflags.push(...this.getCmakeBuildFlags());
             }
             // log.silly('install', 'using flags from OPENCV4NODEJS_AUTOBUILD_FLAGS:', this.autoBuildFlags)
-            // cMakeflags.push(...this.autoBuildFlags.split(' '));
+            // cMakeflags.push(...this.autoBuildFlags.split(/\s+/));
             for (const arg of addedFlags) {
                 const m = arg.match(/^(-D.+=)(.+)$/);
                 if (!m) {
@@ -598,6 +598,7 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                     }
                 } else {
                     log.info('config', `adding cmake flag "${highlight('%s')}"`, m[0]);
+                    cMakeflags.push(m[0]);
                 }
             }
         } else {
@@ -673,12 +674,13 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
     get optHash(): string {
         if (this.hash)
             return this.hash;
-        let optArgs = this.getCongiguredCmakeFlags().join(' ');
+        let optArgs = this.getConfiguredCmakeFlags().join(' ');
         if (this.buildWithCuda) optArgs += 'cuda'
         if (this.isWithoutContrib) optArgs += 'noContrib'
         if (optArgs) {
             optArgs = '-' + crypto.createHash('md5').update(optArgs).digest('hex').substring(0, 5);
         }
+        this.hash = optArgs;
         return optArgs;
     }
 
