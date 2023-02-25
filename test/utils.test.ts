@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { args2Option } from '../lib/index';
+import { args2Option } from '../';
 
 describe('utils', () => {
 

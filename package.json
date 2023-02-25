@@ -30,7 +30,7 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "lint": "eslint src/**/*.ts",
-    "test": "mocha -r ts-node/register 'test/**/*.test.ts'"
+    "test": "cross-env NODE_OPTIONS=\"-r ts-node/register --no-warnings\" TS_NODE_PROJECT=tsconfig-cjs.json mocha 'test/**/*.test.ts'"
   },
   "bin": {
     "opencv-build-npm": "bin/main.js"
