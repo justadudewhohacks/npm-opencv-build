@@ -36,4 +36,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
     - run: pnpm run build
+    - run: node bin/main.js --version 4.6.0
     - run: pnpm test
