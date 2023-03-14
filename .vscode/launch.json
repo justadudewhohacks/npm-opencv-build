@@ -7,16 +7,16 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "install 4.6.0 with python",
+            "name": "install 4.7.0 with python, imgcodecs",
             "program": "${workspaceFolder}/bin/main.js",
             "preLaunchTask": "tsc: build - tsconfig-cjs.json",
             "outFiles": ["${workspaceFolder}/lib/**/*.js"],
-            "args": ["--keepsources"],
-            "env": {
-                "OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION": "4.6.0",
-                "OPENCV4NODEJS_AUTOBUILD_FLAGS": "-DBUILD_LIST=core,calib3d,python3,python_bindings_generator",
-                "OPENCV_GIT_CACHE": "1"
-            },
+            "args": [
+                "--keepsources",
+                "--version=4.7.0",
+                "--flags=-DBUILD_LIST=core,imgcodecs,calib3d,python3,python_bindings_generator",
+                "--git-cache"
+            ],
             "console": "integratedTerminal"
         },
 

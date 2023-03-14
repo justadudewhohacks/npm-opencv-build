@@ -318,7 +318,15 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
                 throw Error(`No build found in ${this.rootDir} you should launch opencv-build-npm once`);
             }
             const expVer = this.getExpectedVersion();
-            builds = builds.filter(b => b.buildInfo.opencvVersion === expVer)
+            /**
+             * try to match the expected version
+             */
+            const buildV = builds.filter(b => b.buildInfo.opencvVersion === expVer);
+            /**
+             * but if no match, use the latest build with a different version number.
+             */
+            if (buildV.length)
+                builds = buildV;
             if (!builds.length) {
                 throw Error(`No build of version ${expVer} found in ${this.rootDir} you should launch opencv-build-npm`);
             }
