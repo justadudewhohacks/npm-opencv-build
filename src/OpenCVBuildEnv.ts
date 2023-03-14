@@ -8,6 +8,7 @@ import { AutoBuildFile, EnvSummery } from './types.js';
 import { ALLARGS, ArgInfo, MODEULES_MAP, OpenCVBuildEnvParams, OpenCVBuildEnvParamsBool, OpenCVBuildEnvParamsString, OpencvModulesType, OpenCVPackageBuildOptions, OPENCV_PATHS_ENV } from './misc.js';
 import { ALL_OPENCV_MODULES } from './misc.js';
 import { sync as blob } from '@u4/tiny-glob';
+import pc from 'picocolors'
 
 function toBool(value?: string | null) {
     if (!value)
@@ -574,12 +575,19 @@ export default class OpenCVBuildEnv implements OpenCVBuildEnvParamsBool, OpenCVB
         }
 
         // add user added flags
-        if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string' && this.autoBuildFlags.length) {
+        if (this.autoBuildFlags && typeof (this.autoBuildFlags) === 'string') {
             const addedFlags = this.autoBuildFlags.split(/\s+/);
             const buildList = addedFlags.find(a => a.startsWith('-DBUILD_LIST'));
             if (buildList) {
                 if (!this.getConfiguredCmakeFlagsOnce)
-                    log.info('config', `cmake flag contains "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
+                    log.info('config', `cmake flag contains special ${pc.red('DBUILD_LIST')} options "${highlight('%s')}" automatic cmake flags are now disabled.`, buildList);
+                    const extraModules = (buildList.split('=')[1] || '').split(',').filter(a=>a);
+                    for (const extraModule of extraModules) {
+                        // drop any --DWITH_
+                        ALL_OPENCV_MODULES.delete(extraModule as OpencvModulesType)
+                        // or use --DWITH_modules=ON
+                        // this.#enabledModules.add(extraModule as OpencvModulesType);
+                    }
             } else {
                 cMakeflags.push(...this.getCmakeBuildFlags());
             }

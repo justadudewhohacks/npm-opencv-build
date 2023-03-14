@@ -547,4 +547,4 @@ export type OpencvModulesType = keyof typeof MODEULES_MAP;
 /**
  * All available module fron openCV 4.5.5
  */
-export const ALL_OPENCV_MODULES = Object.keys(MODEULES_MAP) as OpencvModulesType[];
+export const ALL_OPENCV_MODULES = new Set(Object.keys(MODEULES_MAP) as OpencvModulesType[]);
