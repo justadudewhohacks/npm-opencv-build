@@ -1,5 +1,9 @@
 # Changelog
 
+## V 0.7.7
+- will use the latest build version even if the version differ from you current env data.
+- update -DBUILD_LIST handling
+
 ## V 0.7.6
 - fix parameter separator detection by piercus
 

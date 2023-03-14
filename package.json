@@ -1,6 +1,6 @@
 {
   "name": "@u4/opencv-build",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "A simple script to auto build recent OpenCV + contrib version via npm 2022 Edition",
   "type": "commonjs",
   "main": "dist/cjs/index.js",
@@ -63,7 +63,7 @@
     "@types/chai": "^4.3.4",
     "@types/chai-string": "^1.4.2",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.2",
+    "@types/node": "^18.15.3",
     "@types/npmlog": "^4.1.4",
     "@types/rimraf": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^5.55.0",

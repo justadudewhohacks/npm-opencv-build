@@ -4,7 +4,7 @@ specifiers:
   '@types/chai': ^4.3.4
   '@types/chai-string': ^1.4.2
   '@types/mocha': ^10.0.1
-  '@types/node': ^18.15.2
+  '@types/node': ^18.15.3
   '@types/npmlog': ^4.1.4
   '@types/rimraf': ^3.0.2
   '@typescript-eslint/eslint-plugin': ^5.55.0
@@ -31,7 +31,7 @@ devDependencies:
   '@types/chai': 4.3.4
   '@types/chai-string': 1.4.2
   '@types/mocha': 10.0.1
-  '@types/node': 18.15.2
+  '@types/node': 18.15.3
   '@types/npmlog': 4.1.4
   '@types/rimraf': 3.0.2
   '@typescript-eslint/eslint-plugin': 5.55.0_342y7v4tc7ytrrysmit6jo4wri
@@ -41,7 +41,7 @@ devDependencies:
   cross-env: 7.0.3
   eslint: 8.36.0
   mocha: 10.2.0
-  ts-node: 10.9.1_mubmc4jbdynqubpxxo2ltzd5ve
+  ts-node: 10.9.1_cbfmry4sbbh4vatmdrsmatfg5a
   typescript: 4.9.5
 
 packages:
@@ -177,7 +177,7 @@ packages:
     resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 18.15.2
+      '@types/node': 18.15.3
     dev: true
 
   /@types/json-schema/7.0.11:
@@ -192,8 +192,8 @@ packages:
     resolution: {integrity: sha512-/fvYntiO1GeICvqbQ3doGDIP97vWmvFt83GKguJ6prmQM2iXZfFcq6YE8KteFyRtX2/h5Hf91BYvPodJKFYv5Q==}
     dev: true
 
-  /@types/node/18.15.2:
-    resolution: {integrity: sha512-sDPHm2wfx2QhrMDK0pOt2J4KLJMAcerqWNvnED0itPRJWvI+bK+uNHzcH1dFsBlf7G3u8tqXmRF3wkvL9yUwMw==}
+  /@types/node/18.15.3:
+    resolution: {integrity: sha512-p6ua9zBxz5otCmbpb5D3U4B5Nanw6Pk3PPyX05xnxbB/fRv71N7CPmORg7uAD5P70T0xmx1pzAx/FUfa5X+3cw==}
     dev: true
 
   /@types/npmlog/4.1.4:
@@ -204,7 +204,7 @@ packages:
     resolution: {integrity: sha512-F3OznnSLAUxFrCEu/L5PY8+ny8DtcFRjx7fZZ9bycvXRi3KPTRS9HOitGZwvPg0juRhXFWIeKX58cnX5YqLohQ==}
     dependencies:
       '@types/glob': 8.1.0
-      '@types/node': 18.15.2
+      '@types/node': 18.15.3
     dev: true
 
   /@types/semver/7.3.13:
@@ -1417,7 +1417,7 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /ts-node/10.9.1_mubmc4jbdynqubpxxo2ltzd5ve:
+  /ts-node/10.9.1_cbfmry4sbbh4vatmdrsmatfg5a:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -1436,7 +1436,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
-      '@types/node': 18.15.2
+      '@types/node': 18.15.3
       acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
