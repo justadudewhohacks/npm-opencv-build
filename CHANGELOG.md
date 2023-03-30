@@ -1,5 +1,9 @@
 # Changelog
 
+## V 0.7.8
+- fix ESM/commonJS dual stack
+- update deps verison
+
 ## V 0.7.7
 - will use the latest build version even if the version differ from you current env data.
 - update -DBUILD_LIST handling
