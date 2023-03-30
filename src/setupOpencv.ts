@@ -6,11 +6,8 @@ import type { AutoBuildFile } from './types.js';
 import { formatNumber, formatRed, highlight, protect, spawn, toExecCmd } from './utils.js';
 import log from 'npmlog';
 import rimraf from 'rimraf';
-import { promisify } from 'util';
 import { OPENCV_PATHS_ENV } from './misc.js';
 import path from 'path';
-
-const primraf = promisify(rimraf);
 
 export class SetupOpencv {
   constructor(private readonly builder: OpenCVBuilder) { }
@@ -181,7 +178,7 @@ export class SetupOpencv {
       const dirs = [env.opencvBuild, env.opencvSrc, env.opencvContribSrc];
       this.execLog.push(toExecCmd('rimraf', dirs))
       for (const dir of dirs)
-        await primraf(dir);
+        await rimraf(dir);
       // ensure build dir exists
       this.execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
       fs.mkdirSync(env.opencvBuild, { recursive: true });
@@ -267,7 +264,7 @@ export class SetupOpencv {
        */
       try {
         log.info('install', `cleaning openCV build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvSrc)
-        await primraf(env.opencvSrc)
+        await rimraf(env.opencvSrc)
       } catch (err) {
         log.error('install', 'failed to clean opencv source folder:', err)
         log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvSrc)
@@ -275,7 +272,7 @@ export class SetupOpencv {
 
       try {
         log.info('install', `cleaning openCVContrib build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvContribSrc)
-        await primraf(env.opencvContribSrc)
+        await rimraf(env.opencvContribSrc)
       } catch (err) {
         log.error('install', 'failed to clean opencv_contrib source folder:', err)
         log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvContribSrc)
