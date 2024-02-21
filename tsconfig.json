@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
-    "removeComments": false,
+    "outDir": "dist/esm",
+    "moduleResolution": "node",
+    "module": "ES2020",
     "declaration": true,
+    "removeComments": false,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "outDir": "build",
-    "module": "commonjs",
-    "target": "es5",
-    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "target": "ES2019",
+    "sourceMap": true,
     "typeRoots": [
-      "typings",
       "node_modules/@types"
     ]
   },

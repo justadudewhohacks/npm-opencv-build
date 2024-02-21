@@ -1,17 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import OpenCVBuilder from './OpenCVBuilder.js';
 
-import { opencvModules } from './constants';
-import { dirs } from './dirs';
-import { getLibsFactory } from './getLibsFactory';
-import { isOSX, isWin } from './utils';
-
-export { opencvModules } from './constants';
-export { isAutoBuildDisabled, readAutoBuildFile, readEnvsFromPackageJson, applyEnvsFromPackageJson } from './env';
-export { isOSX, isWin, isUnix } from './utils';
-export const opencvInclude = dirs.opencvInclude
-export const opencv4Include = dirs.opencv4Include
-export const opencvLibDir = dirs.opencvLibDir
-export const opencvBinDir = dirs.opencvBinDir
-export const opencvBuildDir = dirs.opencvBuild
-export const getLibs = getLibsFactory({ isWin, isOSX, opencvModules, path, fs })
+export type { OpencvModule, AutoBuildFile } from './types.js'
+export { default as OpenCVBuilder } from './OpenCVBuilder.js';
+export { getLibsFactory } from './getLibsFactory.js';
+export { default as OpenCVBuildEnv } from './OpenCVBuildEnv.js';
+export { ALLARGS, genHelp, type OpenCVBuildEnvParams, args2Option, type OpencvModulesType, ALL_OPENCV_MODULES } from './misc.js';
+export default OpenCVBuilder;

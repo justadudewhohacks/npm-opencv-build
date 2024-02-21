@@ -1,65 +1,114 @@
-import { OpencvModule } from './types';
+import OpenCVBuilder from './OpenCVBuilder.js';
+import type { OpencvModule } from './types.js';
+import fs from 'fs';
+import path from 'path';
+import { OpencvModulesType } from './misc.js';
 
-const worldModule = 'world';
+export class getLibsFactory {
+  libFiles: string[] = [];
+  syncPath = true;
 
-export function getLibsFactory(
-  args: { opencvModules: string[], isWin: () => boolean, isOSX: () => boolean, fs: any, path: any }
-): (libDir: string) => OpencvModule[] {
-
-  const { opencvModules, isWin, isOSX, fs, path } = args
-
-  function getLibPrefix() {
-    return isWin() ? 'opencv_' : 'libopencv_'
+  constructor(private builder: OpenCVBuilder) {
   }
 
-  function getLibSuffix() {
-    return isWin() ? 'lib' : (isOSX() ? 'dylib' : 'so')
+  /**
+   * list en cache file in lib folder
+   * @returns files in lib directory
+   */
+  private listFiles(): string[] {
+    if (this.libFiles && this.libFiles.length)
+      return this.libFiles;
+    const libDir = this.builder.env.opencvLibDir;
+    this.libFiles = fs.readdirSync(libDir)
+    return this.libFiles;
   }
 
-  function getLibNameRegex(opencvModuleName: string) {
-    return new RegExp(`^${getLibPrefix()}${opencvModuleName}[0-9]{0,3}.${getLibSuffix()}$`)
+  /**
+   * lib files are prefixed differently on Unix / Windows base system.
+   * @returns current OS prefix
+   */
+  get getLibPrefix(): string {
+    return this.builder.env.isWin ? 'opencv_' : 'libopencv_'
   }
 
-  function createLibResolver(libDir: string): (libFile: string) => string | undefined {
-    function getLibAbsPath(libFile: string | undefined): string | undefined {
-      return (
-        libFile
-          ? fs.realpathSync(path.resolve(libDir, libFile))
-          : undefined
-      )
+  /**
+   * @returns lib extention based on current OS
+   */
+  get getLibSuffix(): 'lib' | 'dylib' | 'so' {
+    switch (this.builder.env.platform) {
+      case 'win32':
+        return 'lib'
+      case 'darwin':
+        return 'dylib'
+      default:
+        return 'so'
     }
-
-    function matchLibName(libFile: string, opencvModuleName: string) {
-      return !!(libFile.match(getLibNameRegex(opencvModuleName)) || [])[0]
-    }
-
-    const libFiles = fs.readdirSync(libDir) as string[]
-
-    return function (opencvModuleName: string) {
-      return getLibAbsPath(libFiles.find(libFile => matchLibName(libFile, opencvModuleName)))
-    }
   }
 
-  return function (libDir: string) {
+  /**
+   * build a regexp matching os lib file
+   * @param opencvModuleName 
+   * @returns 
+   */
+  getLibNameRegex(opencvModuleName: string): RegExp {
+    const regexp = `^${this.getLibPrefix}${opencvModuleName}[0-9.]*\\.${this.getLibSuffix}$`;
+    return new RegExp(regexp)
+  }
+
+  /**
+   * find a lib
+   */
+  public resolveLib(opencvModuleName: OpencvModulesType): string {
+    const libDir = this.builder.env.opencvLibDir;
+    const libFiles: string[] = this.listFiles();
+    return this.matchLib(opencvModuleName, libDir, libFiles);
+  }
+  /**
+   * Match lib file names in a folder, was part of resolveLib, but was splitted for easy testing
+   * @param opencvModuleName openCV module name
+   * @param libDir library directory
+   * @param libFiles files in lib directory
+   * @returns full path to looked up lib file
+   */
+  public matchLib(opencvModuleName: string, libDir: string, libFiles: string[]): string {
+    const regexp = this.getLibNameRegex(opencvModuleName);
+    const match = libFiles.find((libFile: string) => !!(libFile.match(regexp) || [])[0]);
+    if (!match)
+      return '';
+    let fullpath = path.resolve(libDir, match);
+    if (this.syncPath)
+      fullpath = fs.realpathSync(fullpath)
+    return fullpath
+  }
+
+  getLibs(): OpencvModule[] {
+    const libDir = this.builder.env.opencvLibDir;
     if (!fs.existsSync(libDir)) {
       throw new Error(`specified lib dir does not exist: ${libDir}`)
     }
 
-    const resolveLib = createLibResolver(libDir)
-
-    const worldLibPath = resolveLib(worldModule)
+    const modules: OpencvModule[] = [];
+    const worldModule = 'world';
+    const worldLibPath = this.resolveLib(worldModule)
     if (worldLibPath) {
-      return [{
+      modules.push({
         opencvModule: worldModule,
-        libPath: worldLibPath
-      }]
+        libPath: worldLibPath,
+      });
     }
-
-    return (opencvModules as string[]).map(
-      opencvModule => ({
+    
+    const extra = [...this.builder.env.enabledModules].map(
+      (opencvModule: OpencvModulesType) => ({
         opencvModule,
-        libPath: resolveLib(opencvModule)
+        libPath: this.resolveLib(opencvModule),
       })
     )
+    for (const m of extra) {
+      if (m.opencvModule === 'world')
+        continue;
+      if (m.libPath)
+        modules.push(m);
+    }
+    return modules;
   }
 }

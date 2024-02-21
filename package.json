@@ -1,35 +1,80 @@
 {
-  "name": "opencv-build",
-  "version": "0.1.9",
-  "description": "A simple script to auto build recent OpenCV + contrib version via npm",
-  "main": "./build/index.js",
+  "name": "@u4/opencv-build",
+  "version": "0.7.8",
+  "description": "A simple script to auto build recent OpenCV + contrib version via npm 2022 Edition",
+  "main": "dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "typings": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "types": "./dist/cjs/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "rm -rf build && tsc",
-    "install": "node ./install.js",
-    "test": "mocha --recursive ./test"
+    "clean": "rimraf build",
+    "build": "tsc --pretty --project . && tsc --pretty --project tsconfig-cjs.json",
+    "build3x": "npm run build && node bin/main.js --keepsource",
+    "install_macm1": "npm run build && node bin/main.js --version 4.5.5 --flag=\"-DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_OSX_ARCHITECTURES=arm64\"",
+    "install_4_6_0": "npm run build && node bin/main.js --version 4.6.0",
+    "install_4_6_0_cuda_30XX": "npm run build && cross-env OPENCV4NODEJS_DISABLE_AUTOBUILD= node bin/main.js --keepsource --version 4.6.0 --cuda --cudaArch=8.6",
+    "install_4_7_0_cuda_30XX": "npm run build && cross-env OPENCV4NODEJS_DISABLE_AUTOBUILD= node bin/main.js --keepsource --version 4.7.0 --cuda --cudaArch=8.6",
+    "do-install": "node bin/main.js",
+    "cleanbuild": "rimraf lib dist && npm run build",
+    "postinstallDISABLED": "npm run do-install",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/**/*.ts",
+    "test": "cross-env NODE_OPTIONS=\"-r ts-node/register --no-warnings\" TS_NODE_PROJECT=tsconfig-cjs.json mocha 'test/**/*.test.ts'"
+  },
+  "bin": {
+    "opencv-build-npm": "bin/main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/justadudewhohacks/npm-opencv-build.git"
+    "url": "git+https://github.com/UrielCh/npm-opencv-build.git"
   },
   "keywords": [
     "opencv",
     "build",
     "opencv4nodejs"
   ],
-  "author": "justadudewhohacks",
+  "contributors": [
+    "Uriel Chemouni <uchemouni@gmail.com> (https://uriel.ovh/)",
+    "justadudewhohacks (https://github.com/justadudewhohacks)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/justadudewhohacks/npm-opencv-build/issues"
+    "url": "https://github.com/UrielCh/npm-opencv-build/issues"
   },
-  "homepage": "https://github.com/justadudewhohacks/npm-opencv-build#readme",
+  "homepage": "https://github.com/UrielCh/npm-opencv-build#readme",
   "dependencies": {
-    "npmlog": "^4.1.2"
+    "@u4/tiny-glob": "^0.3.2",
+    "npmlog": "^7.0.1",
+    "picocolors": "^1.0.0",
+    "rimraf": "^4.4.1"
   },
   "devDependencies": {
-    "@types/node": "^12.7.4",
-    "chai": "^4.2.0",
-    "mocha": "^6.2.0",
-    "typescript": "^3.6.2"
-  }
+    "@types/chai": "^4.3.4",
+    "@types/chai-string": "^1.4.2",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.11",
+    "@types/npmlog": "^4.1.4",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "chai": "^4.3.7",
+    "chai-string": "^1.5.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.37.0",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "files": [
+    "dist"
+  ]
 }

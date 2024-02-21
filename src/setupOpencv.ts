@@ -1,169 +1,290 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import { EOL } from 'os';
+import { OpenCVBuilder } from './OpenCVBuilder.js';
+import { findMSBuild, PathVersion } from './findMsBuild.js';
+import type { AutoBuildFile } from './types.js';
+import { formatNumber, formatRed, highlight, protect, spawn, toExecCmd } from './utils.js';
+import log from 'npmlog';
+import rimraf from 'rimraf';
+import { OPENCV_PATHS_ENV } from './misc.js';
+import path from 'path';
 
-import { getLibs } from '.';
-import { cmakeArchs, cmakeVsCompilers, defaultCmakeFlags, opencvContribRepoUrl, opencvRepoUrl } from './constants';
-import { dirs } from './dirs';
-import {
-  autoBuildFlags,
-  buildWithCuda,
-  isWithoutContrib,
-  numberOfCoresAvailable,
-  opencvVersion,
-  parseAutoBuildFlags,
-} from './env';
-import { findMsBuild } from './findMsBuild';
-import { AutoBuildFile } from './types';
-import { exec, isCudaAvailable, isWin, spawn } from './utils';
+export class SetupOpencv {
+  constructor(private readonly builder: OpenCVBuilder) { }
 
-const log = require('npmlog')
+  private getMsbuildCmd(sln: string): string[] {
+    return [
+      sln,
+      '/p:Configuration=Release',
+      `/p:Platform=${process.arch === 'x64' ? 'x64' : 'x86'}`,
+    ]
+  }
 
-function getIfExistsDirCmd(dirname: string, exists: boolean = true): string {
-  return isWin() ? `if ${!exists ? 'not ' : ''}exist ${dirname}` : ''
-}
+  private async runBuildCmd(msbuildExe?: string): Promise<void> {
+    const env = this.builder.env;
+    if (msbuildExe) {
+      if (!fs.existsSync(msbuildExe)) {
+        log.error('install', 'invalid msbuildExe path" %s', msbuildExe);
+        throw Error('invalid msbuildExe path ' + msbuildExe);
+      }
+      const buildSLN = this.getMsbuildCmd('./OpenCV.sln');
+      let args = toExecCmd(msbuildExe, buildSLN);
+      this.execLog.push(`cd ${protect(env.opencvBuild)}`);
+      this.execLog.push(args);
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: %s', env.opencvBuild, args);
+        await spawn(`${msbuildExe}`, buildSLN, { cwd: env.opencvBuild })
+      }
+      const buildVcxproj = this.getMsbuildCmd('./INSTALL.vcxproj');
+      args = toExecCmd(msbuildExe, buildVcxproj);
+      this.execLog.push(`${args}`);
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: %s', env.opencvBuild, args);
+        await spawn(`${msbuildExe}`, buildVcxproj, { cwd: env.opencvBuild })
+      }
+    } else {
+      this.execLog.push(`cd ${protect(env.opencvBuild)}`);
+      this.execLog.push(`make install -j${env.numberOfCoresAvailable()}`);
 
-function getMkDirCmd(dirname: string): string {
-  return isWin() ? `${getIfExistsDirCmd(dirname, false)} mkdir ${dirname}` : `mkdir -p ${dirname}`
-}
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: make', env.opencvBuild);
+        await spawn('make', ['install', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      }
 
-function getRmDirCmd(dirname: string): string {
-  return isWin() ? `${getIfExistsDirCmd(dirname)} rd /s /q ${dirname}` : `rm -rf ${dirname}`
-}
-
-function getMsbuildCmd(sln: string): string[] {
-  return [
-    sln,
-    '/p:Configuration=Release',
-    `/p:Platform=${process.arch === 'x64' ? 'x64' : 'x86'}`
-  ]
-}
-
-function getRunBuildCmd(msbuildExe: string): () => Promise<void> {
-  if (msbuildExe) {
-    return async () => {
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./OpenCV.sln'), { cwd: dirs.opencvBuild })
-      await spawn(`${msbuildExe}`, getMsbuildCmd('./INSTALL.vcxproj'), { cwd: dirs.opencvBuild })
+      this.execLog.push(`make all -j${env.numberOfCoresAvailable()}`);
+      // revert the strange archiving of libopencv.so going on with make install
+      if (!env.dryRun) {
+        log.info('install', 'spawning in %s: make all', env.opencvBuild);
+        await spawn('make', ['all', `-j${env.numberOfCoresAvailable()}`], { cwd: env.opencvBuild })
+      }
     }
   }
-  return async () => {
-    await spawn('make', ['install', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
-    // revert the strange archiving of libopencv.so going on with make install
-    await spawn('make', ['all', `-j${numberOfCoresAvailable()}`], { cwd: dirs.opencvBuild })
-  }
-}
 
-function getCudaCmakeFlags() {
-  return [
-    '-DWITH_CUDA=ON',
-    '-DBUILD_opencv_cudacodec=OFF', // video codec (NVCUVID) is deprecated in cuda 10, so don't add it
-    '-DCUDA_FAST_MATH=ON', // optional
-    '-DWITH_CUBLAS=ON', // optional
-  ];
-}
+  private getWinCmakeFlags(msversion: string): string[] {
+    const cmakeVsCompiler = this.builder.constant.cmakeVsCompilers[msversion]
+    const cmakeArch = this.builder.constant.cmakeArchs[process.arch]
 
-function getSharedCmakeFlags() {
-  let conditionalFlags = isWithoutContrib()
-    ? []
-    : [
-      '-DOPENCV_ENABLE_NONFREE=ON',
-      `-DOPENCV_EXTRA_MODULES_PATH=${dirs.opencvContribModules}`
-    ]
+    if (!cmakeVsCompiler) {
+      throw new Error(`no cmake Visual Studio compiler found for msversion: ${msversion}`)
+    }
+    if (!cmakeArch) {
+      throw new Error(`no cmake arch found for process.arch: ${process.arch}`)
+    }
 
-  if (buildWithCuda() && isCudaAvailable()) {
-    log.info('install', 'Adding CUDA flags...');
-    conditionalFlags = conditionalFlags.concat(getCudaCmakeFlags());
+    let GFlag: string[] = [];
+    if (Number(msversion) <= 15)
+      GFlag = ['-G', `${cmakeVsCompiler}${cmakeArch}`];
+    else
+      GFlag = ['-G', `${cmakeVsCompiler}`];
+    return GFlag.concat(this.builder.env.getSharedCmakeFlags())
   }
 
-  return defaultCmakeFlags
-    .concat(conditionalFlags)
-    .concat(parseAutoBuildFlags())
-}
-
-function getWinCmakeFlags(msversion: string) {
-  const cmakeVsCompiler = (cmakeVsCompilers as any)[msversion]
-  const cmakeArch = (cmakeArchs as any)[process.arch]
-
-  if (!cmakeVsCompiler) {
-    throw new Error(`no cmake vs compiler found for msversion: ${msversion}`)
-  }
-  if (!cmakeArch) {
-    throw new Error(`no cmake arch found for process.arch: ${process.arch}`)
+  private getCmakeArgs(cmakeFlags: string[]): string[] {
+    log.info('install', `getCmakeArgs prefixing Cmake args with ${highlight("%s")}`, this.builder.env.opencvSrc)
+    return [this.builder.env.opencvSrc].concat(cmakeFlags)
   }
 
-  return [
-    '-G',
-    `${cmakeVsCompiler}${cmakeArch}`
-  ].concat(getSharedCmakeFlags())
-}
-
-function getCmakeArgs(cmakeFlags: string[]) {
-  return [dirs.opencvSrc].concat(cmakeFlags)
-}
-
-async function getMsbuildIfWin() {
-  if (isWin()) {
-    const msbuild = await findMsBuild()
-    log.info('install', 'using msbuild:', msbuild)
-    return msbuild
+  private async getMsbuildIfWin(): Promise<PathVersion | undefined> {
+    if (this.builder.env.isWin) {
+      const msbuilds = await findMSBuild()
+      if (msbuilds.length > 1)
+        log.warn('install', `${msbuilds.length} msbuild version detected using the most recent one.`);
+      log.info('install', `using msbuild V${formatNumber("%s")} path: ${highlight("%s")}`, msbuilds[0].version, msbuilds[0].path)
+      return msbuilds[0]
+    }
+    return undefined;
   }
-}
-
-function writeAutoBuildFile() {
-  const autoBuildFile: AutoBuildFile = {
-    opencvVersion: opencvVersion(),
-    autoBuildFlags: autoBuildFlags(),
-    modules: getLibs(dirs.opencvLibDir)
-  }
-  log.info('install', 'writing auto-build file into directory: %s', dirs.autoBuildFile)
-  log.info('install', autoBuildFile)
-  fs.writeFileSync(dirs.autoBuildFile, JSON.stringify(autoBuildFile))
-}
-
-export async function setupOpencv() {
-  const msbuild = await getMsbuildIfWin()
-
-  // Get cmake flags here to check for CUDA early on instead of the start of the building process
-  const cMakeFlags = isWin() ? getWinCmakeFlags(msbuild.version) : getSharedCmakeFlags();
-
-  const tag = opencvVersion()
-  log.info('install', 'installing opencv version %s into directory: %s', tag, dirs.opencvRoot)
-
-  await exec(getMkDirCmd('opencv'), { cwd: dirs.rootDir })
-  await exec(getRmDirCmd('build'), { cwd: dirs.opencvRoot })
-  await exec(getMkDirCmd('build'), { cwd: dirs.opencvRoot })
-  await exec(getRmDirCmd('opencv'), { cwd: dirs.opencvRoot })
-  await exec(getRmDirCmd('opencv_contrib'), { cwd: dirs.opencvRoot })
-
-  if (isWithoutContrib()) {
-    log.info('install', 'skipping download of opencv_contrib since OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB is set')
-  } else {
-    await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvContribRepoUrl], { cwd: dirs.opencvRoot })
-  }
-  await spawn('git', ['clone', '-b', `${tag}`, '--single-branch', '--depth',  '1', '--progress', opencvRepoUrl], { cwd: dirs.opencvRoot })
-
-  const cmakeArgs = getCmakeArgs(cMakeFlags)
-  log.info('install', 'running cmake %s', cmakeArgs)
-  await spawn('cmake', cmakeArgs, { cwd: dirs.opencvBuild })
-  log.info('install', 'starting build...')
-  await getRunBuildCmd(isWin() ? msbuild.path : undefined)()
-
-  writeAutoBuildFile()
-
-  const rmOpenCV = getRmDirCmd('opencv')
-  try {
-    await exec(rmOpenCV, { cwd: dirs.opencvRoot })
-  } catch (err) {
-    log.error('install', 'failed to clean opencv source folder:', err)
-    log.error('install', 'command was: %s', rmOpenCV)
-    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv'))
+  /**
+   * Write Build Context to disk, to avoid further rebuild
+   * @returns AutoBuildFile
+   */
+  public writeAutoBuildFile(overwrite: boolean, buildLog?: string): AutoBuildFile {
+    const env = this.builder.env;
+    const autoBuildInfo: AutoBuildFile = {
+      opencvVersion: env.opencvVersion,
+      autoBuildFlags: env.autoBuildFlags,
+      modules: this.builder.getLibs.getLibs(),
+      env: this.builder.env.dumpEnv(),
+    }
+    log.info('install', `writing auto-build file into directory: ${highlight("%s")}`, env.autoBuildFile)
+    // log.info('install', JSON.stringify(autoBuildFile))
+    fs.mkdirSync(env.opencvRoot, { recursive: true });
+    if (!overwrite) {
+      const old = env.readAutoBuildFile()
+      if (old)
+        return old;
+    }
+    fs.writeFileSync(env.autoBuildFile, JSON.stringify(autoBuildInfo, null, 4))
+    if (buildLog)
+      fs.writeFileSync(env.autoBuildLog, buildLog)
+    return autoBuildInfo;
   }
 
-  const rmOpenCVContrib = getRmDirCmd('opencv_contrib')
-  try {
-    await exec(rmOpenCVContrib, { cwd: dirs.opencvRoot })
-  } catch (err) {
-    log.error('install', 'failed to clean opencv_contrib source folder:', err)
-    log.error('install', 'command was: %s', rmOpenCV)
-    log.error('install', 'consider removing the folder yourself: %s', path.join(dirs.opencvRoot, 'opencv_contrib'))
+  /**
+   * add a sym link named latest to the current build.
+   */
+  public linkBuild(): void {
+    const env = this.builder.env;
+    const latest = path.join(env.rootDir, 'latest');
+    try {
+      fs.unlinkSync(latest);
+    } catch (_e) {
+      // ignore
+    }
+    try {
+      fs.symlinkSync(env.opencvRoot, latest);
+      log.info('install', `Cretate link ${highlight("%s")} to ${highlight("%s")}`, latest, env.opencvRoot);
+    } catch (e) {
+      log.info('install', `Failed to create link ${highlight("%s")} to ${highlight("%s")} Error: ${formatRed("%s")}`, latest, env.opencvRoot, (e as Error).message);
+    }
+  }
+
+  private execLog: string[] = [];
+
+  /**
+   * clone OpenCV repo
+   * build OpenCV
+   * delete source files
+   */
+  public async start(): Promise<void> {
+    this.execLog = [];
+    const env = this.builder.env;
+    const msbuild = await this.getMsbuildIfWin()
+    let cMakeFlags: string[] = [];
+    let msbuildPath = '';
+    // Get cmake flags here to check for CUDA early on instead of the start of the building process
+    if (env.isWin) {
+      if (!msbuild)
+        throw Error('Error getting Ms Build info');
+      cMakeFlags = this.getWinCmakeFlags("" + msbuild.version);
+      msbuildPath = msbuild.path;
+    } else {
+      cMakeFlags = this.builder.env.getSharedCmakeFlags();
+    }
+    log.info('install', `cMakeFlags will be: ${formatNumber("%s")}`, cMakeFlags.join(' '));
+
+    const tag = env.opencvVersion
+    log.info('install', `installing opencv version ${formatNumber("%s")} into directory: ${highlight("%s")}`, tag, env.opencvRoot)
+    log.info('install', `Cleaning old build: src, build and contrib-src directories`)
+    try {
+      for (const k of OPENCV_PATHS_ENV) {
+        const v = process.env[k];
+        if (v) {
+          const setEnv = (process.platform === 'win32') ? '$Env:' : 'export ';
+          this.execLog.push(`${setEnv}${k}=${protect(v)}`);
+        }
+      }
+      // clean up
+      const dirs = [env.opencvBuild, env.opencvSrc, env.opencvContribSrc];
+      this.execLog.push(toExecCmd('rimraf', dirs))
+      for (const dir of dirs)
+        await rimraf(dir);
+      // ensure build dir exists
+      this.execLog.push(toExecCmd('mkdir', ['-p', env.opencvBuild]))
+      fs.mkdirSync(env.opencvBuild, { recursive: true });
+
+      // hide detached HEAD message.
+      const gitFilter = (data: Buffer): Buffer | null => {
+        const asTxt = data.toString();
+        if (asTxt.includes('detached HEAD')) return null;
+        if (asTxt.includes('--depth is ignored in local clones')) return null;
+        return data;
+      }
+
+      if (env.isWithoutContrib) {
+        this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
+        log.info('install', `skipping download of opencv_contrib since ${highlight("OPENCV4NODEJS_AUTOBUILD_WITHOUT_CONTRIB")} is set`)
+      } else {
+        let opencvContribRepoUrl = this.builder.constant.opencvContribRepoUrl;
+        if (this.builder.env.gitCache) {
+          if (!fs.existsSync(this.builder.env.opencvContribGitCache)) {
+            const args = ['clone', '--quiet', '--progress', opencvContribRepoUrl, this.builder.env.opencvContribGitCache];
+            await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
+          } else {
+            await spawn('git', ['pull'], { cwd: env.opencvContribGitCache }, { err: gitFilter });
+          }
+          opencvContribRepoUrl = env.opencvContribGitCache.replace(/\\/g, '/');
+        }
+        log.info('install', `git clone ${opencvContribRepoUrl}`)
+        const args = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvContribRepoUrl, env.opencvContribSrc];
+        this.execLog.push(toExecCmd('cd', [env.opencvRoot]))
+        this.execLog.push(toExecCmd('git', args))
+        await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
+      }
+      let opencvRepoUrl = this.builder.constant.opencvRepoUrl;
+
+      if (this.builder.env.gitCache) {
+        if (!fs.existsSync(this.builder.env.opencvGitCache)) {
+          const args = ['clone', '--quiet', '--progress', opencvRepoUrl, this.builder.env.opencvGitCache];
+          await spawn('git', args, { cwd: env.opencvRoot }, { err: gitFilter });
+        } else {
+          await spawn('git', ['pull'], { cwd: env.opencvGitCache }, { err: gitFilter });
+        }
+        opencvRepoUrl = env.opencvGitCache.replace(/\\/g, '/');
+      }
+
+      log.info('install', `git clone ${opencvRepoUrl}`)
+      const args2 = ['clone', '--quiet', '-b', `${tag}`, '--single-branch', '--depth', '1', '--progress', opencvRepoUrl, env.opencvSrc];
+      this.execLog.push(toExecCmd('git', args2))
+      await spawn('git', args2, { cwd: env.opencvRoot }, { err: gitFilter })
+
+      this.execLog.push(`export OPENCV_BIN_DIR=${protect(env.opencvBinDir)}`);
+      this.execLog.push(`export OPENCV_INCLUDE_DIR=${protect(env.opencvIncludeDir)}`);
+      this.execLog.push(`export OPENCV_LIB_DIR=${protect(env.opencvLibDir)}`);
+
+      const cmakeArgs = this.getCmakeArgs(cMakeFlags)
+
+      log.info('install', 'running in %s cmake %s', protect(env.opencvBuild), cmakeArgs.map(protect).join(' '))
+      this.execLog.push(toExecCmd('cd', [env.opencvBuild]))
+      this.execLog.push(toExecCmd('cmake', cmakeArgs))
+      if (!env.dryRun) {
+        await spawn('cmake', cmakeArgs, { cwd: env.opencvBuild })
+        log.info('install', 'starting build...')
+      }
+      await this.runBuildCmd(msbuildPath)
+    } catch (e) {
+      const allCmds = this.execLog.join(EOL);
+      log.error('build', `Compilation failed, previous calls:${EOL}%s`, allCmds);
+      // log.error(`Compilation failed, previous calls:${EOL}%s`, allCmds);
+      throw e;
+    }
+
+    if (!env.dryRun) {
+      this.writeAutoBuildFile(true, this.execLog.join(EOL))
+      this.linkBuild();
+    } else {
+      this.execLog.push('echo lock file can not be generated in dry-mode');
+    }
+    // cmake -D CMAKE_BUILD_TYPE=RELEASE -D ENABLE_NEON=ON 
+    // -D ENABLE_TBB=ON -D ENABLE_IPP=ON -D ENABLE_VFVP3=ON -D WITH_OPENMP=ON -D WITH_CSTRIPES=ON -D WITH_OPENCL=ON -D CMAKE_INSTALL_PREFIX=/usr/local
+    // -D OPENCV_EXTRA_MODULES_PATH=/root/[username]/opencv_contrib-3.4.0/modules/ ..
+    if (!env.keepsources && !env.dryRun) {
+      /**
+       * DELETE TMP build dirs
+       */
+      try {
+        log.info('install', `cleaning openCV build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvSrc)
+        await rimraf(env.opencvSrc)
+      } catch (err) {
+        log.error('install', 'failed to clean opencv source folder:', err)
+        log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvSrc)
+      }
+
+      try {
+        log.info('install', `cleaning openCVContrib build file in ${highlight("%s")} to keep these files enable keepsources with ${highlight("--keepsources")}`, env.opencvContribSrc)
+        await rimraf(env.opencvContribSrc)
+      } catch (err) {
+        log.error('install', 'failed to clean opencv_contrib source folder:', err)
+        log.error('install', `consider removing the folder yourself: ${highlight("%s")}`, env.opencvContribSrc)
+      }
+    } else {
+      log.info('install', `Keeping openCV build file in ${highlight("%s")}`, env.opencvSrc)
+      log.info('install', `Keeping openCVContrib build file in ${highlight("%s")}`, env.opencvContribSrc)
+    }
+    if (env.dryRun) {
+      console.log();
+      console.log();
+      console.log(this.execLog.join(EOL));
+    }
   }
 }
