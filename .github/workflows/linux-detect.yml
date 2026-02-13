@@ -1,0 +1,31 @@
+name: Use OpenCV from Ubuntu apt
+on:
+   push:
+     branches: [ "never", "master", "deno" ]
+     paths: ['src/**', 'deno.json',  'src/*.ts', '.github/workflows/linux-detect.yml' ]
+#   pull_request:
+#     branches: [ "master" ]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # node-version: [14.x, 16.x, 18.x]
+        opencv_version:
+          - 4
+
+    env:
+      OPENCV4NODEJS_DISABLE_AUTOBUILD: 1
+    steps:
+    - uses: actions/checkout@v4
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+    - name: Install OpenCV ${{ matrix.opencv_version }}
+      run: |
+        sudo apt update; sudo apt install libopencv-dev
+    - name: Detect OpenCV
+      run: deno run -A main.ts --verbose
+    - run: deno test -A

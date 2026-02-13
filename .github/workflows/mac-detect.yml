@@ -1,0 +1,31 @@
+name: Use OpenCV from Brew
+on:
+   push:
+     branches: [ "never", "master", "deno" ]
+     paths: ['src/**', 'deno.json', '*.ts', '.github/workflows/mac-detect.yml' ]
+#   pull_request:
+#     branches: [ "master" ]
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        # node-version: [14.x, 16.x, 18.x]
+        opencv_version:
+          - 4
+
+    env:
+      OPENCV4NODEJS_DISABLE_AUTOBUILD: 1
+    steps:
+    - uses: actions/checkout@v4
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+    - name: Install OpenCV ${{ matrix.opencv_version }}
+      run: |
+        brew install opencv@${{ matrix.opencv_version }}
+    - name: Detect OpenCV
+      run: deno run -A main.ts --verbose
+    - run: deno test -A

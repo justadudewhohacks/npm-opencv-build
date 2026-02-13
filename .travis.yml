@@ -6,12 +6,12 @@ matrix:
   include:
     # default OpenCV Version (3.4.6)
     - os: linux
-      node_js: 10
+      node_js: 16
     # OpenCV 4.1.0
     - os: linux
-      node_js: 10
+      node_js: 16
       env:
-        - OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=4.1.0
+        - OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION=4.6.0
 
 before_install:
   - sudo apt-get update

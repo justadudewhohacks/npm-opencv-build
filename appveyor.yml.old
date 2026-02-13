@@ -1,0 +1,35 @@
+# platform:
+#   - x64
+# 
+# image:
+#   #- Visual Studio 2017
+#   #- Visual Studio 2019
+#   - Visual Studio 2022
+# 
+# init:
+#   - git config --global core.autocrlf true
+# shallow_clone: true
+# environment:
+#   matrix:
+#     #- nodejs_version: 14
+#     - nodejs_version: 16
+# 
+# clone_folder: c:\projects\opencv-build
+# 
+# install:
+#   # no need to update cmake on "Visual Studio 2019" image
+#   # - cmd: choco upgrade --yes chocolatey
+#   - cmd: choco install cmake --version 3.23.0 -y
+#   - ps: Install-Product node $env:nodejs_version x64
+#   - node --version
+#   - SET PATH=%PATH%;C:\Program Files\CMake\bin;
+# 
+# build: off
+# 
+# test_script:
+#   # install and run tests of opencv-build
+#   - cd c:\projects\opencv-build
+#   - npm install
+#   - npm link
+#   - opencv-build-npm --version 4.5.5
+#   - npm test

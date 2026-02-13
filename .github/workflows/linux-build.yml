@@ -1,0 +1,23 @@
+name: build openCV on ubuntu
+
+on:
+  push:
+    branches: [ "master", "piercus", "test", "deno" ]
+    paths: ['src/**', 'deno.json', '.github/workflows/linux-build.yml' ]
+  pull_request:
+    branches: [ "master", "piercus" ]
+    paths: ['src/**', 'deno.json', '.github/workflows/linux-build.yml' ]
+
+#env:
+#  OPENCV4NODEJS_AUTOBUILD_OPENCV_VERSION : 4.7.0
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+    - name: deno run -A main.ts --version 4.10.0
+      run: deno run -A main.ts --version 4.10.0
+    - run: deno test -A
